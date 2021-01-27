@@ -33,8 +33,6 @@ void ABikeCharacter::BeginPlay()
 	// Display a debug message for five seconds. 
 	// The -1 "Key" value argument prevents the message from being updated or refreshed.
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Biker is being used."));
-
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, -1.0f, FColor::Blue, TEXT("Power Level: ") + FString::SanitizeFloat(powerLevel), true);
 }
 
 // Called every frame
@@ -72,4 +70,9 @@ void ABikeCharacter::Movement(float Value)
 void ABikeCharacter::PowerDisplay(float Value)
 {
 	powerLevel = Value;
+}
+
+float ABikeCharacter::GetPowerLevel() const
+{
+	return powerLevel;
 }

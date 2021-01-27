@@ -18,13 +18,15 @@ public:
 	ABikeCharacter();
 
 protected:
+	// Variables
+
+	UPROPERTY(BlueprintGetter=GetPowerLevel)
+	float powerLevel;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Variables
-	float powerLevel;
-
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -42,4 +44,8 @@ public:
 	// Third-person camera.
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* TPCameraComponent;
+
+	// Getter
+	UFUNCTION(BlueprintCallable)
+	float GetPowerLevel() const;
 };
