@@ -9,18 +9,29 @@ ABikeCharacter::ABikeCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Create a third person camera component.
-	TPCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
-	check(TPCameraComponent != nullptr);
+	//Create our components
+	// Our root component will be a sphere that reacts to physics
+	USphereComponent* SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
+	RootComponent = SphereComponent;
+	SphereComponent->InitSphereRadius(50.0f);
+	SphereComponent->SetCollisionProfileName(TEXT("Pawn"));
 
-	// Attach the camera component to our capsule component.
-	TPCameraComponent->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
+	PlayerVisibleComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerVisibleComponent"));
+	PlayerVisibleComponent->SetupAttachment(RootComponent);
 
-	// Position the camera behind the pawn.
-	TPCameraComponent->SetRelativeLocation(FVector(-120.0f, 0.0f, 80.0f + BaseEyeHeight));
+	PlayerCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
+	PlayerCameraSpringArm->SetupAttachment(RootComponent);
 
-	// Enable the pawn to control camera rotation.
-	TPCameraComponent->bUsePawnControlRotation = true;
+	PlayerCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator(-60.0f, 0.0f, 0.0f));
+	PlayerCameraSpringArm->TargetArmLength = 400.f;
+	PlayerCameraSpringArm->bEnableCameraLag = true;
+	PlayerCameraSpringArm->CameraLagSpeed = 3.0f;
+
+	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
+	PlayerCamera->SetupAttachment(PlayerCameraSpringArm, USpringArmComponent::SocketName);
+
+	//Take control of the default Player
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
 // Called when the game starts or when spawned
@@ -48,28 +59,18 @@ void ABikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	// Set up "movement" bindings.
-	PlayerInputComponent->BindAxis("Move", this, &ABikeCharacter::Movement);
-
-	// Set up "power" bindings.
-	PlayerInputComponent->BindAxis("Power", this, &ABikeCharacter::PowerDisplay);
-
-	// Set up "look" bindings.
-	PlayerInputComponent->BindAxis("Turn", this, &ABikeCharacter::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &ABikeCharacter::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("Power", this, &ABikeCharacter::Movement);
 }
 
 void ABikeCharacter::Movement(float Value)
 {
+	powerLevel = Value;
+
 	// Find out which way is "forward" and record that the player wants to move that way.
 	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
 
 	Value = FMath::Clamp(Value, -1.0f, 1.0f);
 	AddMovementInput(Direction, Value);
-}
-
-void ABikeCharacter::PowerDisplay(float Value)
-{
-	powerLevel = Value;
 }
 
 float ABikeCharacter::GetPowerLevel() const
