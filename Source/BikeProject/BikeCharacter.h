@@ -3,13 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Components/CapsuleComponent.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/SphereComponent.h"
 #include "BikeCharacter.generated.h"
 
 UCLASS()
-class BIKEPROJECT_API ABikeCharacter : public ACharacter
+class BIKEPROJECT_API ABikeCharacter : public APawn
 {
 	GENERATED_BODY()
 
@@ -19,9 +22,14 @@ public:
 
 protected:
 	// Variables
-
 	UPROPERTY(BlueprintGetter=GetPowerLevel)
 	float powerLevel;
+
+	UPROPERTY(EditAnywhere)
+	USceneComponent* PlayerVisibleComponent;
+
+	USpringArmComponent* PlayerCameraSpringArm;
+	UCameraComponent* PlayerCamera;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -36,10 +44,6 @@ public:
 	// Handles input for moving forward.
 	UFUNCTION()
 	void Movement(float Value);
-
-	// Handles input for power display.
-	UFUNCTION()
-	void PowerDisplay(float Value);
 
 	// Third-person camera.
 	UPROPERTY(VisibleAnywhere)
