@@ -23,13 +23,66 @@ public:
 protected:
 	// Variables
 	UPROPERTY(BlueprintGetter=GetPowerLevel)
-	float powerLevel;
+	float PowerLevel;
+	UPROPERTY(BlueprintReadWrite)
+	int MAXPOWER = 120;
 
 	UPROPERTY(EditAnywhere)
 	USceneComponent* PlayerVisibleComponent;
 
 	USpringArmComponent* PlayerCameraSpringArm;
 	UCameraComponent* PlayerCamera;
+
+	// Handles input for moving forward.
+	UPROPERTY()
+		int PowerLane;
+	UPROPERTY()
+		TArray<double> PedalTimes;
+	UPROPERTY(BlueprintReadWrite)
+		int ARRAYMAXSIZE = 10;
+	UPROPERTY()
+		double RPM;
+
+	UPROPERTY()
+		double TimeStartLeft;
+	UPROPERTY()
+		double TimeStartRight;
+
+	UPROPERTY()
+		bool PedalLeft;
+	UPROPERTY()
+		bool PedalRight;
+
+	UFUNCTION()
+		void Movement(float Value);
+	UFUNCTION()
+		void MoveUp();
+	UFUNCTION()
+		void MoveDown();
+	UFUNCTION()
+		void PedalLeftStart();
+	UFUNCTION()
+		void PedalRightStart();
+	UFUNCTION()
+		void PedalLeftEnd();
+	UFUNCTION()
+		void PedalRightEnd();
+	UFUNCTION()
+		void PedalLeftAxis(float Value);
+	UFUNCTION()
+		void PedalRightAxis(float Value);
+
+	UFUNCTION()
+		void AddTime();
+	UFUNCTION()
+		void CalculateBPM();
+
+	UFUNCTION()
+		void MoveHard();
+	UFUNCTION()
+		void MoveMed();
+	UFUNCTION()
+		void MoveEasy();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -40,10 +93,6 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	// Handles input for moving forward.
-	UFUNCTION()
-	void Movement(float Value);
 
 	// Third-person camera.
 	UPROPERTY(VisibleAnywhere)
