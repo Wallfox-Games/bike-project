@@ -32,6 +32,11 @@ ABikeCharacter::ABikeCharacter()
 
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
+
+	PowerLane = 1;
+	TimeStartLeft = FPlatformTime::Seconds();
+	TimeStartRight = FPlatformTime::Seconds();
+	PedalTimes.Reserve(ARRAYMAXSIZE + 1);
 }
 
 // Called when the game starts or when spawned
@@ -59,12 +64,22 @@ void ABikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	// Set up "movement" bindings.
-	PlayerInputComponent->BindAxis("Power", this, &ABikeCharacter::Movement);
+	PlayerInputComponent->BindAction("PowerLevelUp", IE_Pressed, this, &ABikeCharacter::MoveUp);
+	PlayerInputComponent->BindAction("PowerLevelDown", IE_Pressed, this, &ABikeCharacter::MoveDown);
+
+	PlayerInputComponent->BindAction("PedalLeftButton", IE_Pressed, this, &ABikeCharacter::PedalLeftStart);
+	PlayerInputComponent->BindAction("PedalRightButton", IE_Pressed, this, &ABikeCharacter::PedalRightStart);
+
+	PlayerInputComponent->BindAction("PedalLeftButton", IE_Released, this, &ABikeCharacter::PedalLeftEnd);
+	PlayerInputComponent->BindAction("PedalRightButton", IE_Released, this, &ABikeCharacter::PedalRightEnd);
+
+	PlayerInputComponent->BindAxis("PedalLeftAxis", this, &ABikeCharacter::PedalLeftAxis);
+	PlayerInputComponent->BindAxis("PedalRightAxis", this, &ABikeCharacter::PedalRightAxis);
 }
 
 void ABikeCharacter::Movement(float Value)
 {
-	powerLevel = Value;
+	PowerLevel = Value;
 
 	// Find out which way is "forward" and record that the player wants to move that way.
 	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
@@ -73,7 +88,121 @@ void ABikeCharacter::Movement(float Value)
 	AddMovementInput(Direction, Value);
 }
 
+void ABikeCharacter::MoveUp()
+{
+	if (PowerLane < 2) PowerLane++;
+	if (PowerLane == 2)
+	{
+		MoveHard();
+	}
+	else
+	{
+		MoveMed();
+	}
+}
+
+void ABikeCharacter::MoveDown()
+{
+	if (PowerLane > 0) PowerLane--;
+	if (PowerLane == 0)
+	{
+		MoveEasy();
+	}
+	else
+	{
+		MoveMed();
+	}
+}
+
+void ABikeCharacter::PedalLeftStart()
+{
+	PedalLeft = true;
+	TimeStartLeft = FPlatformTime::Seconds();
+	AddTime();
+}
+
+void ABikeCharacter::PedalRightStart()
+{
+	PedalRight = true;
+	TimeStartRight = FPlatformTime::Seconds();
+	AddTime();
+}
+
+void ABikeCharacter::PedalLeftEnd()
+{
+	PedalLeft = false;
+}
+
+void ABikeCharacter::PedalRightEnd()
+{
+	PedalRight = false;
+}
+
+void ABikeCharacter::PedalLeftAxis(float Value)
+{
+	if (!PedalLeft && Value > 0.7) PedalLeftStart();
+	else if (PedalLeft && Value <= 0.7) PedalLeftEnd();
+}
+
+void ABikeCharacter::PedalRightAxis(float Value)
+{
+	if (!PedalRight && Value > 0.7) PedalRightStart();
+	else if (PedalRight && Value <= 0.7) PedalRightEnd();
+}
+
+void ABikeCharacter::AddTime()
+{
+	double TimeValue = abs(TimeStartLeft - TimeStartRight);
+
+	PedalTimes.Add(TimeValue);
+	if (PedalTimes.Num() > ARRAYMAXSIZE) PedalTimes.RemoveAt(0);
+
+	CalculateBPM();
+}
+
+void ABikeCharacter::CalculateBPM()
+{
+	RPM = 0;
+	for (auto& Time : PedalTimes)
+	{
+		RPM += Time;
+	}
+	// Length of one beat
+	RPM = RPM / PedalTimes.Num();
+	// Beats-per-second
+	RPM = 1 / RPM;
+	// Beats-per-minute
+	RPM *= 60;
+
+	// Set to power / RPM (roughly half)
+	PowerLevel = RPM / 2;
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.4f, FColor::Blue, TEXT("RPM: ") + FString::SanitizeFloat(RPM), true);
+	GEngine->AddOnScreenDebugMessage(-1, 0.4f, FColor::Green, TEXT("Power: ") + FString::SanitizeFloat(PowerLevel), true);
+}
+
+void ABikeCharacter::MoveHard()
+{
+	FVector newLocation = FVector(GetActorLocation().X, -300.f, GetActorLocation().Z);
+	SetActorLocation(newLocation);
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Hard lane"));
+}
+
+void ABikeCharacter::MoveMed()
+{
+	FVector newLocation = FVector(GetActorLocation().X, 0.f, GetActorLocation().Z);
+	SetActorLocation(newLocation);
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Medium lane"));
+}
+
+void ABikeCharacter::MoveEasy()
+{
+	FVector newLocation = FVector(GetActorLocation().X, 300.f, GetActorLocation().Z);
+	SetActorLocation(newLocation);
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Easy lane"));
+}
+
 float ABikeCharacter::GetPowerLevel() const
 {
-	return powerLevel;
+	return PowerLevel / MAXPOWER;
 }
