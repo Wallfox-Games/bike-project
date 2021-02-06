@@ -91,24 +91,12 @@ void ABikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ABikeCharacter::Movement(float DeltaTime)
 {
-	float PowerRatio = FMath::Clamp(PowerLevel / MAXPOWER, 0.5f, 0.8f);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Yellow, TEXT("Power Ratio Pre Normalise: ") + FString::SanitizeFloat(PowerRatio));
-	PowerRatio = ((PowerRatio - 0.5f) / (0.8f - 0.5f));
-	float HorizontalPos = FMath::Lerp(-300, 300, PowerRatio);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Yellow, TEXT("Power Ratio: ") + FString::SanitizeFloat(PowerRatio));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Aiming: ") + FString::SanitizeFloat(HorizontalPos));
-
-	float ForwardValue = 200.f + FMath::Clamp(MAXPOWER / PowerLevel, 0.f, 1.f) * 300.f;
-
-	float HorizontalValue;
-	// Transition position based on power level
-	//float HorizontalValue = FMath::FInterpConstantTo(GetActorLocation().Y, HorizontalPos, DeltaTime, 3.f);
-	HorizontalValue = FMath::Lerp(GetActorLocation().Y, HorizontalPos, DeltaTime * 3.f);
-	SetActorLocation(FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z));
-
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("Y Coord: ") + FString::SanitizeFloat(HorizontalValue));
+	if (PowerLevel > (UPPERPOWER + MIDDLEPOWER) / 2) MoveHardDT(DeltaTime);
+	else if (PowerLevel > (MIDDLEPOWER + LOWERPOWER) / 2) MoveMedDT(DeltaTime);
+	else MoveEasyDT(DeltaTime);
 
 	// Find out which way is "forward" and record that the player wants to move that way.
+	float ForwardValue = 200.f + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * 300.f;
 	FVector Direction = FVector(ForwardValue, 0, 0);
 	MovementComponent->AddInputVector(Direction);
 }
@@ -235,17 +223,23 @@ void ABikeCharacter::MoveHardDT(float DeltaTime)
 	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, -300.f, DeltaTime * 3.f);
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Hard lane"));
+	if (GetActorLocation().Y < -200.f) {
+		PowerLane = 2;
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Hard lane"));
+	}
 }
 
 void ABikeCharacter::MoveMedDT(float DeltaTime)
 {
 	float HorizontalValue;
-	if (abs(GetActorLocation().Y - 15.f) < 15.f) HorizontalValue = 0.f;
+	if (abs(GetActorLocation().Y) < 15.f) HorizontalValue = 0.f;
 	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, 0.f, DeltaTime * 3.f);
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Medium lane"));
+	if (abs(GetActorLocation().Y) < 200.f) {
+		PowerLane = 1;
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Medium lane"));
+	}
 }
 
 void ABikeCharacter::MoveEasyDT(float DeltaTime)
@@ -255,7 +249,10 @@ void ABikeCharacter::MoveEasyDT(float DeltaTime)
 	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, 300.f, DeltaTime * 3.f);
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Easy lane"));
+	if (GetActorLocation().Y > 200.f) {
+		PowerLane = 0;
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Easy lane"));
+	}
 }
 
 UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
