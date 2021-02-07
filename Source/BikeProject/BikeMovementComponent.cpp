@@ -13,17 +13,18 @@ void UBikeMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
         return;
     }
 
-    // Get (and then clear) the movement vector that we set in ABikeCharacter::Tick
-    FVector DesiredMovementThisFrame = ConsumeInputVector().GetClampedToMaxSize(1.0f) * DeltaTime * 150.0f;
+    FVector DesiredMovementThisFrame = FVector(0.f, 0.f, -2.f) * DeltaTime;
     if (!DesiredMovementThisFrame.IsNearlyZero())
     {
         FHitResult Hit;
         SafeMoveUpdatedComponent(DesiredMovementThisFrame, UpdatedComponent->GetComponentRotation(), true, Hit);
+    }
 
-        // If we bumped into something, try to slide along it
-        if (Hit.IsValidBlockingHit())
-        {
-            SlideAlongSurface(DesiredMovementThisFrame, 1.f - Hit.Time, Hit.Normal, Hit);
-        }
+    // Get (and then clear) the movement vector that we set in ABikeCharacter::Tick
+    DesiredMovementThisFrame = ConsumeInputVector() * DeltaTime;
+    if (!DesiredMovementThisFrame.IsNearlyZero())
+    {
+        FHitResult Hit;
+        SafeMoveUpdatedComponent(DesiredMovementThisFrame, UpdatedComponent->GetComponentRotation(), true, Hit);
     }
 };

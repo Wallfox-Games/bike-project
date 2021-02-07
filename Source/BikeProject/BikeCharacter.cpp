@@ -11,10 +11,11 @@ ABikeCharacter::ABikeCharacter()
 
 	//Create our components
 	// Our root component will be a sphere that reacts to physics
-	USphereComponent* SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
-	RootComponent = SphereComponent;
-	SphereComponent->InitSphereRadius(50.0f);
-	SphereComponent->SetCollisionProfileName(TEXT("Pawn"));
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RootComponent"));
+	RootComponent = CapsuleComponent;
+	CapsuleComponent->SetCapsuleRadius(50);
+	CapsuleComponent->SetCapsuleHalfHeight(50);
+	CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
 
 	PlayerVisibleComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerVisibleComponent"));
 	PlayerVisibleComponent->SetupAttachment(RootComponent);
@@ -30,6 +31,10 @@ ABikeCharacter::ABikeCharacter()
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	PlayerCamera->SetupAttachment(PlayerCameraSpringArm, USpringArmComponent::SocketName);
 
+	// Create an instance of our movement component, and tell it to update the root.
+	MovementComponent = CreateDefaultSubobject<UBikeMovementComponent>(TEXT("CustomMovementComponent"));
+	MovementComponent->UpdatedComponent = RootComponent;
+
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
@@ -37,6 +42,10 @@ ABikeCharacter::ABikeCharacter()
 	TimeStartLeft = FPlatformTime::Seconds();
 	TimeStartRight = FPlatformTime::Seconds();
 	PedalTimes.Reserve(ARRAYMAXSIZE + 1);
+
+	UPPERPOWER = MAXPOWER * 0.8;
+	MIDDLEPOWER = MAXPOWER * 0.65;
+	LOWERPOWER = MAXPOWER * 0.5;
 }
 
 // Called when the game starts or when spawned
@@ -56,6 +65,9 @@ void ABikeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Determine current Lane
+	// Snap to Upper and Lower Lanes
+	Movement(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -77,15 +89,16 @@ void ABikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("PedalRightAxis", this, &ABikeCharacter::PedalRightAxis);
 }
 
-void ABikeCharacter::Movement(float Value)
+void ABikeCharacter::Movement(float DeltaTime)
 {
-	PowerLevel = Value;
+	if (PowerLevel > (UPPERPOWER + MIDDLEPOWER) / 2) MoveHardDT(DeltaTime);
+	else if (PowerLevel > (MIDDLEPOWER + LOWERPOWER) / 2) MoveMedDT(DeltaTime);
+	else MoveEasyDT(DeltaTime);
 
 	// Find out which way is "forward" and record that the player wants to move that way.
-	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
-
-	Value = FMath::Clamp(Value, -1.0f, 1.0f);
-	AddMovementInput(Direction, Value);
+	float ForwardValue = 200.f + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * 300.f;
+	FVector Direction = FVector(ForwardValue, 0, 0);
+	MovementComponent->AddInputVector(Direction);
 }
 
 void ABikeCharacter::MoveUp()
@@ -175,31 +188,76 @@ void ABikeCharacter::CalculateBPM()
 	RPM *= 60;
 
 	// Set to power / RPM (roughly half)
+	PowerLevelOld = PowerLevel;
 	PowerLevel = RPM / 2;
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.4f, FColor::Blue, TEXT("RPM: ") + FString::SanitizeFloat(RPM), true);
-	GEngine->AddOnScreenDebugMessage(-1, 0.4f, FColor::Green, TEXT("Power: ") + FString::SanitizeFloat(PowerLevel), true);
+	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Blue, TEXT("RPM: ") + FString::SanitizeFloat(RPM), true);
+	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Power: ") + FString::SanitizeFloat(PowerLevel), true);
 }
 
 void ABikeCharacter::MoveHard()
 {
 	FVector newLocation = FVector(GetActorLocation().X, -300.f, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Hard lane"));
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Hard lane"));
 }
 
 void ABikeCharacter::MoveMed()
 {
 	FVector newLocation = FVector(GetActorLocation().X, 0.f, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Medium lane"));
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Medium lane"));
 }
 
 void ABikeCharacter::MoveEasy()
 {
 	FVector newLocation = FVector(GetActorLocation().X, 300.f, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Easy lane"));
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Easy lane"));
+}
+
+void ABikeCharacter::MoveHardDT(float DeltaTime)
+{
+	float HorizontalValue;
+	if (GetActorLocation().Y < -285.f) HorizontalValue = -300.f;
+	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, -300.f, DeltaTime * 3.f);
+	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
+	SetActorLocation(newLocation);
+	if (GetActorLocation().Y < -200.f) {
+		PowerLane = 2;
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Hard lane"));
+	}
+}
+
+void ABikeCharacter::MoveMedDT(float DeltaTime)
+{
+	float HorizontalValue;
+	if (abs(GetActorLocation().Y) < 15.f) HorizontalValue = 0.f;
+	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, 0.f, DeltaTime * 3.f);
+	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
+	SetActorLocation(newLocation);
+	if (abs(GetActorLocation().Y) < 200.f) {
+		PowerLane = 1;
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Medium lane"));
+	}
+}
+
+void ABikeCharacter::MoveEasyDT(float DeltaTime)
+{
+	float HorizontalValue;
+	if (GetActorLocation().Y > 285.f) HorizontalValue = 300.f;
+	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, 300.f, DeltaTime * 3.f);
+	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
+	SetActorLocation(newLocation);
+	if (GetActorLocation().Y > 200.f) {
+		PowerLane = 0;
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Easy lane"));
+	}
+}
+
+UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
+{
+	return MovementComponent;
 }
 
 float ABikeCharacter::GetPowerLevel() const
