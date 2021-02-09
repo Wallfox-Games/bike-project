@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BikeMovementComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "BikeCharacter.generated.h"
 
 UCLASS()
@@ -24,13 +25,25 @@ protected:
 	// Variables
 	UPROPERTY(BlueprintGetter=GetPowerLevel)
 	float PowerLevel;
-	UPROPERTY(BlueprintReadWrite)
-	int MAXPOWER = 120;
+	UPROPERTY()
+	float PowerLevelOld;
+	UPROPERTY(EditAnywhere)
+	float MAXPOWER = 120;
+	UPROPERTY()
+		float UPPERPOWER;
+	UPROPERTY()
+		float MIDDLEPOWER;
+	UPROPERTY()
+		float LOWERPOWER;
 
 	UPROPERTY(EditAnywhere)
-	USceneComponent* PlayerVisibleComponent;
+	UCapsuleComponent* CapsuleComponent;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* PlayerVisibleComponent;
 
+	UPROPERTY(EditAnywhere)
 	USpringArmComponent* PlayerCameraSpringArm;
+	UPROPERTY(EditAnywhere)
 	UCameraComponent* PlayerCamera;
 
 	// Handles input for moving forward.
@@ -83,6 +96,12 @@ protected:
 		void MoveMed();
 	UFUNCTION()
 		void MoveEasy();
+	UFUNCTION()
+		void MoveHardDT(float DeltaTime);
+	UFUNCTION()
+		void MoveMedDT(float DeltaTime);
+	UFUNCTION()
+		void MoveEasyDT(float DeltaTime);
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -97,6 +116,12 @@ public:
 	// Third-person camera.
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* TPCameraComponent;
+
+	// Movement component.
+	UPROPERTY()
+	class UBikeMovementComponent* MovementComponent;
+
+	virtual UBikeMovementComponent* GetMovementComponent() const override;
 
 	// Getter
 	UFUNCTION(BlueprintCallable)
