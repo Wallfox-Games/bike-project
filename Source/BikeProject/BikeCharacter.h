@@ -23,18 +23,20 @@ public:
 
 protected:
 	// Variables
-	UPROPERTY(BlueprintGetter=GetPowerLevel)
+	UPROPERTY(BlueprintGetter=GetRawPower)
 	float PowerLevel;
 	UPROPERTY()
 	float PowerLevelOld;
-	UPROPERTY(EditAnywhere)
-	float MAXPOWER = 120;
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetMaxPower)
+	float MAXPOWER;
 	UPROPERTY()
-		float UPPERPOWER;
+	float UPPERPOWER;
 	UPROPERTY()
-		float MIDDLEPOWER;
+	float MIDDLEPOWER;
 	UPROPERTY()
-		float LOWERPOWER;
+	float LOWERPOWER;
+	UPROPERTY(BlueprintGetter = GetTutorialState)
+	bool TutorialState;
 
 	UPROPERTY(EditAnywhere)
 	UCapsuleComponent* CapsuleComponent;
@@ -122,8 +124,14 @@ public:
 	class UBikeMovementComponent* MovementComponent;
 
 	virtual UBikeMovementComponent* GetMovementComponent() const override;
-
-	// Getter
+	
+	// Getter and Setter
+	UFUNCTION(BlueprintCallable)
+	bool GetTutorialState() const;
 	UFUNCTION(BlueprintCallable)
 	float GetPowerLevel() const;
+	UFUNCTION(BlueprintCallable)
+	float GetRawPower() const;
+	UFUNCTION(BlueprintCallable)
+	void SetMaxPower(float newMaxPower);
 };
