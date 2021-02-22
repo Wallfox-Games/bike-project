@@ -113,8 +113,8 @@ void ABikeCharacter::Movement(float DeltaTime)
 	else MoveEasyDT(DeltaTime);
 
 	// Find out which way is "forward" and record that the player wants to move that way.
-	float ForwardValue = 200.f + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * 300.f;
-	FVector Direction = FVector(ForwardValue, 0, 0);
+	float ForwardValue = 200.f + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * 300.f;	
+	FVector Direction = ForwardValue * GetActorForwardVector();;
 	MovementComponent->AddInputVector(Direction);
 }
 
