@@ -63,6 +63,11 @@ ABikeCharacter::ABikeCharacter()
 	UPPERPOWER = MAXPOWER * 0.8;
 	MIDDLEPOWER = MAXPOWER * 0.65;
 	LOWERPOWER = MAXPOWER * 0.5;
+
+	LaneWidth = 80.f;
+	LaneSpeed = 1.5f;
+	SpeedBase = 200.f;
+	SpeedMultiplier = 300.f;
 }
 
 // Called when the game starts or when spawned
@@ -113,7 +118,7 @@ void ABikeCharacter::Movement(float DeltaTime)
 	else MoveEasyDT(DeltaTime);
 
 	// Find out which way is "forward" and record that the player wants to move that way.
-	float ForwardValue = 200.f + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * 300.f;	
+	float ForwardValue = SpeedBase + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * SpeedMultiplier;
 	FVector Direction = ForwardValue * GetActorForwardVector();;
 	MovementComponent->AddInputVector(Direction);
 }
@@ -214,7 +219,7 @@ void ABikeCharacter::CalculateBPM()
 
 void ABikeCharacter::MoveHard()
 {
-	FVector newLocation = FVector(GetActorLocation().X, -300.f, GetActorLocation().Z);
+	FVector newLocation = FVector(GetActorLocation().X, -LaneWidth, GetActorLocation().Z);
 	SetActorLocation(newLocation);
 	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Hard lane"));
 }
@@ -228,7 +233,7 @@ void ABikeCharacter::MoveMed()
 
 void ABikeCharacter::MoveEasy()
 {
-	FVector newLocation = FVector(GetActorLocation().X, 300.f, GetActorLocation().Z);
+	FVector newLocation = FVector(GetActorLocation().X, LaneWidth, GetActorLocation().Z);
 	SetActorLocation(newLocation);
 	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Easy lane"));
 }
@@ -236,11 +241,11 @@ void ABikeCharacter::MoveEasy()
 void ABikeCharacter::MoveHardDT(float DeltaTime)
 {
 	float HorizontalValue;
-	if (GetActorLocation().Y < -285.f) HorizontalValue = -300.f;
-	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, -300.f, DeltaTime * 3.f);
+	if (GetActorLocation().Y < (0.95f * -LaneWidth)) HorizontalValue = -LaneWidth;
+	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, -LaneWidth, DeltaTime * LaneSpeed);
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	if (GetActorLocation().Y < -200.f) {
+	if (GetActorLocation().Y < (0.7f * -LaneWidth)) {
 		PowerLane = 2;
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Hard lane"));
 	}
@@ -249,11 +254,11 @@ void ABikeCharacter::MoveHardDT(float DeltaTime)
 void ABikeCharacter::MoveMedDT(float DeltaTime)
 {
 	float HorizontalValue;
-	if (abs(GetActorLocation().Y) < 15.f) HorizontalValue = 0.f;
-	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, 0.f, DeltaTime * 3.f);
+	if (abs(GetActorLocation().Y) < (0.05f * LaneWidth)) HorizontalValue = 0.f;
+	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, 0.f, DeltaTime * LaneSpeed);
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	if (abs(GetActorLocation().Y) < 200.f) {
+	if (abs(GetActorLocation().Y) < (0.3f * LaneWidth) && abs(GetActorLocation().Y) > (0.3f * -LaneWidth)) {
 		PowerLane = 1;
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Medium lane"));
 	}
@@ -262,11 +267,11 @@ void ABikeCharacter::MoveMedDT(float DeltaTime)
 void ABikeCharacter::MoveEasyDT(float DeltaTime)
 {
 	float HorizontalValue;
-	if (GetActorLocation().Y > 285.f) HorizontalValue = 300.f;
-	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, 300.f, DeltaTime * 3.f);
+	if (GetActorLocation().Y > (0.95f * LaneWidth)) HorizontalValue = LaneWidth;
+	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, LaneWidth, DeltaTime * LaneSpeed);
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	if (GetActorLocation().Y > 200.f) {
+	if (GetActorLocation().Y > (0.7f * LaneWidth)) {
 		PowerLane = 0;
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Easy lane"));
 	}

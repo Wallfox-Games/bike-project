@@ -39,6 +39,15 @@ protected:
 	bool TutorialState;
 
 	UPROPERTY(EditAnywhere)
+	float LaneWidth;
+	UPROPERTY(EditAnywhere)
+	float LaneSpeed;
+	UPROPERTY(EditAnywhere)
+	float SpeedBase;
+	UPROPERTY(EditAnywhere)
+	float SpeedMultiplier;
+
+	UPROPERTY(EditAnywhere)
 	UCapsuleComponent* CapsuleComponent;
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* PlayerVisibleComponent;
