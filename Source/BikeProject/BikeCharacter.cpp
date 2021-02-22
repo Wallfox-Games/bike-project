@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "BikeCharacter.h"
+#include "BikeProject.h"
 
 // Sets default values
 ABikeCharacter::ABikeCharacter()
@@ -42,6 +42,23 @@ ABikeCharacter::ABikeCharacter()
 	TimeStartLeft = FPlatformTime::Seconds();
 	TimeStartRight = FPlatformTime::Seconds();
 	PedalTimes.Reserve(ARRAYMAXSIZE + 1);
+
+	// Only load game stats if the load .sav file exists
+	const FString SaveSlotName = FString(TEXT("PlayerSaveSlot"));
+
+	if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, 0))
+	{
+		class UBikeProjectSaveGame* LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass()));
+		LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadInstance->SaveSlotName, LoadInstance->UserIndex));
+		MAXPOWER = LoadInstance->PlayerMaxPower;
+		TutorialState = false;
+	}
+	else
+	{
+		// In tutorial mode
+		MAXPOWER = 500;
+		TutorialState = true;
+	}
 
 	UPPERPOWER = MAXPOWER * 0.8;
 	MIDDLEPOWER = MAXPOWER * 0.65;
@@ -96,8 +113,8 @@ void ABikeCharacter::Movement(float DeltaTime)
 	else MoveEasyDT(DeltaTime);
 
 	// Find out which way is "forward" and record that the player wants to move that way.
-	float ForwardValue = 200.f + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * 300.f;
-	FVector Direction = FVector(ForwardValue, 0, 0);
+	float ForwardValue = 200.f + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * 300.f;	
+	FVector Direction = ForwardValue * GetActorForwardVector();;
 	MovementComponent->AddInputVector(Direction);
 }
 
@@ -260,7 +277,35 @@ UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
 	return MovementComponent;
 }
 
+bool ABikeCharacter::GetTutorialState() const
+{
+	return TutorialState;
+}
+
 float ABikeCharacter::GetPowerLevel() const
 {
 	return PowerLevel / MAXPOWER;
 }
+
+float ABikeCharacter::GetRawPower() const
+{
+	return PowerLevel;
+}
+
+void ABikeCharacter::SetMaxPower(float newMaxPower)
+{
+	MAXPOWER = newMaxPower;
+
+	if (UBikeProjectSaveGame* SaveGameInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass())))
+	{
+		// Set data on the savegame object.
+		SaveGameInstance->PlayerMaxPower = MAXPOWER;
+
+		// Save the data immediately.
+		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex))
+		{
+			// Save succeeded.
+		}
+	}
+}
+
