@@ -23,7 +23,7 @@ public:
 
 protected:
 	// Variables
-	UPROPERTY(BlueprintGetter=GetRawPower)
+	UPROPERTY()
 	float PowerLevel;
 	UPROPERTY()
 	float PowerLevelOld;
@@ -72,41 +72,18 @@ protected:
 	UPROPERTY()
 		double TimeStartRight;
 
-	UPROPERTY()
-		bool PedalLeft;
-	UPROPERTY()
-		bool PedalRight;
-
 	UFUNCTION()
 		void Movement(float Value);
-	UFUNCTION()
-		void MoveUp();
-	UFUNCTION()
-		void MoveDown();
 	UFUNCTION()
 		void PedalLeftStart();
 	UFUNCTION()
 		void PedalRightStart();
-	UFUNCTION()
-		void PedalLeftEnd();
-	UFUNCTION()
-		void PedalRightEnd();
-	UFUNCTION()
-		void PedalLeftAxis(float Value);
-	UFUNCTION()
-		void PedalRightAxis(float Value);
 
 	UFUNCTION()
 		void AddTime();
 	UFUNCTION()
 		void CalculateBPM();
 
-	UFUNCTION()
-		void MoveHard();
-	UFUNCTION()
-		void MoveMed();
-	UFUNCTION()
-		void MoveEasy();
 	UFUNCTION()
 		void MoveHardDT(float DeltaTime);
 	UFUNCTION()
@@ -140,7 +117,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetPowerLevel() const;
 	UFUNCTION(BlueprintCallable)
-	float GetRawPower() const;
+	float GetRawPower(int Scale) const;
 	UFUNCTION(BlueprintCallable)
 	void SetMaxPower(float newMaxPower);
 };
