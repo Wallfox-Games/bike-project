@@ -240,24 +240,22 @@ float ABikeCharacter::GetRawPower(int Scale) const
 	switch (Scale)
 	{
 	case 0:
-		return PowerLevel;
-		break;
-	case 1:
 		return LOWERPOWER;
 		break;
-	case 2:
+	case 1:
 		return MIDDLEPOWER;
 		break;
-	case 3:
+	case 2:
 		return UPPERPOWER;
 		break;
-	case 4:
+	case 3:
 		return MAXPOWER;
 		break;
+	case 4:
 	default:
+		return PowerLevel;
 		break;
 	}
-	return 0;
 }
 
 // Sets MAXPOWER and saves to file
