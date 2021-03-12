@@ -110,7 +110,15 @@ public:
 	class UBikeMovementComponent* MovementComponent;
 
 	virtual UBikeMovementComponent* GetMovementComponent() const override;
-	
+
+	UFUNCTION(BlueprintCallable)
+	void TurnActor(float Angle);
+
+	UFUNCTION()
+		void RotateLeft();
+	UFUNCTION()
+		void RotateRight();
+
 	// Getter and Setter
 	UFUNCTION(BlueprintCallable)
 	bool GetTutorialState() const;

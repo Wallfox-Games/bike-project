@@ -107,6 +107,10 @@ void ABikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	// Set up "movement" bindings.
 	PlayerInputComponent->BindAction("PedalLeftButton", IE_Pressed, this, &ABikeCharacter::PedalLeftStart);
 	PlayerInputComponent->BindAction("PedalRightButton", IE_Pressed, this, &ABikeCharacter::PedalRightStart);
+
+	// Set up "test" bindings.
+	PlayerInputComponent->BindAction("RotateLeft", IE_Pressed, this, &ABikeCharacter::RotateLeft);
+	PlayerInputComponent->BindAction("RotateRight", IE_Pressed, this, &ABikeCharacter::RotateRight);
 }
 
 // Checks current power of dinosaur and moves them into correct lane
@@ -123,7 +127,7 @@ void ABikeCharacter::Movement(float DeltaTime)
 
 	// Find out which way is "forward" and record that the player wants to move that way.
 	float ForwardValue = SpeedBase + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * SpeedMultiplier;
-	FVector Direction = ForwardValue * GetActorForwardVector();;
+	FVector Direction = ForwardValue * GetActorForwardVector();
 	MovementComponent->AddInputVector(Direction);
 }
 
@@ -173,19 +177,26 @@ void ABikeCharacter::CalculateBPM()
 	PowerLevelOld = PowerLevel;
 	PowerLevel = RPM / 2;
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Blue, TEXT("RPM: ") + FString::SanitizeFloat(RPM), true);
 	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Power: ") + FString::SanitizeFloat(PowerLevel), true);
 }
 
 // Smoothly moves the player into the hard lane
 void ABikeCharacter::MoveHardDT(float DeltaTime)
-{
+{	
+	float Position = GetActorLocation().Y;
 	float HorizontalValue;
-	if (GetActorLocation().Y < (0.95f * -LaneWidth)) HorizontalValue = -LaneWidth;
-	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, -LaneWidth, DeltaTime * LaneSpeed);
+
+	// if the Position is close to the LaneWidth, then snap the value to the LaneWidth
+	if (Position > (0.95f * LaneWidth)) HorizontalValue = LaneWidth;
+	// else, lerp the value towards the LaneWidth
+	else HorizontalValue = FMath::Lerp(Position, LaneWidth, DeltaTime * LaneSpeed);
+
+	// set the actor to the new Y value
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	if (GetActorLocation().Y < (0.7f * -LaneWidth)) {
+
+	// if the new value has entered the new lane, change the PowerLane variable
+	if (HorizontalValue > (0.7f * LaneWidth)) {
 		PowerLane = 2;
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Hard lane"));
 	}
@@ -194,12 +205,20 @@ void ABikeCharacter::MoveHardDT(float DeltaTime)
 // Smoothly moves the player into the medium lane
 void ABikeCharacter::MoveMedDT(float DeltaTime)
 {
+	float Position = GetActorLocation().Y;
 	float HorizontalValue;
-	if (abs(GetActorLocation().Y) < (0.05f * LaneWidth)) HorizontalValue = 0.f;
-	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, 0.f, DeltaTime * LaneSpeed);
+
+	// if the Position is close to the LaneWidth, then snap the value to the LaneWidth
+	if (abs(Position) < (0.05f * LaneWidth)) HorizontalValue = 0.f;
+	// else, lerp the value towards the LaneWidth
+	else HorizontalValue = FMath::Lerp(Position, 0.f, DeltaTime * LaneSpeed);
+
+	// set the actor to the new Y value
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	if (abs(GetActorLocation().Y) < (0.3f * LaneWidth) && abs(GetActorLocation().Y) > (0.3f * -LaneWidth)) {
+
+	// if the new value has entered the new lane, change the PowerLane variable
+	if (abs(HorizontalValue) < (0.3f * LaneWidth) && abs(HorizontalValue) > (0.3f * -LaneWidth)) {
 		PowerLane = 1;
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Medium lane"));
 	}
@@ -208,12 +227,20 @@ void ABikeCharacter::MoveMedDT(float DeltaTime)
 // Smoothly moves the player into the easy lane
 void ABikeCharacter::MoveEasyDT(float DeltaTime)
 {
+	float Position = GetActorLocation().Y;
 	float HorizontalValue;
-	if (GetActorLocation().Y > (0.95f * LaneWidth)) HorizontalValue = LaneWidth;
-	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, LaneWidth, DeltaTime * LaneSpeed);
+
+	// if the Position is close to the LaneWidth, then snap the value to the LaneWidth
+	if (Position < (0.95f * -LaneWidth)) HorizontalValue = -LaneWidth;
+	// else, lerp the value towards the LaneWidth
+	else HorizontalValue = FMath::Lerp(Position, -LaneWidth, DeltaTime * LaneSpeed);
+
+	// set the actor to the new Y value
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	if (GetActorLocation().Y > (0.7f * LaneWidth)) {
+
+	// if the new value has entered the new lane, change the PowerLane variable
+	if (HorizontalValue < (0.7f * -LaneWidth)) {
 		PowerLane = 0;
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Easy lane"));
 	}
@@ -222,6 +249,23 @@ void ABikeCharacter::MoveEasyDT(float DeltaTime)
 UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
 {
 	return MovementComponent;
+}
+
+void ABikeCharacter::TurnActor(float Angle)
+{
+	float NewAngle = GetActorRotation().Yaw + Angle;
+	FRotator NewRotation = FRotator(GetActorRotation().Pitch, NewAngle, GetActorRotation().Roll);
+	SetActorRotation(NewRotation);
+}
+
+void ABikeCharacter::RotateLeft()
+{
+	TurnActor(-10.f);
+}
+
+void ABikeCharacter::RotateRight()
+{
+	TurnActor(10.f);
 }
 
 bool ABikeCharacter::GetTutorialState() const
