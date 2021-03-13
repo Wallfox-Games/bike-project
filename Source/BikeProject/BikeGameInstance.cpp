@@ -5,20 +5,43 @@
 
 void UBikeGameInstance::Init()
 {
+	Circumference = 2100;
+
 	Task = new BikePhysicalInput(this);
 	Task->Run();
 }
 
-uint8 UBikeGameInstance::GetSpeed()
+void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
 {
-	return SpeedsArray[0];
-}
-
-void UBikeGameInstance::SetSpeed(uint8 value)
-{
-	SpeedsArray.Push(value);
-	while (SpeedsArray.Num() > 1)
+	EventTimes.Push(EventTime);
+	while (EventTimes.Num() > 2)
 	{
-		SpeedsArray.Pop();
+		EventTimes.RemoveAt(0);
+	}
+
+	RevolutionCounts.Push(RevCount);
+	while (RevolutionCounts.Num() > 2)
+	{
+		RevolutionCounts.RemoveAt(0);
+	}
+
+	if (EventTimes.Num() == 2 && RevolutionCounts.Num() == 2)
+	{
+		float CircumferenceM = Circumference / 1000;
+		float RevCountDelta = RevolutionCounts[1] - RevolutionCounts[0];
+		float EventTimeDelta = EventTimes[1] - EventTimes[0];
+
+		currentSpeed = (CircumferenceM * RevCountDelta * 1024) / EventTimeDelta;
 	}
 }
+
+int UBikeGameInstance::GetSpeed()
+{
+	return currentSpeed;
+}
+
+void UBikeGameInstance::SetCircumference(float newCircumference)
+{
+	Circumference = newCircumference;
+}
+

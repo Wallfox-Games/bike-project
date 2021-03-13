@@ -76,6 +76,8 @@ void BikePhysicalInput::Stop()
 
 void BikePhysicalInput::ProcessSocketMessage(uint8 InSocketMessage[16])
 {
-	uint8 NewSpeed = *InSocketMessage;
-	GameInstanceRef->SetSpeed(NewSpeed);
+	unsigned short eventTime = (InSocketMessage[0] << 8) | InSocketMessage[1];
+	unsigned short revCount = (InSocketMessage[2] << 8) | InSocketMessage[3];
+	
+	GameInstanceRef->FillArrays(eventTime, revCount);
 }

@@ -18,10 +18,16 @@ class BIKEPROJECT_API UBikeGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 
-	uint8 GetSpeed();
-	void SetSpeed(uint8 newSpeed);
+	void FillArrays(short EventTime, short RevCount);
+	int GetSpeed();
+
+	void SetCircumference(float newCircumference);
 
 private:
-	TArray<uint8> SpeedsArray;
+	TArray<short> EventTimes;
+	TArray<short> RevolutionCounts;
+	float Circumference;
+
+	int currentSpeed;
 	BikePhysicalInput* Task;
 };
