@@ -3,6 +3,8 @@
 #include "BikeCharacter.h"
 #include "BikeProject.h"
 
+#include "BikeGameInstance.h"
+
 // Sets default values
 ABikeCharacter::ABikeCharacter()
 {
@@ -93,6 +95,9 @@ void ABikeCharacter::BeginPlay()
 void ABikeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
+	PowerLevel = GameInstanceRef->GetSpeed();
 
 	// Determine current Lane
 	// Snap to Upper and Lower Lanes

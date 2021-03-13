@@ -6,6 +6,7 @@
 #include "Sockets.h"
 #include "HAL/Runnable.h"
 
+class BIKEPROJECT_API UBikeGameInstance;
 
 /**
  * 
@@ -15,10 +16,10 @@ class BIKEPROJECT_API BikePhysicalInput : public FRunnable
 	FRunnableThread* RunnableThread;
 	FSocket* Socket;
 	TSharedPtr<FInternetAddr> InternetAddress;
-	TArray<uint8>* SpeedsArrayPtr;
+	UBikeGameInstance* GameInstanceRef;
 
 public:
-	BikePhysicalInput(TArray<uint8>* SpeedsPtr);
+	BikePhysicalInput(UBikeGameInstance* BikeInstanceRef);
 	~BikePhysicalInput();
 
 public: // FRunnable Interface

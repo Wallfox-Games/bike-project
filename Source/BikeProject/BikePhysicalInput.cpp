@@ -3,9 +3,11 @@
 #include "BikePhysicalInput.h"
 #include "Networking.h"
 
-BikePhysicalInput::BikePhysicalInput(TArray<uint8>* SpeedsPtr)
+#include "BikeGameInstance.h"
+
+BikePhysicalInput::BikePhysicalInput(UBikeGameInstance* BikeInstanceRef)
 {
-	SpeedsArrayPtr = SpeedsPtr;
+	GameInstanceRef = BikeInstanceRef;
 
 	FString Address = "127.0.0.1";
 	int32 Port = 6123;
@@ -75,5 +77,5 @@ void BikePhysicalInput::Stop()
 void BikePhysicalInput::ProcessSocketMessage(uint8 InSocketMessage[16])
 {
 	uint8 NewSpeed = *InSocketMessage;
-	SpeedsArrayPtr->Add(NewSpeed);
+	GameInstanceRef->SetSpeed(NewSpeed);
 }

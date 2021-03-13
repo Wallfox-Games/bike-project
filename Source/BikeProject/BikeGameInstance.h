@@ -18,6 +18,9 @@ class BIKEPROJECT_API UBikeGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 
+	uint8 GetSpeed();
+	void SetSpeed(uint8 newSpeed);
+
 private:
 	TArray<uint8> SpeedsArray;
 	BikePhysicalInput* Task;
