@@ -19,7 +19,6 @@ public:
 	UFUNCTION()
 	virtual void Init() override;
 
-	UFUNCTION()
 	void FillArrays(short EventTime, short RevCount);
 	UFUNCTION()
 	int GetSpeed();
@@ -28,15 +27,12 @@ public:
 	void SetCircumference(float newCircumference);
 
 private:
-	UPROPERTY()
 	TArray<short> EventTimes;
-	UPROPERTY()
 	TArray<short> RevolutionCounts;
 	UPROPERTY()
 	float Circumference;
 
 	UPROPERTY()
 	int currentSpeed;
-	UPROPERTY()
 	BikePhysicalInput* Task;
 };
