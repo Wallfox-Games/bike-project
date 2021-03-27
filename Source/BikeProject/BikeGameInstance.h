@@ -18,6 +18,7 @@ class BIKEPROJECT_API UBikeGameInstance : public UGameInstance
 public:
 	UFUNCTION()
 	virtual void Init() override;
+	virtual void Shutdown() override;
 
 	void FillArrays(short EventTime, short RevCount);
 	UFUNCTION()

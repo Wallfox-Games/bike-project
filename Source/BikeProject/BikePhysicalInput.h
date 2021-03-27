@@ -28,7 +28,6 @@ public: // FRunnable Interface
 	virtual uint32 Run() override;
 	virtual void Stop() override;
 
-
 private:
 
 	/** Processes the socket message */
