@@ -25,6 +25,10 @@ protected:
 	// Variables
 	UPROPERTY()
 	float PowerLevel;
+	UPROPERTY()
+	float PowerLevelKB;
+	UPROPERTY()
+	float PowerLevelBP;
 	UPROPERTY(EditAnywhere, BlueprintSetter = SetMaxPower)
 	float MAXPOWER;
 	UPROPERTY()

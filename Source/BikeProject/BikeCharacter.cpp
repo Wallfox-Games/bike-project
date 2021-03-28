@@ -97,9 +97,12 @@ void ABikeCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
-	PowerLevel = GameInstanceRef->GetSpeed();
+	PowerLevelBP = GameInstanceRef->GetSpeed();
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Bike Input Speed: ") + FString::SanitizeFloat(PowerLevel), true);
+
+	if (PowerLevelKB > 0) PowerLevel = PowerLevelKB;
+	else PowerLevel = PowerLevelBP;
 
 	// Determine current Lane
 	// Snap to Upper and Lower Lanes
@@ -181,7 +184,7 @@ void ABikeCharacter::CalculateBPM()
 	RPM *= 60;
 
 	// Set to power / RPM (roughly half)
-	PowerLevel = RPM / 2;
+	PowerLevelKB = RPM / 2;
 
 	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Keyboard Input Power: ") + FString::SanitizeFloat(PowerLevel), true);
 }
