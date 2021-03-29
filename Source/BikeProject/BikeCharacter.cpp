@@ -127,13 +127,13 @@ void ABikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 // Moves dinosaur forward at a speed value relative to power
 void ABikeCharacter::Movement(float DeltaTime)
 {
-	if (!TutorialState)
-	{
+	//if (!TutorialState)
+	//{
 		// Checks if PowerLevel is past the midpoint of the power scale
 		if (PowerLevel > (UPPERPOWER + MIDDLEPOWER) / 2) MoveHardDT(DeltaTime);
 		else if (PowerLevel > (MIDDLEPOWER + LOWERPOWER) / 2) MoveMedDT(DeltaTime);
 		else MoveEasyDT(DeltaTime);
-	}
+	//}
 
 	// Find out which way is "forward" and record that the player wants to move that way.
 	float ForwardValue = SpeedBase + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * SpeedMultiplier;
