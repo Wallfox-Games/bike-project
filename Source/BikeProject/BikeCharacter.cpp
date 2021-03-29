@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BikeCharacter.h"
-#include "BikeProject.h"
+
+#include "BikeGameInstance.h"
 
 // Sets default values
 ABikeCharacter::ABikeCharacter()
@@ -46,30 +47,6 @@ ABikeCharacter::ABikeCharacter()
 	// Reserves memory for the pedal array
 	PedalTimes.Reserve(ARRAYMAXSIZE + 1);
 
-	// Only load game stats if the load .sav file exists
-	const FString SaveSlotName = FString(TEXT("PlayerSaveSlot"));
-
-	// Checks for save data, if it exists then it loads the maximum power in the save and sets tutorial state to false (player has already done tutorial)
-	if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, 0))
-	{
-		class UBikeProjectSaveGame* LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass()));
-		LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadInstance->SaveSlotName, LoadInstance->UserIndex));
-		MAXPOWER = LoadInstance->PlayerMaxPower;
-		TutorialState = false;
-	}
-	// Else set MAXPOWER to high value and tutorial state to true
-	else
-	{
-		// In tutorial mode
-		MAXPOWER = 500;
-		TutorialState = true;
-	}
-	
-	// Sets three power stages to be a percentage of MAXPOWER
-	UPPERPOWER = MAXPOWER * 0.8;
-	MIDDLEPOWER = MAXPOWER * 0.65;
-	LOWERPOWER = MAXPOWER * 0.5;
-
 	// Default variables for lanes and width (editable in blueprints)
 	LaneWidth = 80.f;
 	LaneSpeed = 1.5f;
@@ -94,6 +71,14 @@ void ABikeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
+	PowerLevelBP = GameInstanceRef->GetSpeed();
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Bike Input Speed: ") + FString::SanitizeFloat(PowerLevel), true);
+
+	if (PowerLevelKB > 0) PowerLevel = PowerLevelKB;
+	else PowerLevel = PowerLevelBP;
+
 	// Determine current Lane
 	// Snap to Upper and Lower Lanes
 	Movement(DeltaTime);
@@ -107,23 +92,27 @@ void ABikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	// Set up "movement" bindings.
 	PlayerInputComponent->BindAction("PedalLeftButton", IE_Pressed, this, &ABikeCharacter::PedalLeftStart);
 	PlayerInputComponent->BindAction("PedalRightButton", IE_Pressed, this, &ABikeCharacter::PedalRightStart);
+
+	// Set up "test" bindings.
+	PlayerInputComponent->BindAction("RotateLeft", IE_Pressed, this, &ABikeCharacter::RotateLeft);
+	PlayerInputComponent->BindAction("RotateRight", IE_Pressed, this, &ABikeCharacter::RotateRight);
 }
 
 // Checks current power of dinosaur and moves them into correct lane
 // Moves dinosaur forward at a speed value relative to power
 void ABikeCharacter::Movement(float DeltaTime)
 {
-	if (!TutorialState)
-	{
+	//if (!TutorialState)
+	//{
 		// Checks if PowerLevel is past the midpoint of the power scale
 		if (PowerLevel > (UPPERPOWER + MIDDLEPOWER) / 2) MoveHardDT(DeltaTime);
 		else if (PowerLevel > (MIDDLEPOWER + LOWERPOWER) / 2) MoveMedDT(DeltaTime);
 		else MoveEasyDT(DeltaTime);
-	}
+	//}
 
 	// Find out which way is "forward" and record that the player wants to move that way.
 	float ForwardValue = SpeedBase + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * SpeedMultiplier;
-	FVector Direction = ForwardValue * GetActorForwardVector();;
+	FVector Direction = ForwardValue * GetActorForwardVector();
 	MovementComponent->AddInputVector(Direction);
 }
 
@@ -170,22 +159,28 @@ void ABikeCharacter::CalculateBPM()
 	RPM *= 60;
 
 	// Set to power / RPM (roughly half)
-	PowerLevelOld = PowerLevel;
-	PowerLevel = RPM / 2;
+	PowerLevelKB = RPM / 2;
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Blue, TEXT("RPM: ") + FString::SanitizeFloat(RPM), true);
-	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Power: ") + FString::SanitizeFloat(PowerLevel), true);
+	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Keyboard Input Power: ") + FString::SanitizeFloat(PowerLevel), true);
 }
 
 // Smoothly moves the player into the hard lane
 void ABikeCharacter::MoveHardDT(float DeltaTime)
-{
+{	
+	float Position = GetActorLocation().Y;
 	float HorizontalValue;
-	if (GetActorLocation().Y < (0.95f * -LaneWidth)) HorizontalValue = -LaneWidth;
-	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, -LaneWidth, DeltaTime * LaneSpeed);
+
+	// if the Position is close to the LaneWidth, then snap the value to the LaneWidth
+	if (Position > (0.95f * LaneWidth)) HorizontalValue = LaneWidth;
+	// else, lerp the value towards the LaneWidth
+	else HorizontalValue = FMath::Lerp(Position, LaneWidth, DeltaTime * LaneSpeed);
+
+	// set the actor to the new Y value
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	if (GetActorLocation().Y < (0.7f * -LaneWidth)) {
+
+	// if the new value has entered the new lane, change the PowerLane variable
+	if (HorizontalValue > (0.7f * LaneWidth)) {
 		PowerLane = 2;
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Hard lane"));
 	}
@@ -194,12 +189,20 @@ void ABikeCharacter::MoveHardDT(float DeltaTime)
 // Smoothly moves the player into the medium lane
 void ABikeCharacter::MoveMedDT(float DeltaTime)
 {
+	float Position = GetActorLocation().Y;
 	float HorizontalValue;
-	if (abs(GetActorLocation().Y) < (0.05f * LaneWidth)) HorizontalValue = 0.f;
-	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, 0.f, DeltaTime * LaneSpeed);
+
+	// if the Position is close to the LaneWidth, then snap the value to the LaneWidth
+	if (abs(Position) < (0.05f * LaneWidth)) HorizontalValue = 0.f;
+	// else, lerp the value towards the LaneWidth
+	else HorizontalValue = FMath::Lerp(Position, 0.f, DeltaTime * LaneSpeed);
+
+	// set the actor to the new Y value
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	if (abs(GetActorLocation().Y) < (0.3f * LaneWidth) && abs(GetActorLocation().Y) > (0.3f * -LaneWidth)) {
+
+	// if the new value has entered the new lane, change the PowerLane variable
+	if (abs(HorizontalValue) < (0.3f * LaneWidth) && abs(HorizontalValue) > (0.3f * -LaneWidth)) {
 		PowerLane = 1;
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Medium lane"));
 	}
@@ -208,12 +211,20 @@ void ABikeCharacter::MoveMedDT(float DeltaTime)
 // Smoothly moves the player into the easy lane
 void ABikeCharacter::MoveEasyDT(float DeltaTime)
 {
+	float Position = GetActorLocation().Y;
 	float HorizontalValue;
-	if (GetActorLocation().Y > (0.95f * LaneWidth)) HorizontalValue = LaneWidth;
-	else HorizontalValue = FMath::Lerp(GetActorLocation().Y, LaneWidth, DeltaTime * LaneSpeed);
+
+	// if the Position is close to the LaneWidth, then snap the value to the LaneWidth
+	if (Position < (0.95f * -LaneWidth)) HorizontalValue = -LaneWidth;
+	// else, lerp the value towards the LaneWidth
+	else HorizontalValue = FMath::Lerp(Position, -LaneWidth, DeltaTime * LaneSpeed);
+
+	// set the actor to the new Y value
 	FVector newLocation = FVector(GetActorLocation().X, HorizontalValue, GetActorLocation().Z);
 	SetActorLocation(newLocation);
-	if (GetActorLocation().Y > (0.7f * LaneWidth)) {
+
+	// if the new value has entered the new lane, change the PowerLane variable
+	if (HorizontalValue < (0.7f * -LaneWidth)) {
 		PowerLane = 0;
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Easy lane"));
 	}
@@ -224,9 +235,21 @@ UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
 	return MovementComponent;
 }
 
-bool ABikeCharacter::GetTutorialState() const
+void ABikeCharacter::TurnActor(float Angle)
 {
-	return TutorialState;
+	float NewAngle = GetActorRotation().Yaw + Angle;
+	FRotator NewRotation = FRotator(GetActorRotation().Pitch, NewAngle, GetActorRotation().Roll);
+	SetActorRotation(NewRotation);
+}
+
+void ABikeCharacter::RotateLeft()
+{
+	TurnActor(-10.f);
+}
+
+void ABikeCharacter::RotateRight()
+{
+	TurnActor(10.f);
 }
 
 float ABikeCharacter::GetPowerLevel() const
@@ -258,20 +281,14 @@ float ABikeCharacter::GetRawPower(int Scale) const
 	}
 }
 
-// Sets MAXPOWER and saves to file
-void ABikeCharacter::SetMaxPower(float newMaxPower)
+// Sets MAXPOWER from the GameInstance
+void ABikeCharacter::SetMaxPower()
 {
-	MAXPOWER = newMaxPower;
+	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
+	MAXPOWER = GameInstanceRef->GetMaxPower();
 
-	if (UBikeProjectSaveGame* SaveGameInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass())))
-	{
-		// Set data on the savegame object.
-		SaveGameInstance->PlayerMaxPower = MAXPOWER;
-
-		// Save the data immediately.
-		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex))
-		{
-			// Save succeeded.
-		}
-	}
+	// Sets three power stages to be a percentage of MAXPOWER
+	UPPERPOWER = MAXPOWER * 0.8;
+	MIDDLEPOWER = MAXPOWER * 0.65;
+	LOWERPOWER = MAXPOWER * 0.5;
 }

@@ -26,8 +26,10 @@ protected:
 	UPROPERTY()
 	float PowerLevel;
 	UPROPERTY()
-	float PowerLevelOld;
-	UPROPERTY(EditAnywhere, BlueprintSetter = SetMaxPower)
+	float PowerLevelKB;
+	UPROPERTY()
+	float PowerLevelBP;
+	UPROPERTY()
 	float MAXPOWER;
 	UPROPERTY()
 	float UPPERPOWER;
@@ -35,8 +37,6 @@ protected:
 	float MIDDLEPOWER;
 	UPROPERTY()
 	float LOWERPOWER;
-	UPROPERTY(BlueprintGetter = GetTutorialState)
-	bool TutorialState;
 
 	UPROPERTY(EditAnywhere)
 	float LaneWidth;
@@ -110,14 +110,20 @@ public:
 	class UBikeMovementComponent* MovementComponent;
 
 	virtual UBikeMovementComponent* GetMovementComponent() const override;
-	
-	// Getter and Setter
+
 	UFUNCTION(BlueprintCallable)
-	bool GetTutorialState() const;
+	void TurnActor(float Angle);
+
+	UFUNCTION()
+		void RotateLeft();
+	UFUNCTION()
+		void RotateRight();
+
+	// Getter and Setter
 	UFUNCTION(BlueprintCallable)
 	float GetPowerLevel() const;
 	UFUNCTION(BlueprintCallable)
 	float GetRawPower(int Scale) const;
 	UFUNCTION(BlueprintCallable)
-	void SetMaxPower(float newMaxPower);
+	void SetMaxPower();
 };
