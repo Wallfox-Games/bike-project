@@ -31,7 +31,7 @@ public: // FRunnable Interface
 private:
 
 	/** Processes the socket message */
-	void ProcessSocketMessage(uint8 InSocketMessage[16]);
+	void ProcessSocketMessage(uint8 InSocketMessage[4]);
 
 private:
 	FSocket* ServerUDPSocket;

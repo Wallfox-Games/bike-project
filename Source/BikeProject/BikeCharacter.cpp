@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BikeCharacter.h"
-#include "BikeProject.h"
 
 #include "BikeGameInstance.h"
 
@@ -47,30 +46,6 @@ ABikeCharacter::ABikeCharacter()
 	TimeStartRight = FPlatformTime::Seconds();
 	// Reserves memory for the pedal array
 	PedalTimes.Reserve(ARRAYMAXSIZE + 1);
-
-	// Only load game stats if the load .sav file exists
-	const FString SaveSlotName = FString(TEXT("PlayerSaveSlot"));
-
-	// Checks for save data, if it exists then it loads the maximum power in the save and sets tutorial state to false (player has already done tutorial)
-	if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, 0))
-	{
-		class UBikeProjectSaveGame* LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass()));
-		LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadInstance->SaveSlotName, LoadInstance->UserIndex));
-		MAXPOWER = LoadInstance->PlayerMaxPower;
-		TutorialState = false;
-	}
-	// Else set MAXPOWER to high value and tutorial state to true
-	else
-	{
-		// In tutorial mode
-		MAXPOWER = 500;
-		TutorialState = true;
-	}
-	
-	// Sets three power stages to be a percentage of MAXPOWER
-	UPPERPOWER = MAXPOWER * 0.8;
-	MIDDLEPOWER = MAXPOWER * 0.65;
-	LOWERPOWER = MAXPOWER * 0.5;
 
 	// Default variables for lanes and width (editable in blueprints)
 	LaneWidth = 80.f;
@@ -277,11 +252,6 @@ void ABikeCharacter::RotateRight()
 	TurnActor(10.f);
 }
 
-bool ABikeCharacter::GetTutorialState() const
-{
-	return TutorialState;
-}
-
 float ABikeCharacter::GetPowerLevel() const
 {
 	return PowerLevel / MAXPOWER;
@@ -311,20 +281,14 @@ float ABikeCharacter::GetRawPower(int Scale) const
 	}
 }
 
-// Sets MAXPOWER and saves to file
-void ABikeCharacter::SetMaxPower(float newMaxPower)
+// Sets MAXPOWER from the GameInstance
+void ABikeCharacter::SetMaxPower()
 {
-	MAXPOWER = newMaxPower;
+	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
+	MAXPOWER = GameInstanceRef->GetMaxPower();
 
-	if (UBikeProjectSaveGame* SaveGameInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass())))
-	{
-		// Set data on the savegame object.
-		SaveGameInstance->PlayerMaxPower = MAXPOWER;
-
-		// Save the data immediately.
-		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex))
-		{
-			// Save succeeded.
-		}
-	}
+	// Sets three power stages to be a percentage of MAXPOWER
+	UPPERPOWER = MAXPOWER * 0.8;
+	MIDDLEPOWER = MAXPOWER * 0.65;
+	LOWERPOWER = MAXPOWER * 0.5;
 }

@@ -27,6 +27,13 @@ public:
 	UFUNCTION()
 	void SetCircumference(float newCircumference);
 
+	UFUNCTION(BlueprintCallable)
+	void SetMaxPower(float newMaxPower);
+	UFUNCTION(BlueprintCallable)
+	float GetMaxPower() const;
+	UFUNCTION(BlueprintCallable)
+	bool GetTutorialState() const;
+
 private:
 	TArray<short> EventTimes;
 	TArray<short> RevolutionCounts;
@@ -36,4 +43,9 @@ private:
 	UPROPERTY()
 	int currentSpeed;
 	BikePhysicalInput* Task;
+
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetMaxPower)
+	float MAXPOWER;
+	UPROPERTY(BlueprintGetter = GetTutorialState)
+	bool TutorialState;
 };

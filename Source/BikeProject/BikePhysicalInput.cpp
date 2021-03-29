@@ -92,8 +92,6 @@ void BikePhysicalInput::Stop()
 
 void BikePhysicalInput::ProcessSocketMessage(uint8 InSocketMessage[4])
 {
-	//unsigned short eventTime = (InSocketMessage[0] << 8) | InSocketMessage[1];
-	//unsigned short revCount = (InSocketMessage[2] << 8) | InSocketMessage[3];
 	unsigned short eventTime = ((unsigned short*)InSocketMessage)[0];
 	unsigned short revCount = ((unsigned short*)InSocketMessage)[1];
 

@@ -29,7 +29,7 @@ protected:
 	float PowerLevelKB;
 	UPROPERTY()
 	float PowerLevelBP;
-	UPROPERTY(EditAnywhere, BlueprintSetter = SetMaxPower)
+	UPROPERTY()
 	float MAXPOWER;
 	UPROPERTY()
 	float UPPERPOWER;
@@ -37,8 +37,6 @@ protected:
 	float MIDDLEPOWER;
 	UPROPERTY()
 	float LOWERPOWER;
-	UPROPERTY(BlueprintGetter = GetTutorialState)
-	bool TutorialState;
 
 	UPROPERTY(EditAnywhere)
 	float LaneWidth;
@@ -123,11 +121,9 @@ public:
 
 	// Getter and Setter
 	UFUNCTION(BlueprintCallable)
-	bool GetTutorialState() const;
-	UFUNCTION(BlueprintCallable)
 	float GetPowerLevel() const;
 	UFUNCTION(BlueprintCallable)
 	float GetRawPower(int Scale) const;
 	UFUNCTION(BlueprintCallable)
-	void SetMaxPower(float newMaxPower);
+	void SetMaxPower();
 };
