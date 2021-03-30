@@ -59,6 +59,8 @@ void ABikeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetMaxPower();
+
 	check(GEngine != nullptr);
 
 	// Display a debug message for five seconds. 
