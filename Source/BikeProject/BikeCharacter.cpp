@@ -14,8 +14,8 @@ ABikeCharacter::ABikeCharacter()
 	// Our root component will be a sphere that reacts to physics
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RootComponent"));
 	RootComponent = CapsuleComponent;
-	CapsuleComponent->SetCapsuleRadius(50);
-	CapsuleComponent->SetCapsuleHalfHeight(50);
+	CapsuleComponent->SetCapsuleRadius(25);
+	CapsuleComponent->SetCapsuleHalfHeight(60);
 	CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
 
 	PlayerVisibleComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerVisibleComponent"));
