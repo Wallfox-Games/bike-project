@@ -39,6 +39,9 @@ void UBikeGameInstance::Shutdown()
 
 void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Blue, TEXT("RevCount: " + FString::SanitizeFloat(RevCount)));
+	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Blue, TEXT("EventTime: " + FString::SanitizeFloat(EventTime)));
+
 	EventTimes.Push(EventTime);
 	while (EventTimes.Num() > 2)
 	{
@@ -54,6 +57,15 @@ void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
 	if (EventTimes.Num() == 2 && RevolutionCounts.Num() == 2)
 	{
 		float CircumferenceM = Circumference / 1000;
+
+		if (EventTimes[1] < EventTimes[0])
+		{
+
+		}
+		if (RevolutionCounts[1] < RevolutionCounts[0])
+		{
+
+		}
 		float RevCountDelta = RevolutionCounts[1] - RevolutionCounts[0];
 		float EventTimeDelta = EventTimes[1] - EventTimes[0];
 
