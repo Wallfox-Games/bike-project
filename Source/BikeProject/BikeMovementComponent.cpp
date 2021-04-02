@@ -25,6 +25,12 @@ void UBikeMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
     if (!DesiredMovementThisFrame.IsNearlyZero())
     {
         FHitResult Hit;
-        SafeMoveUpdatedComponent(DesiredMovementThisFrame, UpdatedComponent->GetComponentRotation(), true, Hit);
+        if (SafeMoveUpdatedComponent(DesiredMovementThisFrame, UpdatedComponent->GetComponentRotation(), true, Hit)) PrevMove = DesiredMovementThisFrame;
+        else PrevMove = FVector(0.f);
     }
 };
+
+FVector UBikeMovementComponent::GetPreviousMovement()
+{
+    return PrevMove;
+}

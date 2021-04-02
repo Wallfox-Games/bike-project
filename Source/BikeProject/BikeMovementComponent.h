@@ -16,4 +16,9 @@ class BIKEPROJECT_API UBikeMovementComponent : public UPawnMovementComponent
 
 public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	FVector GetPreviousMovement();
+
+protected:
+	FVector PrevMove;
 };

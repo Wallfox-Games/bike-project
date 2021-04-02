@@ -3,13 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BikeMovementComponent.h"
 #include "GameFramework/Pawn.h"
+
+#include "BikeMovementComponent.h"
+#include "BikeLaneActor.h"
+
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/CapsuleComponent.h"
+
 #include "BikeCharacter.generated.h"
 
 UCLASS()
@@ -41,6 +45,8 @@ protected:
 	float LOWERPOWER;
 
 	UPROPERTY(EditAnywhere)
+	float LaneWidth;
+	UPROPERTY(EditAnywhere)
 	float LaneSpeed;
 	UPROPERTY(EditAnywhere)
 	float SpeedBase;
@@ -51,6 +57,8 @@ protected:
 	UPROPERTY()
 	bool LaneSwitching;
 
+	UPROPERTY()
+	ABikeLaneActor* BikeLanes;
 	UPROPERTY()
 	FVector EasyLanePos;
 	UPROPERTY()
@@ -67,6 +75,7 @@ protected:
 	USpringArmComponent* PlayerCameraSpringArm;
 	UPROPERTY(EditAnywhere)
 	UCameraComponent* PlayerCamera;
+
 
 	// Handles input for moving forward.
 	UPROPERTY()
@@ -97,12 +106,6 @@ protected:
 
 	UFUNCTION()
 		void MoveNewLane(float DeltaTime);
-	UFUNCTION()
-		float MoveHardDT(float DeltaTime);
-	UFUNCTION()
-		float MoveMedDT(float DeltaTime);
-	UFUNCTION()
-		float MoveEasyDT(float DeltaTime);
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
