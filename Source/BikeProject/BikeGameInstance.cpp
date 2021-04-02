@@ -42,6 +42,7 @@ void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
 	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Blue, TEXT("RevCount: " + FString::SanitizeFloat(RevCount)));
 	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Blue, TEXT("EventTime: " + FString::SanitizeFloat(EventTime)));
 
+	// Push values into arrays and trim array size to 2
 	EventTimes.Push(EventTime);
 	while (EventTimes.Num() > 2)
 	{
@@ -54,25 +55,32 @@ void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
 		RevolutionCounts.RemoveAt(0);
 	}
 
+	// Check if arrays are of size two and unique
 	if (EventTimes.Num() == 2 && RevolutionCounts.Num() == 2)
 	{
-		float CircumferenceM = Circumference / 1000;
-
-		if (EventTimes[1] < EventTimes[0])
+		if (EventTimes[1] != EventTimes[0] && RevolutionCounts[1] != RevolutionCounts[0])
 		{
+			// Convert Circumference to Meters
+			float CircumferenceM = Circumference / 1000;
 
+			// Find difference between event times, if rollover then add max value
+			float EventTimeDelta = EventTimes[1] - EventTimes[0];
+			if (EventTimes[1] < EventTimes[0]) EventTimeDelta += 65536;
+
+			float RevCountDelta = RevolutionCounts[1] - RevolutionCounts[0];
+			if (RevolutionCounts[1] < RevolutionCounts[0]) RevCountDelta += 65536;
+
+			GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Red, TEXT("RevDelta: " + FString::SanitizeFloat(RevCountDelta)));
+			GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
+
+			// Set current speed to new value
+			currentSpeed = (CircumferenceM * RevCountDelta * 1024) / EventTimeDelta;
 		}
-		if (RevolutionCounts[1] < RevolutionCounts[0])
+		else
 		{
-
+			// If not unique then bike must be stationary
+			currentSpeed = 0;
 		}
-		float RevCountDelta = RevolutionCounts[1] - RevolutionCounts[0];
-		float EventTimeDelta = EventTimes[1] - EventTimes[0];
-
-		GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Red, TEXT("RevCount: " + FString::SanitizeFloat(RevCountDelta)));
-		GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Red, TEXT("EventTime: " + FString::SanitizeFloat(EventTimeDelta)));
-
-		currentSpeed = (CircumferenceM * RevCountDelta * 1024) / EventTimeDelta;
 	}
 }
 

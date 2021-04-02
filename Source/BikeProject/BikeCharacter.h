@@ -30,6 +30,8 @@ protected:
 	UPROPERTY()
 	float PowerLevelBP;
 	UPROPERTY()
+	float PowerLevelStored;
+	UPROPERTY()
 	float MAXPOWER;
 	UPROPERTY()
 	float UPPERPOWER;
@@ -39,13 +41,22 @@ protected:
 	float LOWERPOWER;
 
 	UPROPERTY(EditAnywhere)
-	float LaneWidth;
-	UPROPERTY(EditAnywhere)
 	float LaneSpeed;
 	UPROPERTY(EditAnywhere)
 	float SpeedBase;
 	UPROPERTY(EditAnywhere)
 	float SpeedMultiplier;
+	UPROPERTY(EditAnywhere)
+	bool LaneBlocked;
+	UPROPERTY()
+	bool LaneSwitching;
+
+	UPROPERTY()
+	FVector EasyLanePos;
+	UPROPERTY()
+	FVector MedLanePos;
+	UPROPERTY()
+	FVector HardLanePos;
 
 	UPROPERTY(EditAnywhere)
 	UCapsuleComponent* CapsuleComponent;
@@ -85,11 +96,13 @@ protected:
 		void CalculateBPM();
 
 	UFUNCTION()
-		void MoveHardDT(float DeltaTime);
+		void MoveNewLane(float DeltaTime);
 	UFUNCTION()
-		void MoveMedDT(float DeltaTime);
+		float MoveHardDT(float DeltaTime);
 	UFUNCTION()
-		void MoveEasyDT(float DeltaTime);
+		float MoveMedDT(float DeltaTime);
+	UFUNCTION()
+		float MoveEasyDT(float DeltaTime);
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -126,4 +139,6 @@ public:
 	float GetRawPower(int Scale) const;
 	UFUNCTION(BlueprintCallable)
 	void SetMaxPower();
+	UFUNCTION(BlueprintCallable)
+	void SetLanePos(FVector Easy, FVector Med, FVector Hard);
 };
