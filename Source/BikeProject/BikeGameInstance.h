@@ -44,7 +44,7 @@ private:
 	int currentSpeed;
 	BikePhysicalInput* Task;
 
-	UPROPERTY(EditAnywhere, BlueprintSetter = SetMaxPower)
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetMaxPower, BlueprintGetter = GetMaxPower)
 	float MAXPOWER;
 	UPROPERTY(BlueprintGetter = GetTutorialState)
 	bool TutorialState;

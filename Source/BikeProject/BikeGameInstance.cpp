@@ -27,7 +27,7 @@ void UBikeGameInstance::Init()
 	else
 	{
 		// In tutorial mode
-		MAXPOWER = 500;
+		SetMaxPower(500.f);
 		TutorialState = true;
 	}
 }

@@ -34,8 +34,6 @@ protected:
 	UPROPERTY()
 	float PowerLevelBP;
 	UPROPERTY()
-	float PowerLevelStored;
-	UPROPERTY()
 	float MAXPOWER;
 	UPROPERTY()
 	float UPPERPOWER;
@@ -52,10 +50,10 @@ protected:
 	float SpeedBase;
 	UPROPERTY(EditAnywhere)
 	float SpeedMultiplier;
-	UPROPERTY(EditAnywhere)
-	bool LaneBlocked;
 	UPROPERTY()
 	bool LaneSwitching;
+	UPROPERTY(BlueprintSetter=SetLaneBlocked)
+	bool LaneBlocked;
 
 	UPROPERTY()
 	ABikeLaneActor* BikeLanes;
@@ -140,8 +138,14 @@ public:
 	float GetPowerLevel() const;
 	UFUNCTION(BlueprintCallable)
 	float GetRawPower(int Scale) const;
+
 	UFUNCTION(BlueprintCallable)
-	void SetMaxPower();
+	void LoadMaxPower();
+	UFUNCTION(BlueprintCallable)
+	void SetMaxPower(float NewPower);
+
 	UFUNCTION(BlueprintCallable)
 	void SetLanePos(FVector Easy, FVector Med, FVector Hard);
+	UFUNCTION(BlueprintCallable)
+	void SetLaneBlocked(bool Blocking);
 };

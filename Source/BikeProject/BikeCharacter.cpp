@@ -39,9 +39,6 @@ ABikeCharacter::ABikeCharacter()
 
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
-
-	// Sets default lane to middle lane
-	PowerLane = 1;
 	// Sets the starting values for non bike input to current time, so the first input isn't very long
 	TimeStartLeft = FPlatformTime::Seconds();
 	TimeStartRight = FPlatformTime::Seconds();
@@ -49,6 +46,7 @@ ABikeCharacter::ABikeCharacter()
 	PedalTimes.Reserve(ARRAYMAXSIZE + 1);
 
 	// Default variables for lanes and width (editable in blueprints)
+	PowerLane = 1;
 	LaneWidth = 90.f;
 	LaneSpeed = 1.5f;
 	SpeedBase = 200.f;
@@ -63,7 +61,7 @@ void ABikeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetMaxPower();
+	LoadMaxPower();
 
 	FVector LanesLocation = GetActorLocation();
 	FRotator LanesRotation(0.f);
@@ -288,7 +286,7 @@ float ABikeCharacter::GetRawPower(int Scale) const
 }
 
 // Sets MAXPOWER from the GameInstance
-void ABikeCharacter::SetMaxPower()
+void ABikeCharacter::LoadMaxPower()
 {
 	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
 	MAXPOWER = GameInstanceRef->GetMaxPower();
@@ -301,6 +299,15 @@ void ABikeCharacter::SetMaxPower()
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, TEXT("Easy: ") + FString::SanitizeFloat(LOWERPOWER), true);
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, TEXT("Med: ") + FString::SanitizeFloat(MIDDLEPOWER), true);
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, TEXT("Hard: ") + FString::SanitizeFloat(UPPERPOWER), true);
+}
+
+void ABikeCharacter::SetMaxPower(float NewPower)
+{
+	MAXPOWER = NewPower;
+	// Sets three power stages to be a percentage of MAXPOWER
+	UPPERPOWER = MAXPOWER * 0.7;
+	MIDDLEPOWER = MAXPOWER * 0.5;
+	LOWERPOWER = MAXPOWER * 0.3;
 }
 
 void ABikeCharacter::SetLanePos(FVector Easy, FVector Med, FVector Hard)
@@ -316,4 +323,9 @@ void ABikeCharacter::SetLanePos(FVector Easy, FVector Med, FVector Hard)
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, TEXT("Easy: ") + EasyLanePos.ToString(), true);
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, TEXT("Med: ") + MedLanePos.ToString(), true);
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, TEXT("Hard: ") + HardLanePos.ToString(), true);
+}
+
+void ABikeCharacter::SetLaneBlocked(bool Blocking)
+{
+	LaneBlocked = Blocking;
 }
