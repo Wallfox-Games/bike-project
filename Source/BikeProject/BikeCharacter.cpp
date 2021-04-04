@@ -94,7 +94,7 @@ void ABikeCharacter::Tick(float DeltaTime)
 
 	// Determine current Lane
 	// Snap to Upper and Lower Lanes
-	Movement(DeltaTime);
+	if (!TutBlocked) Movement(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -328,4 +328,9 @@ void ABikeCharacter::SetLanePos(FVector Easy, FVector Med, FVector Hard)
 void ABikeCharacter::SetLaneBlocked(bool Blocking)
 {
 	LaneBlocked = Blocking;
+}
+
+void ABikeCharacter::SetMovBlocked(bool Blocking)
+{
+	TutBlocked = Blocking;
 }
