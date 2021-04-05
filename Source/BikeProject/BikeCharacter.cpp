@@ -94,7 +94,8 @@ void ABikeCharacter::Tick(float DeltaTime)
 
 	// Determine current Lane
 	// Snap to Upper and Lower Lanes
-	if (!TutBlocked) Movement(DeltaTime);
+	if (TutBlocked) PowerLevel = GetRawPower(PowerLane);
+	Movement(DeltaTime);
 }
 
 // Called to bind functionality to input

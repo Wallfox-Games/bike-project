@@ -13,7 +13,7 @@ void UBikeMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
         return;
     }
 
-    FVector DesiredMovementThisFrame = FVector(0.f, 0.f, -10.f) * DeltaTime;
+    FVector DesiredMovementThisFrame = FVector(0.f, 0.f, -30.f) * DeltaTime;
     if (!DesiredMovementThisFrame.IsNearlyZero())
     {
         FHitResult Hit;
