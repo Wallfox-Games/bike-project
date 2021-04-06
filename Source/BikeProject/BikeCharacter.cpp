@@ -87,7 +87,11 @@ void ABikeCharacter::Tick(float DeltaTime)
 	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
 	PowerLevelBP = GameInstanceRef->GetSpeed();
 
-	if (PowerLevelKB > 0) PowerLevel = PowerLevelKB;
+	if (PowerLevelKB > 0)
+	{
+		PowerLevelKB -= 1.f * DeltaTime;
+		PowerLevel = PowerLevelKB;
+	}
 	else PowerLevel = PowerLevelBP;
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Bike Input Speed: ") + FString::SanitizeFloat(PowerLevel), true);
