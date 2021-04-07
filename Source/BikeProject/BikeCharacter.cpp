@@ -246,6 +246,8 @@ UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
 void ABikeCharacter::TurnActor(float Angle)
 {
 	float NewAngle = GetActorRotation().Yaw + Angle;
+	BikeLanes->Rotate(NewAngle);
+
 	FRotator NewRotation = FRotator(GetActorRotation().Pitch, NewAngle, GetActorRotation().Roll);
 	SetActorRotation(NewRotation);
 }
