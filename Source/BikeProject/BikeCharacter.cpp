@@ -109,10 +109,6 @@ void ABikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	// Set up "movement" bindings.
 	PlayerInputComponent->BindAction("PedalLeftButton", IE_Pressed, this, &ABikeCharacter::PedalLeftStart);
 	PlayerInputComponent->BindAction("PedalRightButton", IE_Pressed, this, &ABikeCharacter::PedalRightStart);
-
-	// Set up "test" bindings.
-	PlayerInputComponent->BindAction("RotateLeft", IE_Pressed, this, &ABikeCharacter::RotateLeft);
-	PlayerInputComponent->BindAction("RotateRight", IE_Pressed, this, &ABikeCharacter::RotateRight);
 }
 
 // Checks current power of dinosaur and moves them into correct lane
@@ -243,23 +239,13 @@ UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
 	return MovementComponent;
 }
 
-void ABikeCharacter::TurnActor(float Angle)
+void ABikeCharacter::Turn(float Angle)
 {
 	float NewAngle = GetActorRotation().Yaw + Angle;
 	BikeLanes->Rotate(NewAngle);
 
 	FRotator NewRotation = FRotator(GetActorRotation().Pitch, NewAngle, GetActorRotation().Roll);
 	SetActorRotation(NewRotation);
-}
-
-void ABikeCharacter::RotateLeft()
-{
-	TurnActor(-10.f);
-}
-
-void ABikeCharacter::RotateRight()
-{
-	TurnActor(10.f);
 }
 
 float ABikeCharacter::GetPowerLevel() const
