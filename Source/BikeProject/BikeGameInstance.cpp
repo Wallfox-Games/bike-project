@@ -120,3 +120,23 @@ bool UBikeGameInstance::GetTutorialState() const
 	return TutorialState;
 }
 
+void UBikeGameInstance::SetPlayerHealth(int newHealth)
+{
+	PlayerHealth = newHealth;
+}
+
+int UBikeGameInstance::GetPlayerHealth() const
+{
+	return PlayerHealth;
+}
+
+void UBikeGameInstance::SetBossHealth(int newHealth)
+{
+	BossHealth = newHealth;
+}
+
+int UBikeGameInstance::GetBossHealth() const
+{
+	return BossHealth;
+}
+

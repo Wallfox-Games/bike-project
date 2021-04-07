@@ -34,6 +34,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetTutorialState() const;
 
+
+	UFUNCTION(BlueprintCallable)
+	void SetPlayerHealth(int newHealth);
+	UFUNCTION(BlueprintCallable)
+	int GetPlayerHealth() const;
+	//getter and setter for players health bar
+	UFUNCTION(BlueprintCallable)
+	void SetBossHealth(int newHealth);
+	UFUNCTION(BlueprintCallable)
+	int GetBossHealth() const;
+	//getter and setter for boss health bar
+
 private:
 	TArray<short> EventTimes;
 	TArray<short> RevolutionCounts;
@@ -48,4 +60,9 @@ private:
 	float MAXPOWER;
 	UPROPERTY(BlueprintGetter = GetTutorialState)
 	bool TutorialState;
+
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetPlayerHealth, BlueprintGetter = GetPlayerHealth)
+	int PlayerHealth;
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetPlayerHealth, BlueprintGetter = GetPlayerHealth)
+    int BossHealth;
 };
