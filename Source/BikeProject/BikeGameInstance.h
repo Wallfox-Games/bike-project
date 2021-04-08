@@ -36,16 +36,30 @@ public:
 
 
 	UFUNCTION(BlueprintCallable)
-	void SetPlayerHealth(int newHealth);
+		void SetPlayerHealth(int newHealth);
 	UFUNCTION(BlueprintCallable)
-	int GetPlayerHealth() const;
+		int GetPlayerHealth() const;
 	//getter and setter for players health bar
 	UFUNCTION(BlueprintCallable)
-	void SetBossHealth(int newHealth);
+		void SetBossHealth(int newHealth);
 	UFUNCTION(BlueprintCallable)
-	int GetBossHealth() const;
+		int GetBossHealth() const;
 	//getter and setter for boss health bar
-
+	UFUNCTION(BlueprintCallable)
+		void SetCombo(int newCombo);
+	UFUNCTION(BlueprintCallable)
+		int GetCombo() const;
+	//getter and setter for combo total
+	UFUNCTION(BlueprintCallable)
+		void SetMultiplier(int newMultiplier);
+	UFUNCTION(BlueprintCallable)
+		int GetMultiplier() const;
+	// getter and setter for combo multiplier
+	UFUNCTION(BlueprintCallable)
+		void SetHit(bool newhit);
+	UFUNCTION(BlueprintCallable)
+		bool GetHit() const;
+	// getter and setter for if the player was hit by an obstacle 
 private:
 	TArray<short> EventTimes;
 	TArray<short> RevolutionCounts;
@@ -62,7 +76,13 @@ private:
 	bool TutorialState;
 
 	UPROPERTY(EditAnywhere, BlueprintSetter = SetPlayerHealth, BlueprintGetter = GetPlayerHealth)
-	int PlayerHealth;
+		int PlayerHealth;
 	UPROPERTY(EditAnywhere, BlueprintSetter = SetPlayerHealth, BlueprintGetter = GetPlayerHealth)
-    int BossHealth;
+		int BossHealth;
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetCombo, BlueprintGetter = GetCombo)
+		int Combo;
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetMultiplier, BlueprintGetter = GetMultiplier)
+		int Multiplier;
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetHit, BlueprintGetter = GetHit)
+		bool hit;
 };

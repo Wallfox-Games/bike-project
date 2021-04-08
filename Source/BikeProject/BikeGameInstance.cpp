@@ -140,3 +140,33 @@ int UBikeGameInstance::GetBossHealth() const
 	return BossHealth;
 }
 
+void UBikeGameInstance::SetCombo(int newCombo)
+{
+	Combo = newCombo;
+}
+
+int UBikeGameInstance::GetCombo() const
+{
+	return Combo;
+}
+
+void UBikeGameInstance::SetMultiplier(int newMultiplier)
+{
+	Multiplier = newMultiplier;
+}
+
+int UBikeGameInstance::GetMultiplier() const
+{
+	return Multiplier;
+}
+
+void UBikeGameInstance::SetHit(bool newhit)
+{
+	hit = newhit;
+}
+
+bool UBikeGameInstance::GetHit() const
+{
+	return hit;
+}
+
