@@ -47,6 +47,9 @@ ABikeCharacter::ABikeCharacter()
 
 	// Default variables for lanes and width (editable in blueprints)
 	PowerLane = 1;
+	PowerLevelCurrent = 0;
+	PowerLevelTarget = 0;
+	PowerAlpha = 0;
 	LaneWidth = 90.f;
 	LaneSpeed = 1.5f;
 	SpeedBase = 200.f;
@@ -84,17 +87,22 @@ void ABikeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	float TempPower;
+
 	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
 	PowerLevelBP = GameInstanceRef->GetSpeed();
 
 	if (PowerLevelKB > 0)
 	{
 		PowerLevelKB -= 1.f * DeltaTime;
-		PowerLevel = PowerLevelKB;
+		TempPower = PowerLevelKB;
 	}
-	else PowerLevel = PowerLevelBP;
+	else TempPower = PowerLevelBP;
 
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Bike Input Speed: ") + FString::SanitizeFloat(PowerLevel), true);
+	PowerTransition(DeltaTime, TempPower);
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Bike Input Speed: ") + FString::SanitizeFloat(PowerLevelBP), true);
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Keyboard Input Speed: ") + FString::SanitizeFloat(PowerLevelKB), true);
 
 	// Determine current Lane
 	// Snap to Upper and Lower Lanes
@@ -167,8 +175,22 @@ void ABikeCharacter::CalculateBPM()
 
 	// Set to power / RPM (roughly half)
 	PowerLevelKB = RPM / 2;
+}
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Keyboard Input Power: ") + FString::SanitizeFloat(PowerLevel), true);
+void ABikeCharacter::PowerTransition(float DeltaTime, float NewPower)
+{
+	if (PowerLevelTarget != NewPower)
+	{
+		PowerLevelCurrent = PowerLevelTarget;
+		PowerLevelTarget = NewPower;
+		PowerAlpha = 0;
+	}
+
+	PowerAlpha += DeltaTime / 3.f;
+	PowerAlpha = FMath::Clamp(PowerAlpha, 0.f, 1.f);
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("Alpha: ") + FString::SanitizeFloat(PowerAlpha), true);
+	PowerLevel = FMath::Lerp(PowerLevelCurrent, PowerLevelTarget, PowerAlpha);
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("Power Level: ") + FString::SanitizeFloat(PowerLevel), true);
 }
 
 void ABikeCharacter::MoveNewLane(float DeltaTime)
@@ -250,6 +272,7 @@ void ABikeCharacter::Turn(float Angle)
 
 float ABikeCharacter::GetPowerLevel() const
 {
+	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Blue, TEXT("Power: ") + FString::SanitizeFloat(PowerLevel / MAXPOWER), true);
 	return PowerLevel / MAXPOWER;
 }
 
