@@ -34,6 +34,12 @@ protected:
 	UPROPERTY()
 	float PowerLevelBP;
 	UPROPERTY()
+	float PowerLevelCurrent;
+	UPROPERTY()
+	float PowerLevelTarget;
+	UPROPERTY()
+	float PowerAlpha;
+	UPROPERTY()
 	float MAXPOWER;
 	UPROPERTY()
 	float UPPERPOWER;
@@ -103,6 +109,9 @@ protected:
 		void AddTime();
 	UFUNCTION()
 		void CalculateBPM();
+
+	UFUNCTION()
+		void PowerTransition(float DeltaTime, float NewPower);
 
 	UFUNCTION()
 		void MoveNewLane(float DeltaTime);

@@ -61,8 +61,6 @@ FVector ABikeLaneActor::MoveLeft(bool NewMove, float DeltaTime)
 	LerpAlpha += DeltaTime * LaneSpeed;
 	LerpAlpha = FMath::Clamp(LerpAlpha, 0.f, 1.f);
 
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("Alpha: ") + FString::SanitizeFloat(LerpAlpha), true);
-
 	FVector NewPos = FMath::Lerp(GetActorLocation(), GetActorLocation() + LeftLane->GetRelativeLocation(), LerpAlpha);
 
 	return NewPos;
@@ -79,10 +77,6 @@ FVector ABikeLaneActor::MoveCenter(bool NewMove, float DeltaTime, FVector DinoPo
 	LerpAlpha += DeltaTime * LaneSpeed;
 	LerpAlpha = FMath::Clamp(LerpAlpha, 0.f, 1.f);
 
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("Alpha: ") + FString::SanitizeFloat(LerpAlpha), true);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("DinoPos: ") + FString::SanitizeFloat(LeftDistance), true);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("Actor: ") + FString::SanitizeFloat(RightDistance), true);
-
 	FVector NewPos = GetActorLocation();
 	if (LeftDistance < RightDistance) NewPos = FMath::Lerp(GetActorLocation() + LeftLane->GetRelativeLocation(), GetActorLocation(), LerpAlpha);
 	else NewPos = FMath::Lerp(GetActorLocation() + RightLane->GetRelativeLocation(), GetActorLocation(), LerpAlpha);
@@ -96,8 +90,6 @@ FVector ABikeLaneActor::MoveRight(bool NewMove, float DeltaTime)
 
 	LerpAlpha += DeltaTime * LaneSpeed;
 	LerpAlpha = FMath::Clamp(LerpAlpha, 0.f, 1.f);
-
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("Alpha: ") + FString::SanitizeFloat(LerpAlpha), true);
 
 	FVector NewPos = FMath::Lerp(GetActorLocation(), GetActorLocation() + RightLane->GetRelativeLocation(), LerpAlpha);
 
