@@ -147,4 +147,9 @@ public:
 	void SetLaneBlocked(bool Blocking);
 	UFUNCTION(BlueprintCallable)
 	void SetMovBlocked(bool Blocking);
+
+	UFUNCTION(BlueprintCallable)
+	void SetPowerLane(int newlane);
+	UFUNCTION(BlueprintCallable)
+	int GetPowerLane() const;
 };

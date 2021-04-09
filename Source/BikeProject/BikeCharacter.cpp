@@ -326,3 +326,13 @@ void ABikeCharacter::SetMovBlocked(bool Blocking)
 {
 	TutBlocked = Blocking;
 }
+
+void ABikeCharacter::SetPowerLane(int newlane)
+{
+	PowerLane = newlane;
+}
+
+int ABikeCharacter::GetPowerLane() const
+{
+	return PowerLane;
+}
