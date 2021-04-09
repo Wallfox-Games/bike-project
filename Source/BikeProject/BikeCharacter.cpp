@@ -125,8 +125,16 @@ void ABikeCharacter::Movement(float DeltaTime)
 {
 	BikeLanes->Move(MovementComponent->GetPreviousMovement());
 
+	float ForwardValue;
 	MoveNewLane(DeltaTime);
-	float ForwardValue = SpeedBase + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * SpeedMultiplier;
+	if (Attacking == true)
+	{
+		ForwardValue = SpeedBase + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * (SpeedMultiplier*2);
+	}
+	else
+	{
+		ForwardValue = SpeedBase + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * SpeedMultiplier;
+	}
 	FVector Direction = ForwardValue * GetActorForwardVector();
 	MovementComponent->AddInputVector(Direction);
 }
@@ -176,6 +184,7 @@ void ABikeCharacter::CalculateBPM()
 	// Set to power / RPM (roughly half)
 	PowerLevelKB = RPM / 2;
 }
+<<<<<<< Updated upstream
 
 void ABikeCharacter::PowerTransition(float DeltaTime, float NewPower)
 {
@@ -186,6 +195,18 @@ void ABikeCharacter::PowerTransition(float DeltaTime, float NewPower)
 		PowerAlpha = 0;
 	}
 
+=======
+
+void ABikeCharacter::PowerTransition(float DeltaTime, float NewPower)
+{
+	if (PowerLevelTarget != NewPower)
+	{
+		PowerLevelCurrent = PowerLevelTarget;
+		PowerLevelTarget = NewPower;
+		PowerAlpha = 0;
+	}
+
+>>>>>>> Stashed changes
 	PowerAlpha += DeltaTime / 3.f;
 	PowerAlpha = FMath::Clamp(PowerAlpha, 0.f, 1.f);
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("Alpha: ") + FString::SanitizeFloat(PowerAlpha), true);
@@ -358,4 +379,9 @@ void ABikeCharacter::SetPowerLane(int newlane)
 int ABikeCharacter::GetPowerLane() const
 {
 	return PowerLane;
+}
+
+void ABikeCharacter::SetAttacking(bool newattacking)
+{
+	Attacking = newattacking;
 }

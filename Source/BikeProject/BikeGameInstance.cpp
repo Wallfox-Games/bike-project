@@ -170,3 +170,13 @@ bool UBikeGameInstance::GetHit() const
 	return hit;
 }
 
+void UBikeGameInstance::SetBossActive(bool newActive)
+{
+	Active = newActive;
+}
+
+bool UBikeGameInstance::GetBossActive() const
+{
+	return Active;
+}
+

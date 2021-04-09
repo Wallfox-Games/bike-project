@@ -98,6 +98,9 @@ protected:
 	UPROPERTY()
 		double TimeStartRight;
 
+	UPROPERTY()
+		bool Attacking;
+
 	UFUNCTION()
 		void Movement(float Value);
 	UFUNCTION()
@@ -161,4 +164,6 @@ public:
 	void SetPowerLane(int newlane);
 	UFUNCTION(BlueprintCallable)
 	int GetPowerLane() const;
+	UFUNCTION(BlueprintCallable)
+	void SetAttacking(bool newattacking);
 };
