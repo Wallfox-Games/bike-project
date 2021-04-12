@@ -184,7 +184,6 @@ void ABikeCharacter::CalculateBPM()
 	// Set to power / RPM (roughly half)
 	PowerLevelKB = RPM / 2;
 }
-<<<<<<< Updated upstream
 
 void ABikeCharacter::PowerTransition(float DeltaTime, float NewPower)
 {
@@ -195,18 +194,6 @@ void ABikeCharacter::PowerTransition(float DeltaTime, float NewPower)
 		PowerAlpha = 0;
 	}
 
-=======
-
-void ABikeCharacter::PowerTransition(float DeltaTime, float NewPower)
-{
-	if (PowerLevelTarget != NewPower)
-	{
-		PowerLevelCurrent = PowerLevelTarget;
-		PowerLevelTarget = NewPower;
-		PowerAlpha = 0;
-	}
-
->>>>>>> Stashed changes
 	PowerAlpha += DeltaTime / 3.f;
 	PowerAlpha = FMath::Clamp(PowerAlpha, 0.f, 1.f);
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("Alpha: ") + FString::SanitizeFloat(PowerAlpha), true);
