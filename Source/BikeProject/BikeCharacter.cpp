@@ -19,7 +19,7 @@ ABikeCharacter::ABikeCharacter()
 	CapsuleComponent->SetCapsuleHalfHeight(60);
 	CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
 
-	PlayerVisibleComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PlayerVisibleComponent"));
+	PlayerVisibleComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerVisibleComponent"));
 	PlayerVisibleComponent->SetupAttachment(RootComponent);
 
 	PlayerCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));

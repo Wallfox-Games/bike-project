@@ -75,7 +75,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UCapsuleComponent* CapsuleComponent;
 	UPROPERTY(EditAnywhere)
-	USkeletalMeshComponent* PlayerVisibleComponent;
+	UStaticMeshComponent* PlayerVisibleComponent;
 
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* PlayerCameraSpringArm;
