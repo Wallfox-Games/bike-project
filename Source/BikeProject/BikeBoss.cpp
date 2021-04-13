@@ -27,7 +27,7 @@ void ABikeBoss::BeginPlay()
 
 void ABikeBoss::Movement()
 {
-	Velocity.X = (SpeedBase + 0.8f * SpeedMultiplier)*0.8f;
+	Velocity.X = SpeedBase + 0.8f * SpeedMultiplier;
 }
 
 void ABikeBoss::SpawnBullet(FVector PlayerPos)
