@@ -25,9 +25,9 @@ void ABikeBoss::BeginPlay()
 	
 }
 
-void ABikeBoss::Movement()
+void ABikeBoss::Movement(float playerLevel, float playerMax)
 {
-	Velocity.X = SpeedBase + 0.8f * SpeedMultiplier;
+	Velocity.X = SpeedBase + FMath::Clamp(playerLevel / playerMax, 0.f, 1.f) * SpeedMultiplier;
 }
 
 void ABikeBoss::SpawnBullet(FVector PlayerPos)
@@ -43,7 +43,6 @@ void ABikeBoss::Death()
 void ABikeBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	Movement();
 	if (!Velocity.IsZero())
 	{
 		FVector NewPos = GetActorLocation() + (Velocity * DeltaTime);

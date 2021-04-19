@@ -24,7 +24,7 @@ protected:
 
 public:	
 	UFUNCTION(BlueprintCallable)
-		void Movement();
+		void Movement(float playerLevel, float playerMax);
 	UFUNCTION(BlueprintCallable)
 		void SpawnBullet(FVector PlayerPos);
 	UFUNCTION(BlueprintCallable)
