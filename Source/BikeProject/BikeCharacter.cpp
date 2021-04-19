@@ -92,7 +92,7 @@ void ABikeCharacter::Tick(float DeltaTime)
 	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
 	PowerLevelBP = GameInstanceRef->GetSpeed();
 
-	if (PowerLevelKB > 0)
+	if (PowerLevelKB > PowerLevelBP)
 	{
 		PowerLevelKB -= 1.f * DeltaTime;
 		TempPower = PowerLevelKB;
@@ -196,9 +196,7 @@ void ABikeCharacter::PowerTransition(float DeltaTime, float NewPower)
 
 	PowerAlpha += DeltaTime / 3.f;
 	PowerAlpha = FMath::Clamp(PowerAlpha, 0.f, 1.f);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("Alpha: ") + FString::SanitizeFloat(PowerAlpha), true);
 	PowerLevel = FMath::Lerp(PowerLevelCurrent, PowerLevelTarget, PowerAlpha);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, TEXT("Power Level: ") + FString::SanitizeFloat(PowerLevel), true);
 }
 
 void ABikeCharacter::MoveNewLane(float DeltaTime)
@@ -206,7 +204,6 @@ void ABikeCharacter::MoveNewLane(float DeltaTime)
 	FVector NewHorizontalPos = GetActorLocation();
 	if (LaneSwitching || LaneBlocked)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Blocked"), true);
 		switch (PowerLane)
 		{
 		case 0:
@@ -224,7 +221,6 @@ void ABikeCharacter::MoveNewLane(float DeltaTime)
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Not Blocked"), true);
 		// Checks if PowerLevel is past the midpoint of the power scale
 		if (PowerLevel > (UPPERPOWER + MIDDLEPOWER) / 2)
 		{
@@ -280,7 +276,6 @@ void ABikeCharacter::Turn(float Angle)
 
 float ABikeCharacter::GetPowerLevel() const
 {
-	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Blue, TEXT("Power: ") + FString::SanitizeFloat(PowerLevel / MAXPOWER), true);
 	return PowerLevel / MAXPOWER;
 }
 
@@ -318,10 +313,6 @@ void ABikeCharacter::LoadMaxPower()
 	UPPERPOWER = MAXPOWER * 0.7;
 	MIDDLEPOWER = MAXPOWER * 0.5;
 	LOWERPOWER = MAXPOWER * 0.3;
-
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, TEXT("Easy: ") + FString::SanitizeFloat(LOWERPOWER), true);
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, TEXT("Med: ") + FString::SanitizeFloat(MIDDLEPOWER), true);
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, TEXT("Hard: ") + FString::SanitizeFloat(UPPERPOWER), true);
 }
 
 void ABikeCharacter::SetMaxPower(float NewPower)
@@ -342,10 +333,6 @@ void ABikeCharacter::SetLanePos(FVector Easy, FVector Med, FVector Hard)
 	EasyLanePos.Z = GetActorLocation().Z;
 	MedLanePos.Z = GetActorLocation().Z;
 	HardLanePos.Z = GetActorLocation().Z;
-
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, TEXT("Easy: ") + EasyLanePos.ToString(), true);
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, TEXT("Med: ") + MedLanePos.ToString(), true);
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, TEXT("Hard: ") + HardLanePos.ToString(), true);
 }
 
 void ABikeCharacter::SetLaneBlocked(bool Blocking)
