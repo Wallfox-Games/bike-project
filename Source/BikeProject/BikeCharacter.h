@@ -58,7 +58,7 @@ protected:
 	float SpeedMultiplier;
 	UPROPERTY()
 	bool LaneSwitching;
-	UPROPERTY(BlueprintSetter=SetLaneBlocked)
+	UPROPERTY()
 	bool LaneBlocked;
 	UPROPERTY()
 	bool TutBlocked;
@@ -144,8 +144,6 @@ public:
 
 	// Getter and Setter
 	UFUNCTION(BlueprintCallable)
-	float GetPowerLevel() const;
-	UFUNCTION(BlueprintCallable)
 	float GetRawPower(int Scale) const;
 
 	UFUNCTION(BlueprintCallable)
@@ -155,7 +153,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetLanePos(FVector Easy, FVector Med, FVector Hard);
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetLaneBlocked(bool Blocking);
 	UFUNCTION(BlueprintCallable)
 	void SetMovBlocked(bool Blocking);

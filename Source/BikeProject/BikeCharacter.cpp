@@ -222,7 +222,7 @@ void ABikeCharacter::MoveNewLane(float DeltaTime)
 	else
 	{
 		// Checks if PowerLevel is past the midpoint of the power scale
-		if (PowerLevel > (UPPERPOWER + MIDDLEPOWER) / 2)
+		if (PowerLevel > MIDDLEPOWER)
 		{
 			if (PowerLane == 0)
 			{
@@ -235,7 +235,7 @@ void ABikeCharacter::MoveNewLane(float DeltaTime)
 				PowerLane = 2;
 			}
 		}
-		else if (PowerLevel > (MIDDLEPOWER + LOWERPOWER) / 2)
+		else if (PowerLevel > LOWERPOWER)
 		{
 			if (PowerLane != 1) NewHorizontalPos = BikeLanes->MoveCenter(true, DeltaTime, GetActorLocation());
 			PowerLane = 1;
@@ -272,11 +272,6 @@ void ABikeCharacter::Turn(float Angle)
 
 	FRotator NewRotation = FRotator(GetActorRotation().Pitch, NewAngle, GetActorRotation().Roll);
 	SetActorRotation(NewRotation);
-}
-
-float ABikeCharacter::GetPowerLevel() const
-{
-	return PowerLevel / MAXPOWER;
 }
 
 // Returns different power values based on Scale input
@@ -335,7 +330,7 @@ void ABikeCharacter::SetLanePos(FVector Easy, FVector Med, FVector Hard)
 	HardLanePos.Z = GetActorLocation().Z;
 }
 
-void ABikeCharacter::SetLaneBlocked(bool Blocking)
+void ABikeCharacter::SetLaneBlocked_Implementation(bool Blocking)
 {
 	LaneBlocked = Blocking;
 }
