@@ -5,6 +5,8 @@
 #include "Networking.h"
 #include "SocketSubsystem.h"
 
+#include "Misc/Paths.h" 
+
 #include "Engine/Engine.h" 
 
 #include "BikeGameInstance.h"
@@ -52,7 +54,9 @@ bool BikePhysicalInput::Init()
 
 uint32 BikePhysicalInput::Run()
 {
-	FString FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(TEXT("../ANTPlus/ANT_Socket.exe"));	
+	//FString FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(TEXT("../ANTPlus/ANT_Socket.exe"));
+	FString FullPath = FPaths::ProjectContentDir() + TEXT("ThirdParty/ANTPlus/ANT_Socket.exe");
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, FullPath);
 	TCHAR* tempParam = L" ";
 	FProcHandle tempProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, true, false, NULL, 0, NULL, NULL);
 	
