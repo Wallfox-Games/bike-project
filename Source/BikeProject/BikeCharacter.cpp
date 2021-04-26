@@ -257,6 +257,7 @@ void ABikeCharacter::MoveNewLane(float DeltaTime)
 	LaneSwitching = !BikeLanes->IsFinishedMove();
 	
 	NewHorizontalPos.Z = GetActorLocation().Z;
+
 	SetActorLocation(NewHorizontalPos);
 }
 
@@ -265,13 +266,16 @@ UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
 	return MovementComponent;
 }
 
-void ABikeCharacter::Turn(float Angle)
+void ABikeCharacter::Turn(float Angle, FVector CenterPoint)
 {
 	float NewAngle = GetActorRotation().Yaw + Angle;
-	BikeLanes->Rotate(NewAngle);
 
 	FRotator NewRotation = FRotator(GetActorRotation().Pitch, NewAngle, GetActorRotation().Roll);
 	SetActorRotation(NewRotation);
+
+	BikeLanes->Rotate(NewAngle, CenterPoint);
+	
+	LaneSwitching = true;
 }
 
 // Returns different power values based on Scale input

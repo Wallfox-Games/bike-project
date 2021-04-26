@@ -140,7 +140,7 @@ public:
 	virtual UBikeMovementComponent* GetMovementComponent() const override;
 
 	UFUNCTION(BlueprintCallable)
-	void Turn(float Angle);
+	void Turn(float Angle, FVector CenterPoint);
 
 	// Getter and Setter
 	UFUNCTION(BlueprintCallable)

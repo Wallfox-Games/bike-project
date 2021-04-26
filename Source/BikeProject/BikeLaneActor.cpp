@@ -2,6 +2,8 @@
 
 #include "BikeLaneActor.h"
 
+#include "Math/Plane.h" 
+
 #include "Engine/Engine.h" 
 
 // Sets default values
@@ -49,9 +51,16 @@ void ABikeLaneActor::Move(FVector Movement)
 	SetActorLocation(GetActorLocation() + Movement);
 }
 
-void ABikeLaneActor::Rotate(float Rotation)
+void ABikeLaneActor::Rotate(float Rotation, FVector CenterPoint)
 {
 	CenterLane->SetWorldRotation(FRotator(0, Rotation, 0));
+
+	CenterPoint.Z = GetActorLocation().Z;
+	FPlane ActorPlane = FPlane(GetActorLocation(), GetActorForwardVector());
+
+	FVector NewCenter = FMath::RayPlaneIntersection(CenterPoint, -GetActorForwardVector(), ActorPlane);
+
+	SetActorLocation(NewCenter);
 }
 
 FVector ABikeLaneActor::MoveLeft(bool NewMove, float DeltaTime)
@@ -61,7 +70,7 @@ FVector ABikeLaneActor::MoveLeft(bool NewMove, float DeltaTime)
 	LerpAlpha += DeltaTime * LaneSpeed;
 	LerpAlpha = FMath::Clamp(LerpAlpha, 0.f, 1.f);
 
-	FVector NewPos = FMath::Lerp(GetActorLocation(), GetActorLocation() + LeftLane->GetRelativeLocation(), LerpAlpha);
+	FVector NewPos = FMath::Lerp(GetActorLocation(), LeftLane->GetComponentLocation(), LerpAlpha);
 
 	return NewPos;
 }
@@ -69,8 +78,8 @@ FVector ABikeLaneActor::MoveLeft(bool NewMove, float DeltaTime)
 FVector ABikeLaneActor::MoveCenter(bool NewMove, float DeltaTime, FVector DinoPos)
 {
 	DinoPos.Z = GetActorLocation().Z;
-	float LeftDistance = FVector(DinoPos - (GetActorLocation() + LeftLane->GetRelativeLocation())).Size();
-	float RightDistance = FVector(DinoPos - (GetActorLocation() + RightLane->GetRelativeLocation())).Size();
+	float LeftDistance = FVector(DinoPos - LeftLane->GetComponentLocation()).Size();
+	float RightDistance = FVector(DinoPos - RightLane->GetComponentLocation()).Size();
 
 	if (NewMove) LerpAlpha = 0;
 
@@ -78,8 +87,8 @@ FVector ABikeLaneActor::MoveCenter(bool NewMove, float DeltaTime, FVector DinoPo
 	LerpAlpha = FMath::Clamp(LerpAlpha, 0.f, 1.f);
 
 	FVector NewPos = GetActorLocation();
-	if (LeftDistance < RightDistance) NewPos = FMath::Lerp(GetActorLocation() + LeftLane->GetRelativeLocation(), GetActorLocation(), LerpAlpha);
-	else NewPos = FMath::Lerp(GetActorLocation() + RightLane->GetRelativeLocation(), GetActorLocation(), LerpAlpha);
+	if (LeftDistance < RightDistance) NewPos = FMath::Lerp(LeftLane->GetComponentLocation(), GetActorLocation(), LerpAlpha);
+	else NewPos = FMath::Lerp(RightLane->GetComponentLocation(), GetActorLocation(), LerpAlpha);
 
 	return NewPos;
 }
@@ -91,7 +100,7 @@ FVector ABikeLaneActor::MoveRight(bool NewMove, float DeltaTime)
 	LerpAlpha += DeltaTime * LaneSpeed;
 	LerpAlpha = FMath::Clamp(LerpAlpha, 0.f, 1.f);
 
-	FVector NewPos = FMath::Lerp(GetActorLocation(), GetActorLocation() + RightLane->GetRelativeLocation(), LerpAlpha);
+	FVector NewPos = FMath::Lerp(GetActorLocation(), RightLane->GetComponentLocation(), LerpAlpha);
 
 	return NewPos;
 }
