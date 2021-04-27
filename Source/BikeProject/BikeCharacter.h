@@ -73,8 +73,8 @@ protected:
 	bool LaneSwitching;
 	UPROPERTY()
 	bool LaneBlocked;
-	UPROPERTY()
-	bool TutBlocked;
+	UPROPERTY(BlueprintGetter = GetMoveBlocked, BlueprintSetter = SetMoveBlocked)
+	bool MoveBlocked;
 
 	UPROPERTY()
 	ABikeLaneActor* BikeLanes;
@@ -174,8 +174,11 @@ public:
 	void SetLanePos(FVector Easy, FVector Med, FVector Hard);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetLaneBlocked(bool Blocking);
+
 	UFUNCTION(BlueprintCallable)
-	void SetMovBlocked(bool Blocking);
+	bool GetMoveBlocked() const;
+	UFUNCTION(BlueprintCallable)
+	void SetMoveBlocked(bool Blocking);
 
 	UFUNCTION(BlueprintCallable)
 	void SetPowerLane(int newlane);

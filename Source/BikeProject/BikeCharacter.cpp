@@ -54,12 +54,13 @@ ABikeCharacter::ABikeCharacter()
 	PowerLevelTarget = 0;
 	PowerAlpha = 0;
 
-	LaneWidth = 90.f;
+	LaneWidth = 110.f;
 	LaneSpeed = 1.5f;
 	SpeedBase = 200.f;
 	SpeedMultiplier = 300.f;
 	LaneBlocked = false;
 	LaneSwitching = false;
+	MoveBlocked = false;
 
 	FOVBase = 80.f;
 	FOVMultiplier = 40.f;
@@ -115,7 +116,7 @@ void ABikeCharacter::Tick(float DeltaTime)
 
 	// Determine current Lane
 	// Snap to Upper and Lower Lanes
-	if (!TutBlocked) Movement(DeltaTime);
+	if (!MoveBlocked) Movement(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -304,8 +305,8 @@ void ABikeCharacter::Turn(float Angle, FVector CenterPoint)
 
 	FRotator NewRotation = FRotator(GetActorRotation().Pitch, NewAngle, GetActorRotation().Roll);
 	SetActorRotation(NewRotation);
-	
-	BikeLanes->Rotate(NewAngle, CenterPoint);
+
+	BikeLanes->Rotate(NewAngle, CenterPoint, GetActorLocation());
 	LaneSwitching = true;
 }
 
@@ -380,9 +381,14 @@ void ABikeCharacter::SetLaneBlocked_Implementation(bool Blocking)
 	LaneBlocked = Blocking;
 }
 
-void ABikeCharacter::SetMovBlocked(bool Blocking)
+bool ABikeCharacter::GetMoveBlocked() const
 {
-	TutBlocked = Blocking;
+	return MoveBlocked;
+}
+
+void ABikeCharacter::SetMoveBlocked(bool Blocking)
+{
+	MoveBlocked = Blocking;
 }
 
 void ABikeCharacter::SetPowerLane(int NewLane)

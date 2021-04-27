@@ -51,14 +51,23 @@ void ABikeLaneActor::Move(FVector Movement)
 	SetActorLocation(GetActorLocation() + Movement);
 }
 
-void ABikeLaneActor::Rotate(float Rotation, FVector CenterPoint)
+void ABikeLaneActor::Rotate(float Rotation, FVector CenterPoint, FVector DinoPos)
 {
+	// Rotate root component
 	CenterLane->SetWorldRotation(FRotator(0, Rotation, 0));
-
 	CenterPoint.Z = GetActorLocation().Z;
-	FPlane ActorPlane = FPlane(GetActorLocation(), GetActorForwardVector());
 
-	FVector NewCenter = FMath::RayPlaneIntersection(CenterPoint, -GetActorForwardVector(), ActorPlane);
+	// Create a plane along the forward vector, a ray from the dino position to the right vector
+	// The intersection is where the new CenterLane is
+	FPlane ActorPlane = FPlane(GetActorLocation(), GetActorRightVector());
+	FVector NewCenter = FMath::RayPlaneIntersection(DinoPos, -GetActorRightVector(), ActorPlane);
+
+	SetActorLocation(NewCenter);
+
+	// Create a plane along the spheres, a ray from the CenterPoint down into the plane
+	// The intersection is where the new CenterLane is
+	ActorPlane = FPlane(GetActorLocation(), GetActorForwardVector());
+	NewCenter = FMath::RayPlaneIntersection(CenterPoint, -GetActorForwardVector(), ActorPlane);
 
 	SetActorLocation(NewCenter);
 }
@@ -110,4 +119,3 @@ bool ABikeLaneActor::IsFinishedMove()
 	if (LerpAlpha >= 1) return true;
 	else return false;
 }
-
