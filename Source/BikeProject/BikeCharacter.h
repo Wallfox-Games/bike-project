@@ -49,6 +49,19 @@ protected:
 	float LOWERPOWER;
 
 	UPROPERTY(EditAnywhere)
+	float CameraDistance;
+	UPROPERTY(EditAnywhere)
+	float FOVBase;
+	UPROPERTY(EditAnywhere)
+	float FOVMultiplier;
+	UPROPERTY(EditAnywhere)
+	float PPMed;
+	UPROPERTY(EditAnywhere)
+	float PPAlphaMult;
+	UPROPERTY(BlueprintGetter = GetPostProcessAlpha)
+	float PPAlpha;
+
+	UPROPERTY(EditAnywhere)
 	float LaneWidth;
 	UPROPERTY(EditAnywhere)
 	float LaneSpeed;
@@ -75,7 +88,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UCapsuleComponent* CapsuleComponent;
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* PlayerVisibleComponent;
+	USkeletalMeshComponent* PlayerVisibleComponent;
 
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* PlayerCameraSpringArm;
@@ -114,7 +127,9 @@ protected:
 		void CalculateBPM();
 
 	UFUNCTION()
-		void PowerTransition(float DeltaTime, float NewPower);
+	void PowerTransition(float DeltaTime, float NewPower);
+	UFUNCTION()
+	void PostProcessTransition(float DeltaTime);
 
 	UFUNCTION()
 		void MoveNewLane(float DeltaTime);
@@ -143,6 +158,10 @@ public:
 	void Turn(float Angle, FVector CenterPoint);
 
 	// Getter and Setter
+	UFUNCTION(BlueprintCallable)
+	float GetPostProcessAlpha() const;
+	UFUNCTION(BlueprintCallable)
+	float GetPowerPercent() const;
 	UFUNCTION(BlueprintCallable)
 	float GetRawPower(int Scale) const;
 

@@ -19,16 +19,19 @@ ABikeCharacter::ABikeCharacter()
 	CapsuleComponent->SetCapsuleHalfHeight(60);
 	CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
 
-	PlayerVisibleComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerVisibleComponent"));
+	PlayerVisibleComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PlayerVisibleComponent"));
 	PlayerVisibleComponent->SetupAttachment(RootComponent);
 
 	PlayerCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	PlayerCameraSpringArm->SetupAttachment(RootComponent);
 
-	PlayerCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.0f), FRotator(-60.0f, 0.0f, 0.0f));
-	PlayerCameraSpringArm->TargetArmLength = 400.f;
+	CameraDistance = 300.f;
+	PlayerCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 30.f), FRotator(-15.0f, 0.0f, 0.0f));
+	PlayerCameraSpringArm->TargetArmLength = CameraDistance;
 	PlayerCameraSpringArm->bEnableCameraLag = true;
+	PlayerCameraSpringArm->bEnableCameraRotationLag = true;
 	PlayerCameraSpringArm->CameraLagSpeed = 3.0f;
+	PlayerCameraSpringArm->CameraRotationLagSpeed = 3.0f;
 
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	PlayerCamera->SetupAttachment(PlayerCameraSpringArm, USpringArmComponent::SocketName);
@@ -50,6 +53,7 @@ ABikeCharacter::ABikeCharacter()
 	PowerLevelCurrent = 0;
 	PowerLevelTarget = 0;
 	PowerAlpha = 0;
+
 	LaneWidth = 90.f;
 	LaneSpeed = 1.5f;
 	SpeedBase = 200.f;
@@ -57,6 +61,11 @@ ABikeCharacter::ABikeCharacter()
 	LaneBlocked = false;
 	LaneSwitching = false;
 
+	FOVBase = 80.f;
+	FOVMultiplier = 40.f;
+	PPMed = 0.3f;
+	PPAlpha = 0.f;
+	PPAlphaMult = 1.f;
 }
 
 // Called when the game starts or when spawned
@@ -127,14 +136,9 @@ void ABikeCharacter::Movement(float DeltaTime)
 
 	float ForwardValue;
 	MoveNewLane(DeltaTime);
-	if (Attacking == true)
-	{
-		ForwardValue = SpeedBase + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * (SpeedMultiplier*2);
-	}
-	else
-	{
-		ForwardValue = SpeedBase + FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f) * SpeedMultiplier;
-	}
+
+	ForwardValue = SpeedBase + GetPowerPercent() * (SpeedMultiplier + Attacking);
+
 	FVector Direction = ForwardValue * GetActorForwardVector();
 	MovementComponent->AddInputVector(Direction);
 }
@@ -199,6 +203,32 @@ void ABikeCharacter::PowerTransition(float DeltaTime, float NewPower)
 	PowerLevel = FMath::Lerp(PowerLevelCurrent, PowerLevelTarget, PowerAlpha);
 }
 
+void ABikeCharacter::PostProcessTransition(float DeltaTime)
+{
+	float AlphaChange = DeltaTime * PPAlphaMult;
+
+	switch (PowerLane)
+	{
+	case 0:
+		PPAlpha = FMath::Clamp(PPAlpha - DeltaTime, 0.f, PPMed);
+		break;
+	case 1:
+		if (PPAlpha > PPMed) PPAlpha = FMath::Clamp(PPAlpha - DeltaTime, PPMed, 1.f);
+		else PPAlpha = FMath::Clamp(PPAlpha + DeltaTime, 0.f, PPMed);
+		break;
+	case 2:
+		PPAlpha = FMath::Clamp(PPAlpha + DeltaTime, PPMed, 1.f);
+		break;
+	default:
+		break;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::SanitizeFloat(PPAlpha), true);
+
+	PlayerCamera->SetFieldOfView(FOVBase + FOVMultiplier * PPAlpha);
+	PlayerCameraSpringArm->TargetArmLength = CameraDistance - PPAlpha * PlayerCamera->FieldOfView;
+}
+
 void ABikeCharacter::MoveNewLane(float DeltaTime)
 {
 	FVector NewHorizontalPos = GetActorLocation();
@@ -256,6 +286,8 @@ void ABikeCharacter::MoveNewLane(float DeltaTime)
 	}
 	LaneSwitching = !BikeLanes->IsFinishedMove();
 	
+	PostProcessTransition(DeltaTime);
+
 	NewHorizontalPos.Z = GetActorLocation().Z;
 
 	SetActorLocation(NewHorizontalPos);
@@ -272,10 +304,19 @@ void ABikeCharacter::Turn(float Angle, FVector CenterPoint)
 
 	FRotator NewRotation = FRotator(GetActorRotation().Pitch, NewAngle, GetActorRotation().Roll);
 	SetActorRotation(NewRotation);
-
-	BikeLanes->Rotate(NewAngle, CenterPoint);
 	
+	BikeLanes->Rotate(PowerLane, NewAngle, CenterPoint);
 	LaneSwitching = true;
+}
+
+float ABikeCharacter::GetPostProcessAlpha() const
+{
+	return PPAlpha;
+}
+
+float ABikeCharacter::GetPowerPercent() const
+{
+	return FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f);
 }
 
 // Returns different power values based on Scale input
@@ -344,9 +385,10 @@ void ABikeCharacter::SetMovBlocked(bool Blocking)
 	TutBlocked = Blocking;
 }
 
-void ABikeCharacter::SetPowerLane(int newlane)
+void ABikeCharacter::SetPowerLane(int NewLane)
 {
-	PowerLane = newlane;
+	if (PowerLane != NewLane) PowerLane = NewLane;
+	LaneSwitching = true;
 }
 
 int ABikeCharacter::GetPowerLane() const
