@@ -305,7 +305,7 @@ void ABikeCharacter::Turn(float Angle, FVector CenterPoint)
 	FRotator NewRotation = FRotator(GetActorRotation().Pitch, NewAngle, GetActorRotation().Roll);
 	SetActorRotation(NewRotation);
 	
-	BikeLanes->Rotate(PowerLane, NewAngle, CenterPoint);
+	BikeLanes->Rotate(NewAngle, CenterPoint);
 	LaneSwitching = true;
 }
 
