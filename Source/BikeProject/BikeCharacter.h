@@ -47,6 +47,12 @@ protected:
 	float MIDDLEPOWER;
 	UPROPERTY()
 	float LOWERPOWER;
+	UPROPERTY(EditAnywhere)
+	float UpperPercent;
+	UPROPERTY(EditAnywhere)
+	float MiddlePercent;
+	UPROPERTY(EditAnywhere)
+	float LowerPercent;
 
 	UPROPERTY(EditAnywhere)
 	float CameraDistance;

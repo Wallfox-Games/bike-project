@@ -54,6 +54,10 @@ ABikeCharacter::ABikeCharacter()
 	PowerLevelTarget = 0;
 	PowerAlpha = 0;
 
+	UpperPercent = 0.7f;
+	MiddlePercent = 0.5f;
+	LowerPercent = 0.3f;
+
 	LaneWidth = 110.f;
 	LaneSpeed = 1.5f;
 	SpeedBase = 400.f;
@@ -261,7 +265,7 @@ void ABikeCharacter::MoveNewLane_Implementation(float DeltaTime)
 	else
 	{
 		// Checks if PowerLevel is past the midpoint of the power scale
-		if (PowerLevel > MIDDLEPOWER)
+		if (PowerLevel > UPPERPOWER)
 		{
 			if (PowerLane == 0)
 			{
@@ -274,7 +278,7 @@ void ABikeCharacter::MoveNewLane_Implementation(float DeltaTime)
 				PowerLane = 2;
 			}
 		}
-		else if (PowerLevel > LOWERPOWER)
+		else if (PowerLevel > MIDDLEPOWER)
 		{
 			if (PowerLane != 1) NewHorizontalPos = BikeLanes->MoveCenter(true, DeltaTime, GetActorLocation());
 			PowerLane = 1;
@@ -359,18 +363,18 @@ void ABikeCharacter::LoadMaxPower()
 	MAXPOWER = GameInstanceRef->GetMaxPower();
 
 	// Sets three power stages to be a percentage of MAXPOWER
-	UPPERPOWER = MAXPOWER * 0.7;
-	MIDDLEPOWER = MAXPOWER * 0.5;
-	LOWERPOWER = MAXPOWER * 0.3;
+	UPPERPOWER = MAXPOWER * UpperPercent;
+	MIDDLEPOWER = MAXPOWER * MiddlePercent;
+	LOWERPOWER = MAXPOWER * LowerPercent;
 }
 
 void ABikeCharacter::SetMaxPower(float NewPower)
 {
 	MAXPOWER = NewPower;
 	// Sets three power stages to be a percentage of MAXPOWER
-	UPPERPOWER = MAXPOWER * 0.7;
-	MIDDLEPOWER = MAXPOWER * 0.5;
-	LOWERPOWER = MAXPOWER * 0.3;
+	UPPERPOWER = MAXPOWER * UpperPercent;
+	MIDDLEPOWER = MAXPOWER * MiddlePercent;
+	LOWERPOWER = MAXPOWER * LowerPercent;
 }
 
 void ABikeCharacter::SetLanePos(FVector Easy, FVector Med, FVector Hard)
