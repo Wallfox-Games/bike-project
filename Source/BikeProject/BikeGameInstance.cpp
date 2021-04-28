@@ -38,8 +38,8 @@ void UBikeGameInstance::Shutdown()
 
 void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
 {
-	GEngine->AddOnScreenDebugMessage(3, 5.f, FColor::Blue, TEXT("RevCount: " + FString::SanitizeFloat(RevCount)));
-	GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Blue, TEXT("EventTime: " + FString::SanitizeFloat(EventTime)));
+	GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Blue, TEXT("RevCount: " + FString::SanitizeFloat(RevCount)));
+	GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Blue, TEXT("EventTime: " + FString::SanitizeFloat(EventTime)));
 
 	// Push values into arrays and trim array size to 2
 	EventTimes.Push(EventTime);
@@ -69,8 +69,8 @@ void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
 			float RevCountDelta = RevolutionCounts[1] - RevolutionCounts[0];
 			if (RevolutionCounts[1] < RevolutionCounts[0]) RevCountDelta += 65536;
 
-			GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, TEXT("RevDelta: " + FString::SanitizeFloat(RevCountDelta)));
-			GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
+			GEngine->AddOnScreenDebugMessage(3, 5.f, FColor::Red, TEXT("RevDelta: " + FString::SanitizeFloat(RevCountDelta)));
+			GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
 
 			// Set current speed to new value
 			currentSpeed = (CircumferenceM * RevCountDelta * 1024) / EventTimeDelta;
@@ -81,6 +81,7 @@ void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
 			currentSpeed = 0;
 		}
 	}
+	GEngine->AddOnScreenDebugMessage(5, 5.f, FColor::Green, TEXT("CurrentSpeed: " + FString::SanitizeFloat(currentSpeed)));
 }
 
 int UBikeGameInstance::GetSpeed()
