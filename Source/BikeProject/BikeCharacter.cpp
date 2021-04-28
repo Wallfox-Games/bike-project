@@ -264,7 +264,7 @@ void ABikeCharacter::MoveNewLane_Implementation(float DeltaTime)
 	}
 	else
 	{
-		// Checks if PowerLevel is past the midpoint of the power scale
+		// Checks if PowerLevel is past the upper of the power scale
 		if (PowerLevel > UPPERPOWER)
 		{
 			if (PowerLane == 0)
@@ -304,6 +304,11 @@ void ABikeCharacter::MoveNewLane_Implementation(float DeltaTime)
 	NewHorizontalPos.Z = GetActorLocation().Z;
 
 	SetActorLocation(NewHorizontalPos);
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::FromInt(PowerLane), true);
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::SanitizeFloat(LOWERPOWER), true);
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::SanitizeFloat(MIDDLEPOWER), true);
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::SanitizeFloat(UPPERPOWER), true);
 }
 
 UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
