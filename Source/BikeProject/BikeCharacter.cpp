@@ -230,7 +230,7 @@ void ABikeCharacter::PostProcessTransition(float DeltaTime)
 	PlayerCameraSpringArm->TargetArmLength = CameraDistance - PPAlpha * PlayerCamera->FieldOfView;
 }
 
-void ABikeCharacter::MoveNewLane(float DeltaTime)
+void ABikeCharacter::MoveNewLane_Implementation(float DeltaTime)
 {
 	FVector NewHorizontalPos = GetActorLocation();
 	if (LaneSwitching || LaneBlocked)

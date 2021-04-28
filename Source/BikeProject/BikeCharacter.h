@@ -131,7 +131,7 @@ protected:
 	UFUNCTION()
 	void PostProcessTransition(float DeltaTime);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void MoveNewLane(float DeltaTime);
 
 	// Called when the game starts or when spawned
