@@ -74,4 +74,4 @@ Plugins/*/Intermediate/*
 DerivedDataCache/*
 
 # ThirdParty folder
-!ThirdParty/ANTPlus/*
+!Content/ThirdParty/ANTPlus/*

@@ -54,6 +54,10 @@ ABikeCharacter::ABikeCharacter()
 	PowerLevelTarget = 0;
 	PowerAlpha = 0;
 
+	UpperPercent = 0.7f;
+	MiddlePercent = 0.5f;
+	LowerPercent = 0.3f;
+
 	LaneWidth = 110.f;
 	LaneSpeed = 1.5f;
 	SpeedBase = 400.f;
@@ -89,7 +93,6 @@ void ABikeCharacter::BeginPlay()
 
 	// Display a debug message for five seconds. 
 	// The -1 "Key" value argument prevents the message from being updated or refreshed.
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Biker is being used."));
 }
 
 // Called every frame
@@ -138,7 +141,8 @@ void ABikeCharacter::Movement(float DeltaTime)
 	float ForwardValue;
 	MoveNewLane(DeltaTime);
 
-	ForwardValue = SpeedBase + GetPowerPercent() * (SpeedMultiplier + Attacking);
+	ForwardValue = SpeedBase + GetPowerPercent() * SpeedMultiplier * (1 + (int)Attacking);
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Speed: ") + FString::SanitizeFloat(ForwardValue), true);
 
 	FVector Direction = ForwardValue * GetActorForwardVector();
 	MovementComponent->AddInputVector(Direction);
@@ -224,8 +228,6 @@ void ABikeCharacter::PostProcessTransition(float DeltaTime)
 		break;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::SanitizeFloat(PPAlpha), true);
-
 	PlayerCamera->SetFieldOfView(FOVBase + FOVMultiplier * PPAlpha);
 
 	//PlayerCameraSpringArm->TargetArmLength = CameraDistance - PPAlpha * PlayerCamera->FieldOfView;
@@ -233,12 +235,12 @@ void ABikeCharacter::PostProcessTransition(float DeltaTime)
 	//PlayerCameraSpringArm->RelativeLocation = FVector(0.f, 0.f, 30.f + FMath::Clamp((PPAlpha * 2.f), 0.f, 1.f) * 100.f);
 	//PlayerCameraSpringArm->TargetArmLength = CameraDistance - FMath::Clamp((PPAlpha * 2.f), 0.f, 1.f) * (CameraDistance * 1.5f);
 
-	PlayerCameraSpringArm->RelativeLocation = FVector(0.f, 0.f, 30.f + PPAlpha * 20.f);
-	PlayerCameraSpringArm->RelativeRotation = FRotator(-15.f + PPAlpha * 10.f, 0.f, 0.f);
+	PlayerCameraSpringArm->SetRelativeLocation(FVector(0.f, 0.f, 30.f + PPAlpha * 20.f));
+	PlayerCameraSpringArm->SetRelativeRotation(FRotator(-15.f + PPAlpha * 10.f, 0.f, 0.f));
 	PlayerCameraSpringArm->TargetArmLength = CameraDistance + PPAlpha * (CameraDistance * 0.1f);
 }
 
-void ABikeCharacter::MoveNewLane(float DeltaTime)
+void ABikeCharacter::MoveNewLane_Implementation(float DeltaTime)
 {
 	FVector NewHorizontalPos = GetActorLocation();
 	if (LaneSwitching || LaneBlocked)
@@ -260,8 +262,8 @@ void ABikeCharacter::MoveNewLane(float DeltaTime)
 	}
 	else
 	{
-		// Checks if PowerLevel is past the midpoint of the power scale
-		if (PowerLevel > MIDDLEPOWER)
+		// Checks if PowerLevel is past the upper of the power scale
+		if (PowerLevel > UPPERPOWER)
 		{
 			if (PowerLane == 0)
 			{
@@ -274,7 +276,7 @@ void ABikeCharacter::MoveNewLane(float DeltaTime)
 				PowerLane = 2;
 			}
 		}
-		else if (PowerLevel > LOWERPOWER)
+		else if (PowerLevel > MIDDLEPOWER)
 		{
 			if (PowerLane != 1) NewHorizontalPos = BikeLanes->MoveCenter(true, DeltaTime, GetActorLocation());
 			PowerLane = 1;
@@ -359,18 +361,18 @@ void ABikeCharacter::LoadMaxPower()
 	MAXPOWER = GameInstanceRef->GetMaxPower();
 
 	// Sets three power stages to be a percentage of MAXPOWER
-	UPPERPOWER = MAXPOWER * 0.7;
-	MIDDLEPOWER = MAXPOWER * 0.5;
-	LOWERPOWER = MAXPOWER * 0.3;
+	UPPERPOWER = MAXPOWER * UpperPercent;
+	MIDDLEPOWER = MAXPOWER * MiddlePercent;
+	LOWERPOWER = MAXPOWER * LowerPercent;
 }
 
 void ABikeCharacter::SetMaxPower(float NewPower)
 {
 	MAXPOWER = NewPower;
 	// Sets three power stages to be a percentage of MAXPOWER
-	UPPERPOWER = MAXPOWER * 0.7;
-	MIDDLEPOWER = MAXPOWER * 0.5;
-	LOWERPOWER = MAXPOWER * 0.3;
+	UPPERPOWER = MAXPOWER * UpperPercent;
+	MIDDLEPOWER = MAXPOWER * MiddlePercent;
+	LOWERPOWER = MAXPOWER * LowerPercent;
 }
 
 void ABikeCharacter::SetLanePos(FVector Easy, FVector Med, FVector Hard)

@@ -14,8 +14,8 @@ ABikeBoss::ABikeBoss()
 
 	BossVisibleComponent->SetupAttachment(RootComponent);
 
-	SpeedBase = 200.f;
-	SpeedMultiplier = 300.f;
+	SpeedBase = 400.f;
+	SpeedMultiplier = 600.f;
 }
 
 // Called when the game starts or when spawned

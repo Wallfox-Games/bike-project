@@ -44,11 +44,6 @@ bool BikePhysicalInput::Init()
 
 	Socket = FUdpSocketBuilder(TEXT("ANTPlus Socket")).BoundToAddress(ip).BoundToPort(Port).Build();
 
-	if (Socket == nullptr)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Socket null!"));
-	}
-
 	return (Socket != nullptr);
 }
 
@@ -60,7 +55,6 @@ uint32 BikePhysicalInput::Run()
 	
 	if (Socket != nullptr)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Socket open!"));
 
 		// Continue updating the device while possible...
 		while (Socket != nullptr)
@@ -78,7 +72,6 @@ uint32 BikePhysicalInput::Run()
 			FPlatformProcess::Sleep(0.03F);
 		}
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Socket null!"));
 	return 0;
 }
 
