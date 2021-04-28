@@ -20,9 +20,9 @@ public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
 
-	void FillArrays(short EventTime, short RevCount);
+	void FillArrays(unsigned short EventTime, unsigned short RevCount);
 	UFUNCTION()
-	int GetSpeed();
+	float GetSpeed();
 
 	UFUNCTION()
 	void SetCircumference(float newCircumference);
@@ -65,13 +65,13 @@ public:
 		bool GetBossActive() const;
 	// getter and setter for if the player was hit by an obstacle 
 private:
-	TArray<short> EventTimes;
-	TArray<short> RevolutionCounts;
+	TArray<unsigned short> EventTimes;
+	TArray<unsigned short> RevolutionCounts;
 	UPROPERTY()
 	float Circumference;
 
 	UPROPERTY()
-	int currentSpeed;
+	float currentSpeed;
 	BikePhysicalInput* Task;
 
 	UPROPERTY(EditAnywhere, BlueprintSetter = SetMaxPower, BlueprintGetter = GetMaxPower)

@@ -233,8 +233,8 @@ void ABikeCharacter::PostProcessTransition(float DeltaTime)
 	//PlayerCameraSpringArm->RelativeLocation = FVector(0.f, 0.f, 30.f + FMath::Clamp((PPAlpha * 2.f), 0.f, 1.f) * 100.f);
 	//PlayerCameraSpringArm->TargetArmLength = CameraDistance - FMath::Clamp((PPAlpha * 2.f), 0.f, 1.f) * (CameraDistance * 1.5f);
 
-	PlayerCameraSpringArm->RelativeLocation = FVector(0.f, 0.f, 30.f + PPAlpha * 20.f);
-	PlayerCameraSpringArm->RelativeRotation = FRotator(-15.f + PPAlpha * 10.f, 0.f, 0.f);
+	PlayerCameraSpringArm->SetRelativeLocation(FVector(0.f, 0.f, 30.f + PPAlpha * 20.f));
+	PlayerCameraSpringArm->SetRelativeRotation(FRotator(-15.f + PPAlpha * 10.f, 0.f, 0.f));
 	PlayerCameraSpringArm->TargetArmLength = CameraDistance + PPAlpha * (CameraDistance * 0.1f);
 }
 

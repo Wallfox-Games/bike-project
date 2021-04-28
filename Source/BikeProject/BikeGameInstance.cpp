@@ -36,7 +36,7 @@ void UBikeGameInstance::Shutdown()
 	delete Task;
 }
 
-void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
+void UBikeGameInstance::FillArrays(unsigned short EventTime, unsigned short RevCount)
 {
 	GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Blue, TEXT("RevCount: " + FString::SanitizeFloat(RevCount)));
 	GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Blue, TEXT("EventTime: " + FString::SanitizeFloat(EventTime)));
@@ -73,7 +73,7 @@ void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
 			GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
 
 			// Set current speed to new value
-			currentSpeed = (CircumferenceM * RevCountDelta * 1024) / EventTimeDelta;
+			currentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
 		}
 		else
 		{
@@ -84,7 +84,7 @@ void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
 	GEngine->AddOnScreenDebugMessage(5, 5.f, FColor::Green, TEXT("CurrentSpeed: " + FString::SanitizeFloat(currentSpeed)));
 }
 
-int UBikeGameInstance::GetSpeed()
+float UBikeGameInstance::GetSpeed()
 {
 	return currentSpeed;
 }
