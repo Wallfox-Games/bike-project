@@ -28,7 +28,7 @@ ABikeCharacter::ABikeCharacter()
 	CameraDistance = 300.f;
 	PlayerCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 30.f), FRotator(-15.0f, 0.0f, 0.0f));
 	PlayerCameraSpringArm->TargetArmLength = CameraDistance;
-	PlayerCameraSpringArm->bEnableCameraLag = true;
+	PlayerCameraSpringArm->bEnableCameraLag = false;
 	PlayerCameraSpringArm->bEnableCameraRotationLag = true;
 	PlayerCameraSpringArm->CameraLagSpeed = 3.0f;
 	PlayerCameraSpringArm->CameraRotationLagSpeed = 3.0f;
@@ -56,17 +56,17 @@ ABikeCharacter::ABikeCharacter()
 
 	LaneWidth = 110.f;
 	LaneSpeed = 1.5f;
-	SpeedBase = 200.f;
-	SpeedMultiplier = 300.f;
+	SpeedBase = 400.f;
+	SpeedMultiplier = 600.f;
 	LaneBlocked = false;
 	LaneSwitching = false;
 	MoveBlocked = false;
 
 	FOVBase = 80.f;
-	FOVMultiplier = 40.f;
+	FOVMultiplier = 30.f;
 	PPMed = 0.3f;
 	PPAlpha = 0.f;
-	PPAlphaMult = 1.f;
+	PPAlphaMult = 2.f;
 }
 
 // Called when the game starts or when spawned
@@ -227,7 +227,15 @@ void ABikeCharacter::PostProcessTransition(float DeltaTime)
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::SanitizeFloat(PPAlpha), true);
 
 	PlayerCamera->SetFieldOfView(FOVBase + FOVMultiplier * PPAlpha);
-	PlayerCameraSpringArm->TargetArmLength = CameraDistance - PPAlpha * PlayerCamera->FieldOfView;
+
+	//PlayerCameraSpringArm->TargetArmLength = CameraDistance - PPAlpha * PlayerCamera->FieldOfView;
+
+	//PlayerCameraSpringArm->RelativeLocation = FVector(0.f, 0.f, 30.f + FMath::Clamp((PPAlpha * 2.f), 0.f, 1.f) * 100.f);
+	//PlayerCameraSpringArm->TargetArmLength = CameraDistance - FMath::Clamp((PPAlpha * 2.f), 0.f, 1.f) * (CameraDistance * 1.5f);
+
+	PlayerCameraSpringArm->RelativeLocation = FVector(0.f, 0.f, 30.f + PPAlpha * 20.f);
+	PlayerCameraSpringArm->RelativeRotation = FRotator(-15.f + PPAlpha * 10.f, 0.f, 0.f);
+	PlayerCameraSpringArm->TargetArmLength = CameraDistance + PPAlpha * (CameraDistance * 0.1f);
 }
 
 void ABikeCharacter::MoveNewLane_Implementation(float DeltaTime)
