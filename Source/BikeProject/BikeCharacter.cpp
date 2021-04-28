@@ -93,7 +93,6 @@ void ABikeCharacter::BeginPlay()
 
 	// Display a debug message for five seconds. 
 	// The -1 "Key" value argument prevents the message from being updated or refreshed.
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Biker is being used."));
 }
 
 // Called every frame
@@ -228,8 +227,6 @@ void ABikeCharacter::PostProcessTransition(float DeltaTime)
 		break;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::SanitizeFloat(PPAlpha), true);
-
 	PlayerCamera->SetFieldOfView(FOVBase + FOVMultiplier * PPAlpha);
 
 	//PlayerCameraSpringArm->TargetArmLength = CameraDistance - PPAlpha * PlayerCamera->FieldOfView;
@@ -304,11 +301,6 @@ void ABikeCharacter::MoveNewLane_Implementation(float DeltaTime)
 	NewHorizontalPos.Z = GetActorLocation().Z;
 
 	SetActorLocation(NewHorizontalPos);
-
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::FromInt(PowerLane), true);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::SanitizeFloat(LOWERPOWER), true);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::SanitizeFloat(MIDDLEPOWER), true);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Blue, FString::SanitizeFloat(UPPERPOWER), true);
 }
 
 UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
