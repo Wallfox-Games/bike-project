@@ -63,6 +63,10 @@ public:
 		void SetBossActive(bool newActive);
 	UFUNCTION(BlueprintCallable)
 		bool GetBossActive() const;
+	UFUNCTION(BlueprintCallable)
+		void SetBossDefeated(bool newDefeated);
+	UFUNCTION(BlueprintCallable)
+		bool GetBossDefeated() const;
 	// getter and setter for if the player was hit by an obstacle 
 private:
 	TArray<unsigned short> EventTimes;
@@ -91,4 +95,6 @@ private:
 		bool hit;
 	UPROPERTY(EditAnywhere, BlueprintSetter = SetBossActive, BlueprintGetter = GetBossActive)
 		bool Active;
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetBossDefeated, BlueprintGetter = GetBossDefeated)
+		bool BDefeated;
 };

@@ -27,7 +27,7 @@ void ABikeBoss::BeginPlay()
 
 void ABikeBoss::Movement(float playerLevel, float playerMax)
 {
-	Velocity.X = SpeedBase + FMath::Clamp(playerLevel / playerMax, 0.f, 1.f) * SpeedMultiplier;
+	Velocity.X = (SpeedBase + FMath::Clamp(playerLevel / playerMax, 0.f, 1.f) * SpeedMultiplier)*1.4;
 }
 
 void ABikeBoss::SpawnBullet(FVector PlayerPos)

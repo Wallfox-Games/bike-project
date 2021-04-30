@@ -178,3 +178,13 @@ bool UBikeGameInstance::GetBossActive() const
 	return Active;
 }
 
+void UBikeGameInstance::SetBossDefeated(bool newDefeated)
+{
+	BDefeated = newDefeated;
+}
+
+bool UBikeGameInstance::GetBossDefeated() const
+{
+	return BDefeated;
+}
+
