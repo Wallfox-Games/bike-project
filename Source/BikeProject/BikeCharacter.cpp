@@ -203,7 +203,7 @@ void ABikeCharacter::PowerTransition(float DeltaTime, float NewPower)
 		PowerAlpha = 0;
 	}
 
-	PowerAlpha += DeltaTime / 3.f;
+	PowerAlpha += DeltaTime / 0.25f;
 	PowerAlpha = FMath::Clamp(PowerAlpha, 0.f, 1.f);
 	PowerLevel = FMath::Lerp(PowerLevelCurrent, PowerLevelTarget, PowerAlpha);
 }
