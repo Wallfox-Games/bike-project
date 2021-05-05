@@ -39,45 +39,37 @@ void UBikeGameInstance::Shutdown()
 void UBikeGameInstance::FillArrays(unsigned short EventTime, unsigned short RevCount)
 {
 
-	// Push values into arrays and trim array size to 2
+	// Push values into arrays and trim array size to 3
 	EventTimes.Push(EventTime);
-	while (EventTimes.Num() > 2)
+	while (EventTimes.Num() > 3)
 	{
 		EventTimes.RemoveAt(0);
 	}
 
 	RevolutionCounts.Push(RevCount);
-	while (RevolutionCounts.Num() > 2)
+	while (RevolutionCounts.Num() > 3)
 	{
 		RevolutionCounts.RemoveAt(0);
 	}
 
-	// Check if arrays are of size two and unique
-	if (EventTimes.Num() == 2 && RevolutionCounts.Num() == 2)
+	// Check if array is filled before calculating speed (m/s)
+	if (EventTimes.Num() == 3 && RevolutionCounts.Num() == 3)
 	{
-		if (EventTimes[1] != EventTimes[0] && RevolutionCounts[1] != RevolutionCounts[0])
-		{
-			// Convert Circumference to Meters
-			float CircumferenceM = Circumference / 1000;
+		// Convert Circumference to Meters
+		float CircumferenceM = Circumference / 1000;
 
-			// Find difference between event times, if rollover then add max value
-			float EventTimeDelta = EventTimes[1] - EventTimes[0];
-			if (EventTimes[1] < EventTimes[0]) EventTimeDelta += 65536;
+		// Find difference between event times, if rollover then add max value
+		float EventTimeDelta = EventTimes[2] - EventTimes[0];
+		if (EventTimes[2] < EventTimes[0]) EventTimeDelta += 65536;
 
-			float RevCountDelta = RevolutionCounts[1] - RevolutionCounts[0];
-			if (RevolutionCounts[1] < RevolutionCounts[0]) RevCountDelta += 65536;
+		float RevCountDelta = RevolutionCounts[2] - RevolutionCounts[0];
+		if (RevolutionCounts[2] < RevolutionCounts[0]) RevCountDelta += 65536;
 
-			//GEngine->AddOnScreenDebugMessage(3, 5.f, FColor::Red, TEXT("RevDelta: " + FString::SanitizeFloat(RevCountDelta)));
-			//GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
+		//GEngine->AddOnScreenDebugMessage(3, 5.f, FColor::Red, TEXT("RevDelta: " + FString::SanitizeFloat(RevCountDelta)));
+		//GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
 
-			// Set current speed to new value
-			currentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
-		}
-		else
-		{
-			// If not unique then bike must be stationary
-			currentSpeed = 0;
-		}
+		// Set current speed to new value
+		currentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
 	}
 }
 
