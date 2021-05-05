@@ -69,7 +69,8 @@ void UBikeGameInstance::FillArrays(unsigned short EventTime, unsigned short RevC
 		//GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
 
 		// Set current speed to new value
-		currentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
+		if (EventTimeDelta != 0 || RevCountDelta != 0) currentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
+		else currentSpeed = 0;
 	}
 }
 
