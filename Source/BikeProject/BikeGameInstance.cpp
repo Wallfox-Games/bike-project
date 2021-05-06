@@ -10,6 +10,8 @@ void UBikeGameInstance::Init()
 {
 	Circumference = 2100;
 
+	SensorState = false;
+
 	Task = new BikePhysicalInput(this);
 
 	// Only load game stats if the load .sav file exists
@@ -109,6 +111,16 @@ float UBikeGameInstance::GetMaxPower() const
 bool UBikeGameInstance::GetTutorialState() const
 {
 	return TutorialState;
+}
+
+bool UBikeGameInstance::GetSensorState() const
+{
+	return SensorState;
+}
+
+void UBikeGameInstance::SetSensorState(bool NewValue)
+{
+	SensorState = NewValue;
 }
 
 void UBikeGameInstance::SetPlayerHealth(int newHealth)

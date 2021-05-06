@@ -55,7 +55,7 @@ uint32 BikePhysicalInput::Run()
 	
 	if (Socket != nullptr)
 	{
-
+		GameInstanceRef->SetSensorState(true);
 		// Continue updating the device while possible...
 		while (Socket != nullptr)
 		{	
