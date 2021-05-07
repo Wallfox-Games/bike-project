@@ -64,7 +64,8 @@ ABikeCharacter::ABikeCharacter()
 	SpeedMultiplier = 600.f;
 	LaneBlocked = false;
 	LaneSwitching = false;
-	MoveBlocked = false;
+	MovePauseBlocked = false;
+	MoveUIBlocked = false;
 
 	FOVBase = 80.f;
 	FOVMultiplier = 30.f;
@@ -119,7 +120,7 @@ void ABikeCharacter::Tick(float DeltaTime)
 
 	// Determine current Lane
 	// Snap to Upper and Lower Lanes
-	if (!MoveBlocked) Movement(DeltaTime);
+	if (!MovePauseBlocked && !MoveUIBlocked) Movement(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -391,14 +392,24 @@ void ABikeCharacter::SetLaneBlocked_Implementation(bool Blocking)
 	LaneBlocked = Blocking;
 }
 
-bool ABikeCharacter::GetMoveBlocked() const
+bool ABikeCharacter::GetMovePauseBlocked() const
 {
-	return MoveBlocked;
+	return MovePauseBlocked;
 }
 
-void ABikeCharacter::SetMoveBlocked(bool Blocking)
+void ABikeCharacter::SetMovePauseBlocked(bool Blocking)
 {
-	MoveBlocked = Blocking;
+	MovePauseBlocked = Blocking;
+}
+
+bool ABikeCharacter::GetMoveUIBlocked() const
+{
+	return MoveUIBlocked;
+}
+
+void ABikeCharacter::SetMoveUIBlocked(bool Blocking)
+{
+	MoveUIBlocked = Blocking;
 }
 
 void ABikeCharacter::SetPowerLane(int NewLane)
