@@ -7,9 +7,13 @@
 #include "BikePhysicalInput.h"
 #include "BikeGameInstance.generated.h"
 
-/**
- * 
- */
+UENUM(BlueprintType)
+enum class Gamestate : uint8 {
+	GSmenu = 0 UMETA(DisplayName = "Menu"),
+	GStutorial = 1 UMETA(DisplayName = "Tutorial"),
+	GSmain = 2 UMETA(DisplayName = "Main"),
+};
+
 UCLASS()
 class BIKEPROJECT_API UBikeGameInstance : public UGameInstance
 {
@@ -71,6 +75,10 @@ public:
 		void SetBossDefeated(bool newDefeated);
 	UFUNCTION(BlueprintCallable)
 		bool GetBossDefeated() const;
+	UFUNCTION(BlueprintCallable)
+		void SetGameState(int newState);
+	UFUNCTION(BlueprintCallable)
+		int GetGameState() const;
 	// getter and setter for if the player was hit by an obstacle 
 private:
 	TArray<unsigned short> EventTimes;
@@ -103,4 +111,7 @@ private:
 		bool Active;
 	UPROPERTY(EditAnywhere, BlueprintSetter = SetBossDefeated, BlueprintGetter = GetBossDefeated)
 		bool BDefeated;
+	Gamestate gameState;
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetGameState, BlueprintGetter = GetGameState)
+		int gameStateInt;
 };

@@ -193,3 +193,13 @@ bool UBikeGameInstance::GetBossDefeated() const
 	return BDefeated;
 }
 
+void UBikeGameInstance::SetGameState(int newState)
+{
+	gameState = (Gamestate)newState;
+}
+
+int UBikeGameInstance::GetGameState() const
+{
+	return (int)gameState;
+}
+
