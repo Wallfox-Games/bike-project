@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericPlatform/GenericPlatformProcess.h" 
 #include "Sockets.h"
 #include "HAL/Runnable.h"
 
@@ -14,6 +15,7 @@ class BIKEPROJECT_API UBikeGameInstance;
 class BIKEPROJECT_API BikePhysicalInput : public FRunnable
 {
 	FRunnableThread* RunnableThread;
+	FProcHandle ANTProcHandle;
 	FSocket* Socket;
 	TSharedPtr<FInternetAddr> InternetAddress;
 	UBikeGameInstance* GameInstanceRef;

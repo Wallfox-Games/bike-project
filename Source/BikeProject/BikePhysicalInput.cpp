@@ -7,6 +7,8 @@
 
 #include "Misc/Paths.h" 
 
+
+
 #include "Engine/Engine.h" 
 
 #include "BikeGameInstance.h"
@@ -14,7 +16,7 @@
 BikePhysicalInput::BikePhysicalInput(UBikeGameInstance* BikeInstanceRef)
 {
 	GameInstanceRef = BikeInstanceRef;
-
+	
 	Socket = nullptr;
 
 	RunnableThread = FRunnableThread::Create(this, TEXT("ANTPlusSocketTask"), 0, TPri_BelowNormal);
@@ -31,6 +33,7 @@ BikePhysicalInput::~BikePhysicalInput()
 		Socket = nullptr;
 	}
 
+	FPlatformProcess::TerminateProc(ANTProcHandle);
 	delete RunnableThread;
 	RunnableThread = nullptr;
 }
@@ -51,7 +54,9 @@ uint32 BikePhysicalInput::Run()
 {
 	FString FullPath = FPaths::ProjectContentDir() + TEXT("ThirdParty/ANTPlus/ANT_Socket.exe");
 	TCHAR* tempParam = L" ";
-	FProcHandle tempProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, true, false, NULL, 0, NULL, NULL);
+		
+	bool isInEditor = (GameInstanceRef->GetWorld()->WorldType == EWorldType::PIE);
+	ANTProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, isInEditor, !isInEditor, NULL, 0, NULL, NULL);
 	
 	if (Socket != nullptr)
 	{
