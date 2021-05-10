@@ -99,6 +99,7 @@ void UBikeGameInstance::SetMaxPower(float newMaxPower)
 		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex))
 		{
 			// Save succeeded.
+			TutorialState = false;
 		}
 	}
 }
@@ -121,11 +122,6 @@ bool UBikeGameInstance::GetSensorState() const
 void UBikeGameInstance::SetSensorState(bool NewValue)
 {
 	SensorState = NewValue;
-}
-
-void UBikeGameInstance::SetTutorialState(bool newState)
-{
-	TutorialState = newState;
 }
 
 void UBikeGameInstance::SetPlayerHealth(int newHealth)

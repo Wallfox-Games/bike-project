@@ -141,14 +141,8 @@ void ABikeCharacter::Movement(float DeltaTime)
 
 	float ForwardValue;
 	MoveNewLane(DeltaTime);
-	if (Attacking == true)
-	{
-		ForwardValue = (SpeedBase + GetPowerPercent() * SpeedMultiplier) * 2;
-	}
-	else
-	{
-		ForwardValue = (SpeedBase + GetPowerPercent() * SpeedMultiplier);
-	}
+
+	ForwardValue = SpeedBase + GetPowerPercent() * SpeedMultiplier * (1 + (int)Attacking);
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Speed: ") + FString::SanitizeFloat(ForwardValue), true);
 
 	FVector Direction = ForwardValue * GetActorForwardVector();

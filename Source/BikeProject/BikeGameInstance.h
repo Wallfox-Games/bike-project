@@ -43,8 +43,6 @@ public:
 	bool GetSensorState() const;
 
 	UFUNCTION(BlueprintCallable)
-		void SetTutorialState(bool newState);
-	UFUNCTION(BlueprintCallable)
 		void SetPlayerHealth(int newHealth);
 	UFUNCTION(BlueprintCallable)
 		int GetPlayerHealth() const;
@@ -91,9 +89,9 @@ private:
 	float currentSpeed;
 	BikePhysicalInput* Task;
 
-	UPROPERTY(EditAnywhere, BlueprintSetter = SetMaxPower, BlueprintGetter = GetMaxPower)
+	UPROPERTY(BlueprintSetter = SetMaxPower, BlueprintGetter = GetMaxPower)
 	float MAXPOWER;
-	UPROPERTY(EditAnywhere, BlueprintSetter = SetTutorialState, BlueprintGetter = GetTutorialState)
+	UPROPERTY(BlueprintGetter = GetTutorialState)
 	bool TutorialState;
 	UPROPERTY(BlueprintGetter = GetSensorState)
 	bool SensorState;
