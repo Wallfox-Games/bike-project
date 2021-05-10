@@ -42,7 +42,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetSensorState() const;
 
-
+	UFUNCTION(BlueprintCallable)
+		void SetTutorialState(bool newState);
 	UFUNCTION(BlueprintCallable)
 		void SetPlayerHealth(int newHealth);
 	UFUNCTION(BlueprintCallable)
@@ -92,7 +93,7 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintSetter = SetMaxPower, BlueprintGetter = GetMaxPower)
 	float MAXPOWER;
-	UPROPERTY(BlueprintGetter = GetTutorialState)
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetTutorialState, BlueprintGetter = GetTutorialState)
 	bool TutorialState;
 	UPROPERTY(BlueprintGetter = GetSensorState)
 	bool SensorState;

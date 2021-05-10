@@ -29,6 +29,10 @@ public:
 		void SpawnBullet(FVector PlayerPos);
 	UFUNCTION(BlueprintCallable)
 		void Death();
+	UFUNCTION(BlueprintCallable)
+		void SetFleeing(bool newFleeing);
+	UFUNCTION(BlueprintCallable)
+		bool GetFleeing() const;
 
 	UPROPERTY(EditAnywhere)
 		FVector Velocity;
@@ -40,6 +44,10 @@ public:
 		float SpeedBase;
 	UPROPERTY(EditAnywhere)
 		float SpeedMultiplier;
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetFleeing, BlueprintGetter = GetFleeing)
+		bool fleeing;
+	UPROPERTY(EditAnywhere)
+		int fleeingCounter;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

@@ -16,6 +16,8 @@ ABikeBoss::ABikeBoss()
 
 	SpeedBase = 400.f;
 	SpeedMultiplier = 600.f;
+	fleeing = false;
+	fleeingCounter = 0;
 }
 
 // Called when the game starts or when spawned
@@ -29,7 +31,23 @@ void ABikeBoss::Movement(float playerLevel, float playerMax, bool paused)
 {
 	if (paused == false)
 	{
-		Velocity.X = (SpeedBase + FMath::Clamp(playerLevel / playerMax, 0.f, 1.f) * SpeedMultiplier);
+		if (fleeing == true)
+		{
+			Velocity.X = (SpeedBase + FMath::Clamp(playerLevel / playerMax, 0.f, 1.f) * SpeedMultiplier)*2;
+			if (fleeingCounter == 180)
+			{
+				fleeing = false;
+				fleeingCounter = 0;
+			}
+			else
+			{
+				fleeingCounter++;
+			}
+		}
+		else
+		{
+			Velocity.X = (SpeedBase + FMath::Clamp(playerLevel / playerMax, 0.f, 1.f) * SpeedMultiplier);
+		}
 	}
 	else
 	{
@@ -44,6 +62,16 @@ void ABikeBoss::SpawnBullet(FVector PlayerPos)
 
 void ABikeBoss::Death()
 {
+}
+
+void ABikeBoss::SetFleeing(bool newFleeing)
+{
+	fleeing = newFleeing;
+}
+
+bool ABikeBoss::GetFleeing() const
+{
+	return fleeing;
 }
 
 // Called every frame

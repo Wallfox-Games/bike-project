@@ -123,6 +123,11 @@ void UBikeGameInstance::SetSensorState(bool NewValue)
 	SensorState = NewValue;
 }
 
+void UBikeGameInstance::SetTutorialState(bool newState)
+{
+	TutorialState = newState;
+}
+
 void UBikeGameInstance::SetPlayerHealth(int newHealth)
 {
 	PlayerHealth = newHealth;
