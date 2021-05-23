@@ -5,6 +5,10 @@
 #include "Networking.h"
 #include "SocketSubsystem.h"
 
+#include "Misc/Paths.h" 
+
+
+
 #include "Engine/Engine.h" 
 
 #include "BikeGameInstance.h"
@@ -12,7 +16,7 @@
 BikePhysicalInput::BikePhysicalInput(UBikeGameInstance* BikeInstanceRef)
 {
 	GameInstanceRef = BikeInstanceRef;
-
+	
 	Socket = nullptr;
 
 	RunnableThread = FRunnableThread::Create(this, TEXT("ANTPlusSocketTask"), 0, TPri_BelowNormal);
@@ -29,6 +33,7 @@ BikePhysicalInput::~BikePhysicalInput()
 		Socket = nullptr;
 	}
 
+	FPlatformProcess::TerminateProc(ANTProcHandle);
 	delete RunnableThread;
 	RunnableThread = nullptr;
 }
@@ -42,24 +47,50 @@ bool BikePhysicalInput::Init()
 
 	Socket = FUdpSocketBuilder(TEXT("ANTPlus Socket")).BoundToAddress(ip).BoundToPort(Port).Build();
 
-	if (Socket == nullptr)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Socket null!"));
-	}
-
 	return (Socket != nullptr);
 }
 
 uint32 BikePhysicalInput::Run()
 {
-	FString FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(TEXT("../ANTPlus/ANT_Socket.exe"));	
+	FString FullPath = FPaths::ProjectContentDir() + TEXT("ThirdParty/ANTPlus/ANT_Socket.exe");
 	TCHAR* tempParam = L" ";
-	FProcHandle tempProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, true, false, NULL, 0, NULL, NULL);
+		
+	bool isInEditor = (GameInstanceRef->GetWorld()->WorldType == EWorldType::PIE);
+	ANTProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, isInEditor, !isInEditor, NULL, 0, NULL, NULL);
+	
+	bool WaitingConf = true;
 	
 	if (Socket != nullptr)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Socket open!"));
+		while (Socket != nullptr && WaitingConf)
+		{
 
+			int32 BufferSize = 1;
+			int32 BytesRead = 0;
+			uint8 Response[1];
+
+			if (Socket->Recv(Response, BufferSize, BytesRead))
+			{
+				if ((char)Response[0] == '1')
+				{
+					WaitingConf = false;
+				}
+			}
+
+			if (WaitingConf)
+			{
+				GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Waiting for conf"), true);
+				if (!FPlatformProcess::IsProcRunning(ANTProcHandle))
+				{
+					GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Green, TEXT("Handle not valid"), true);
+					FPlatformProcess::CloseProc(ANTProcHandle);
+					ANTProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, isInEditor, !isInEditor, NULL, 0, NULL, NULL);
+				}
+				// Sleep to reduce usage of system resources(nearly delta time).
+				FPlatformProcess::Sleep(0.03F);
+			}
+		}
+		GameInstanceRef->SetSensorState(true);
 		// Continue updating the device while possible...
 		while (Socket != nullptr)
 		{	
@@ -76,7 +107,6 @@ uint32 BikePhysicalInput::Run()
 			FPlatformProcess::Sleep(0.03F);
 		}
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Socket null!"));
 	return 0;
 }
 

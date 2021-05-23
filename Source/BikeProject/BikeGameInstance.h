@@ -7,9 +7,13 @@
 #include "BikePhysicalInput.h"
 #include "BikeGameInstance.generated.h"
 
-/**
- * 
- */
+UENUM(BlueprintType)
+enum class Gamestate : uint8 {
+	GSmenu = 0 UMETA(DisplayName = "Menu"),
+	GStutorial = 1 UMETA(DisplayName = "Tutorial"),
+	GSmain = 2 UMETA(DisplayName = "Main"),
+};
+
 UCLASS()
 class BIKEPROJECT_API UBikeGameInstance : public UGameInstance
 {
@@ -20,9 +24,9 @@ public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
 
-	void FillArrays(short EventTime, short RevCount);
+	void FillArrays(unsigned short EventTime, unsigned short RevCount);
 	UFUNCTION()
-	int GetSpeed();
+	float GetSpeed();
 
 	UFUNCTION()
 	void SetCircumference(float newCircumference);
@@ -33,7 +37,10 @@ public:
 	float GetMaxPower() const;
 	UFUNCTION(BlueprintCallable)
 	bool GetTutorialState() const;
-
+	UFUNCTION()
+	void SetSensorState(bool NewValue);
+	UFUNCTION(BlueprintCallable)
+	bool GetSensorState() const;
 
 	UFUNCTION(BlueprintCallable)
 		void SetPlayerHealth(int newHealth);
@@ -59,21 +66,35 @@ public:
 		void SetHit(bool newhit);
 	UFUNCTION(BlueprintCallable)
 		bool GetHit() const;
+	UFUNCTION(BlueprintCallable)
+		void SetBossActive(bool newActive);
+	UFUNCTION(BlueprintCallable)
+		bool GetBossActive() const;
+	UFUNCTION(BlueprintCallable)
+		void SetBossDefeated(bool newDefeated);
+	UFUNCTION(BlueprintCallable)
+		bool GetBossDefeated() const;
+	UFUNCTION(BlueprintCallable)
+		void SetGameState(int newState);
+	UFUNCTION(BlueprintCallable)
+		int GetGameState() const;
 	// getter and setter for if the player was hit by an obstacle 
 private:
-	TArray<short> EventTimes;
-	TArray<short> RevolutionCounts;
+	TArray<unsigned short> EventTimes;
+	TArray<unsigned short> RevolutionCounts;
 	UPROPERTY()
 	float Circumference;
 
 	UPROPERTY()
-	int currentSpeed;
+	float currentSpeed;
 	BikePhysicalInput* Task;
 
-	UPROPERTY(EditAnywhere, BlueprintSetter = SetMaxPower, BlueprintGetter = GetMaxPower)
+	UPROPERTY(BlueprintSetter = SetMaxPower, BlueprintGetter = GetMaxPower)
 	float MAXPOWER;
 	UPROPERTY(BlueprintGetter = GetTutorialState)
 	bool TutorialState;
+	UPROPERTY(BlueprintGetter = GetSensorState)
+	bool SensorState;
 
 	UPROPERTY(EditAnywhere, BlueprintSetter = SetPlayerHealth, BlueprintGetter = GetPlayerHealth)
 		int PlayerHealth;
@@ -85,4 +106,11 @@ private:
 		int Multiplier;
 	UPROPERTY(EditAnywhere, BlueprintSetter = SetHit, BlueprintGetter = GetHit)
 		bool hit;
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetBossActive, BlueprintGetter = GetBossActive)
+		bool Active;
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetBossDefeated, BlueprintGetter = GetBossDefeated)
+		bool BDefeated;
+	Gamestate gameState;
+	UPROPERTY(EditAnywhere, BlueprintSetter = SetGameState, BlueprintGetter = GetGameState)
+		int gameStateInt;
 };

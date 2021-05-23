@@ -10,6 +10,8 @@ void UBikeGameInstance::Init()
 {
 	Circumference = 2100;
 
+	SensorState = false;
+
 	Task = new BikePhysicalInput(this);
 
 	// Only load game stats if the load .sav file exists
@@ -36,54 +38,45 @@ void UBikeGameInstance::Shutdown()
 	delete Task;
 }
 
-void UBikeGameInstance::FillArrays(short EventTime, short RevCount)
+void UBikeGameInstance::FillArrays(unsigned short EventTime, unsigned short RevCount)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Blue, TEXT("RevCount: " + FString::SanitizeFloat(RevCount)));
-	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Blue, TEXT("EventTime: " + FString::SanitizeFloat(EventTime)));
 
-	// Push values into arrays and trim array size to 2
+	// Push values into arrays and trim array size to 3
 	EventTimes.Push(EventTime);
-	while (EventTimes.Num() > 2)
+	while (EventTimes.Num() > 3)
 	{
 		EventTimes.RemoveAt(0);
 	}
 
 	RevolutionCounts.Push(RevCount);
-	while (RevolutionCounts.Num() > 2)
+	while (RevolutionCounts.Num() > 3)
 	{
 		RevolutionCounts.RemoveAt(0);
 	}
 
-	// Check if arrays are of size two and unique
-	if (EventTimes.Num() == 2 && RevolutionCounts.Num() == 2)
+	// Check if array is filled before calculating speed (m/s)
+	if (EventTimes.Num() == 3 && RevolutionCounts.Num() == 3)
 	{
-		if (EventTimes[1] != EventTimes[0] && RevolutionCounts[1] != RevolutionCounts[0])
-		{
-			// Convert Circumference to Meters
-			float CircumferenceM = Circumference / 1000;
+		// Convert Circumference to Meters
+		float CircumferenceM = Circumference / 1000;
 
-			// Find difference between event times, if rollover then add max value
-			float EventTimeDelta = EventTimes[1] - EventTimes[0];
-			if (EventTimes[1] < EventTimes[0]) EventTimeDelta += 65536;
+		// Find difference between event times, if rollover then add max value
+		float EventTimeDelta = EventTimes[2] - EventTimes[0];
+		if (EventTimes[2] < EventTimes[0]) EventTimeDelta += 65536;
 
-			float RevCountDelta = RevolutionCounts[1] - RevolutionCounts[0];
-			if (RevolutionCounts[1] < RevolutionCounts[0]) RevCountDelta += 65536;
+		float RevCountDelta = RevolutionCounts[2] - RevolutionCounts[0];
+		if (RevolutionCounts[2] < RevolutionCounts[0]) RevCountDelta += 65536;
 
-			GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Red, TEXT("RevDelta: " + FString::SanitizeFloat(RevCountDelta)));
-			GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
+		//GEngine->AddOnScreenDebugMessage(3, 5.f, FColor::Red, TEXT("RevDelta: " + FString::SanitizeFloat(RevCountDelta)));
+		//GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
 
-			// Set current speed to new value
-			currentSpeed = (CircumferenceM * RevCountDelta * 1024) / EventTimeDelta;
-		}
-		else
-		{
-			// If not unique then bike must be stationary
-			currentSpeed = 0;
-		}
+		// Set current speed to new value
+		if (EventTimeDelta != 0 || RevCountDelta != 0) currentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
+		else currentSpeed = 0;
 	}
 }
 
-int UBikeGameInstance::GetSpeed()
+float UBikeGameInstance::GetSpeed()
 {
 	return currentSpeed;
 }
@@ -106,6 +99,7 @@ void UBikeGameInstance::SetMaxPower(float newMaxPower)
 		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex))
 		{
 			// Save succeeded.
+			TutorialState = false;
 		}
 	}
 }
@@ -118,6 +112,16 @@ float UBikeGameInstance::GetMaxPower() const
 bool UBikeGameInstance::GetTutorialState() const
 {
 	return TutorialState;
+}
+
+bool UBikeGameInstance::GetSensorState() const
+{
+	return SensorState;
+}
+
+void UBikeGameInstance::SetSensorState(bool NewValue)
+{
+	SensorState = NewValue;
 }
 
 void UBikeGameInstance::SetPlayerHealth(int newHealth)
@@ -168,5 +172,35 @@ void UBikeGameInstance::SetHit(bool newhit)
 bool UBikeGameInstance::GetHit() const
 {
 	return hit;
+}
+
+void UBikeGameInstance::SetBossActive(bool newActive)
+{
+	Active = newActive;
+}
+
+bool UBikeGameInstance::GetBossActive() const
+{
+	return Active;
+}
+
+void UBikeGameInstance::SetBossDefeated(bool newDefeated)
+{
+	BDefeated = newDefeated;
+}
+
+bool UBikeGameInstance::GetBossDefeated() const
+{
+	return BDefeated;
+}
+
+void UBikeGameInstance::SetGameState(int newState)
+{
+	gameState = (Gamestate)newState;
+}
+
+int UBikeGameInstance::GetGameState() const
+{
+	return (int)gameState;
 }
 

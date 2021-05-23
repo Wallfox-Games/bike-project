@@ -42,7 +42,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void Move(FVector Movement);
-	void Rotate(float Rotation);
+	void Rotate(float Rotation, FVector CentrePoint, FVector DinoPos);
 
 	FVector MoveLeft(bool NewMove, float DeltaTime);
 	FVector MoveCenter(bool NewMove, float DeltaTime, FVector DinoPos);

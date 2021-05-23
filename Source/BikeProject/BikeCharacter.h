@@ -47,6 +47,25 @@ protected:
 	float MIDDLEPOWER;
 	UPROPERTY()
 	float LOWERPOWER;
+	UPROPERTY(EditAnywhere)
+	float UpperPercent;
+	UPROPERTY(EditAnywhere)
+	float MiddlePercent;
+	UPROPERTY(EditAnywhere)
+	float LowerPercent;
+
+	UPROPERTY(EditAnywhere)
+	float CameraDistance;
+	UPROPERTY(EditAnywhere)
+	float FOVBase;
+	UPROPERTY(EditAnywhere)
+	float FOVMultiplier;
+	UPROPERTY(EditAnywhere)
+	float PPMed;
+	UPROPERTY(EditAnywhere)
+	float PPAlphaMult;
+	UPROPERTY(BlueprintGetter = GetPostProcessAlpha)
+	float PPAlpha;
 
 	UPROPERTY(EditAnywhere)
 	float LaneWidth;
@@ -58,10 +77,12 @@ protected:
 	float SpeedMultiplier;
 	UPROPERTY()
 	bool LaneSwitching;
-	UPROPERTY(BlueprintSetter=SetLaneBlocked)
-	bool LaneBlocked;
 	UPROPERTY()
-	bool TutBlocked;
+	bool LaneBlocked;
+	UPROPERTY(BlueprintGetter = GetMovePauseBlocked, BlueprintSetter = SetMovePauseBlocked)
+	bool MovePauseBlocked;
+	UPROPERTY(BlueprintGetter = GetMoveUIBlocked, BlueprintSetter = SetMoveUIBlocked)
+	bool MoveUIBlocked;
 
 	UPROPERTY()
 	ABikeLaneActor* BikeLanes;
@@ -75,7 +96,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UCapsuleComponent* CapsuleComponent;
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* PlayerVisibleComponent;
+	USkeletalMeshComponent* PlayerVisibleComponent;
 
 	UPROPERTY(EditAnywhere)
 	USpringArmComponent* PlayerCameraSpringArm;
@@ -98,6 +119,9 @@ protected:
 	UPROPERTY()
 		double TimeStartRight;
 
+	UPROPERTY()
+		bool Attacking;
+
 	UFUNCTION()
 		void Movement(float Value);
 	UFUNCTION()
@@ -111,9 +135,11 @@ protected:
 		void CalculateBPM();
 
 	UFUNCTION()
-		void PowerTransition(float DeltaTime, float NewPower);
-
+	void PowerTransition(float DeltaTime, float NewPower);
 	UFUNCTION()
+	void PostProcessTransition(float DeltaTime);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void MoveNewLane(float DeltaTime);
 
 	// Called when the game starts or when spawned
@@ -137,11 +163,13 @@ public:
 	virtual UBikeMovementComponent* GetMovementComponent() const override;
 
 	UFUNCTION(BlueprintCallable)
-	void Turn(float Angle);
+	void Turn(float Angle, FVector CenterPoint);
 
 	// Getter and Setter
 	UFUNCTION(BlueprintCallable)
-	float GetPowerLevel() const;
+	float GetPostProcessAlpha() const;
+	UFUNCTION(BlueprintCallable)
+	float GetPowerPercent() const;
 	UFUNCTION(BlueprintCallable)
 	float GetRawPower(int Scale) const;
 
@@ -152,8 +180,22 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetLanePos(FVector Easy, FVector Med, FVector Hard);
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetLaneBlocked(bool Blocking);
+
 	UFUNCTION(BlueprintCallable)
-	void SetMovBlocked(bool Blocking);
+	bool GetMovePauseBlocked() const;
+	UFUNCTION(BlueprintCallable)
+	void SetMovePauseBlocked(bool Blocking);
+	UFUNCTION(BlueprintCallable)
+	bool GetMoveUIBlocked() const;
+	UFUNCTION(BlueprintCallable)
+	void SetMoveUIBlocked(bool Blocking);
+
+	UFUNCTION(BlueprintCallable)
+	void SetPowerLane(int newlane);
+	UFUNCTION(BlueprintCallable)
+	int GetPowerLane() const;
+	UFUNCTION(BlueprintCallable)
+	void SetAttacking(bool newattacking);
 };
