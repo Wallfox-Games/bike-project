@@ -9,6 +9,7 @@
 void UBikeGameInstance::Init()
 {
 	Circumference = 2100;
+	CurrentSpeed = -1.f;
 
 	SensorState = false;
 
@@ -71,14 +72,14 @@ void UBikeGameInstance::FillArrays(unsigned short EventTime, unsigned short RevC
 		//GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
 
 		// Set current speed to new value
-		if (EventTimeDelta != 0 || RevCountDelta != 0) currentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
-		else currentSpeed = 0;
+		if (EventTimeDelta != 0 || RevCountDelta != 0) CurrentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
+		else CurrentSpeed = 0;
 	}
 }
 
-float UBikeGameInstance::GetSpeed()
+float UBikeGameInstance::GetSpeed() const
 {
-	return currentSpeed;
+	return CurrentSpeed;
 }
 
 void UBikeGameInstance::SetCircumference(float newCircumference)

@@ -25,8 +25,8 @@ public:
 	virtual void Shutdown() override;
 
 	void FillArrays(unsigned short EventTime, unsigned short RevCount);
-	UFUNCTION()
-	float GetSpeed();
+	UFUNCTION(BlueprintCallable)
+	float GetSpeed() const;
 
 	UFUNCTION()
 	void SetCircumference(float newCircumference);
@@ -85,9 +85,9 @@ private:
 	UPROPERTY()
 	float Circumference;
 
-	UPROPERTY()
-	float currentSpeed;
 	BikePhysicalInput* Task;
+	UPROPERTY(BlueprintGetter = GetSpeed)
+	float CurrentSpeed;
 
 	UPROPERTY(BlueprintSetter = SetMaxPower, BlueprintGetter = GetMaxPower)
 	float MAXPOWER;
