@@ -44,15 +44,14 @@ ABikeBoss::ABikeBoss()
 	MovementComponent = CreateDefaultSubobject<UBikeMovementComponent>(TEXT("BossMovementComponent"));
 	MovementComponent->UpdatedComponent = RootComponent;
 
-	TargetSeconds = 5.f;
 	CameraLerpAlpha = 0.f;
 }
 
-void ABikeBoss::InitValues_Implementation(ABikeCharacter* NewPtr, int NewHealth, float DeltaTime)
+void ABikeBoss::InitValues_Implementation(ABikeCharacter* NewPtr, int NewHealth, float NewSeconds, float NewMultiplier, float DeltaTime)
 {
 	PlayerPtr = NewPtr;
 	Health = NewHealth;
-	TargetAttackPower = PlayerPtr->GetRawPower(2) * TargetSeconds;
+	TargetAttackPower = PlayerPtr->GetRawPower(3) * NewSeconds * NewMultiplier;
 
 	SetActorRotation(PlayerPtr->GetActorRotation());
 	FVector NewLocation = FVector(PlayerPtr->GetLaneActor()->GetActorLocation().X, PlayerPtr->GetLaneActor()->GetActorLocation().Y, PlayerPtr->GetActorLocation().Z - 25.f);

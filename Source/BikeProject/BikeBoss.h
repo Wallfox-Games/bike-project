@@ -63,8 +63,10 @@ protected:
 	int Health;
 	UPROPERTY()
 	TEnumAsByte<EBossState> BossStateEnum;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	float TargetSeconds;
+	UPROPERTY()
+	float TargetMultiplier;
 	UPROPERTY()
 	float TargetAttackPower;
 	UPROPERTY()
@@ -95,7 +97,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void InitValues(ABikeCharacter* NewPtr, int NewHealth, float DeltaTime);
+	void InitValues(ABikeCharacter* NewPtr, int NewHealth, float NewSeconds, float NewMultiplier, float DeltaTime);
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
