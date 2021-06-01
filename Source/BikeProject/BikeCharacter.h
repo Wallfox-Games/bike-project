@@ -13,6 +13,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h" 
 
 #include "BikeCharacter.generated.h"
 
@@ -57,9 +58,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float LowerPercent;
 
-	UPROPERTY()
-	bool Attacking;
-
 	UPROPERTY(EditAnywhere)
 	float LaneWidth;
 	UPROPERTY(EditAnywhere)
@@ -84,19 +82,21 @@ protected:
 	UPROPERTY()
 	FVector HardLanePos;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* CapsuleComponent;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* PlayerVisibleComponent;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* PlayerCameraSpringArm;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* PlayerCamera;
 
 	// Movement component.
 	UPROPERTY()
-		class UBikeMovementComponent* MovementComponent;
+	class UBikeMovementComponent* MovementComponent;
+	UPROPERTY()
+	FVector IntendedMovement;
 
 	UFUNCTION()
 	void PostProcessTransition(float DeltaTime);
@@ -111,8 +111,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-
 	virtual UBikeMovementComponent* GetMovementComponent() const override;
+
+	UFUNCTION(BlueprintCallable)
+	ABikeLaneActor* GetLaneActor() const;
 
 	UFUNCTION(BlueprintCallable)
 	void Turn(float Angle, FVector CenterPoint);
@@ -122,19 +124,23 @@ public:
 	float GetPostProcessAlpha() const;
 
 	UFUNCTION(BlueprintCallable)
-		float GetPowerPercent() const;
+	float GetPowerPercent() const;
 	UFUNCTION(BlueprintCallable)
-		float GetRawPower(int Scale) const;
+	float GetRawPower(int Scale) const;
 
 	UFUNCTION()
-		void SetCurrentPower(float NewPower);
+	void SetCurrentPower(float NewPower);
 	UFUNCTION()
-		void Movement(float DeltaTime);
+	void Movement(float DeltaTime);
+	UFUNCTION()
+	FVector GetPrevMov();
+	UFUNCTION()
+	void ZeroPrevMov();
 
 	UFUNCTION(BlueprintCallable)
-		void LoadMaxPower();
+	void LoadMaxPower();
 	UFUNCTION(BlueprintCallable)
-		void SetMaxPower(float NewPower);
+	void SetMaxPower(float NewPower);
 
 	UFUNCTION(BlueprintCallable)
 	void SetLanePos(FVector Easy, FVector Med, FVector Hard);
@@ -142,9 +148,10 @@ public:
 	void SetLaneBlocked(bool Blocking);
 
 	UFUNCTION(BlueprintCallable)
-	void SetPowerLane(int newlane);
+	void ChangePowerLane(int NewLane, float DeltaTime);
 	UFUNCTION(BlueprintCallable)
 	int GetPowerLane() const;
+
 	UFUNCTION(BlueprintCallable)
-	void SetAttacking(bool newattacking);
+	float GetLaneWidth();
 };

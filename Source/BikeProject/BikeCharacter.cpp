@@ -22,22 +22,25 @@ ABikeCharacter::ABikeCharacter()
 	PlayerVisibleComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PlayerVisibleComponent"));
 	PlayerVisibleComponent->SetupAttachment(RootComponent);
 
+	PlayerVisibleComponent->SetRelativeTransform(FTransform(FRotator(0.f, 180.f, 0.f), FVector(-19.5f, 0.f, -57.f), FVector(0.8f)));
+
 	PlayerCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	PlayerCameraSpringArm->SetupAttachment(RootComponent);
 
 	CameraDistance = 300.f;
-	PlayerCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 30.f), FRotator(-15.0f, 0.0f, 0.0f));
+	PlayerCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.f), FRotator(-15.0f, 0.0f, 0.0f));
 	PlayerCameraSpringArm->TargetArmLength = CameraDistance;
 	PlayerCameraSpringArm->bEnableCameraLag = false;
 	PlayerCameraSpringArm->bEnableCameraRotationLag = true;
+	PlayerCameraSpringArm->bDoCollisionTest = false;
 	PlayerCameraSpringArm->CameraLagSpeed = 3.0f;
 	PlayerCameraSpringArm->CameraRotationLagSpeed = 3.0f;
 
-	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
+	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	PlayerCamera->SetupAttachment(PlayerCameraSpringArm, USpringArmComponent::SocketName);
 
 	// Create an instance of our movement component, and tell it to update the root.
-	MovementComponent = CreateDefaultSubobject<UBikeMovementComponent>(TEXT("CustomMovementComponent"));
+	MovementComponent = CreateDefaultSubobject<UBikeMovementComponent>(TEXT("PlayerMovementComponent"));
 	MovementComponent->UpdatedComponent = RootComponent;
 
 	//Take control of the default Player
@@ -71,7 +74,7 @@ void ABikeCharacter::BeginPlay()
 	LoadMaxPower();
 
 	FVector LanesLocation = GetActorLocation();
-	FRotator LanesRotation(0.f);
+	FRotator LanesRotation(GetActorRotation());
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.bNoFail = true;
 	SpawnInfo.Owner = this;
@@ -99,11 +102,21 @@ void ABikeCharacter::Movement(float DeltaTime)
 	float ForwardValue;
 	MoveNewLane(DeltaTime);
 
-	ForwardValue = SpeedBase + GetPowerPercent() * SpeedMultiplier * (1 + (int)Attacking);
+	ForwardValue = SpeedBase + GetPowerPercent() * SpeedMultiplier;
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Speed: ") + FString::SanitizeFloat(ForwardValue), true);
 
-	FVector Direction = ForwardValue * GetActorForwardVector();
-	MovementComponent->AddInputVector(Direction);
+	IntendedMovement = ForwardValue * GetActorForwardVector();
+	MovementComponent->AddInputVector(IntendedMovement);
+}
+
+FVector ABikeCharacter::GetPrevMov()
+{
+	return IntendedMovement;
+}
+
+void ABikeCharacter::ZeroPrevMov()
+{
+	IntendedMovement = FVector(0.f);
 }
 
 void ABikeCharacter::PostProcessTransition(float DeltaTime)
@@ -127,11 +140,6 @@ void ABikeCharacter::PostProcessTransition(float DeltaTime)
 	}
 
 	PlayerCamera->SetFieldOfView(FOVBase + FOVMultiplier * PPAlpha);
-
-	//PlayerCameraSpringArm->TargetArmLength = CameraDistance - PPAlpha * PlayerCamera->FieldOfView;
-
-	//PlayerCameraSpringArm->RelativeLocation = FVector(0.f, 0.f, 30.f + FMath::Clamp((PPAlpha * 2.f), 0.f, 1.f) * 100.f);
-	//PlayerCameraSpringArm->TargetArmLength = CameraDistance - FMath::Clamp((PPAlpha * 2.f), 0.f, 1.f) * (CameraDistance * 1.5f);
 
 	PlayerCameraSpringArm->SetRelativeLocation(FVector(0.f, 0.f, 30.f + PPAlpha * 20.f));
 	PlayerCameraSpringArm->SetRelativeRotation(FRotator(-15.f + PPAlpha * 10.f, 0.f, 0.f));
@@ -205,6 +213,11 @@ void ABikeCharacter::MoveNewLane_Implementation(float DeltaTime)
 UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
 {
 	return MovementComponent;
+}
+
+ABikeLaneActor* ABikeCharacter::GetLaneActor() const
+{
+	return BikeLanes;
 }
 
 void ABikeCharacter::Turn(float Angle, FVector CenterPoint)
@@ -294,10 +307,33 @@ void ABikeCharacter::SetLaneBlocked_Implementation(bool Blocking)
 	LaneBlocked = Blocking;
 }
 
-void ABikeCharacter::SetPowerLane(int NewLane)
+void ABikeCharacter::ChangePowerLane(int NewLane, float DeltaTime)
 {
-	if (PowerLane != NewLane) PowerLane = NewLane;
-	LaneSwitching = true;
+	if (PowerLane != NewLane)
+	{
+		FVector NewHorizontalPos = GetActorLocation();
+
+		PowerLane = NewLane;
+		switch (PowerLane)
+		{
+		case 0:
+			NewHorizontalPos = BikeLanes->MoveLeft(false, DeltaTime);
+			break;
+		case 1:
+			NewHorizontalPos = BikeLanes->MoveCenter(false, DeltaTime, GetActorLocation());
+			break;
+		case 2:
+			NewHorizontalPos = BikeLanes->MoveRight(false, DeltaTime);
+			break;
+		default:
+			break;
+		}
+		LaneSwitching = true;
+
+		NewHorizontalPos.Z = GetActorLocation().Z;
+
+		SetActorLocation(NewHorizontalPos);
+	}
 }
 
 int ABikeCharacter::GetPowerLane() const
@@ -305,7 +341,7 @@ int ABikeCharacter::GetPowerLane() const
 	return PowerLane;
 }
 
-void ABikeCharacter::SetAttacking(bool newattacking)
+float ABikeCharacter::GetLaneWidth()
 {
-	Attacking = newattacking;
+	return LaneWidth;
 }

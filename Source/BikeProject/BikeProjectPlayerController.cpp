@@ -20,12 +20,20 @@ ABikeProjectPlayerController::ABikeProjectPlayerController()
 
 	MovePauseBlocked = false;
 	MoveUIBlocked = false;
+
+	PlayerHealth = 8;
+	ComboMeter = 0;
+
+	PlayerMoveEnum = PME_Normal;
 }
 
 void ABikeProjectPlayerController::BeginPlay()
 {
     Super::BeginPlay();
     SetInputMode(FInputModeGameOnly());
+
+	ABikeCharacter* PawnInstanceRef = Cast<ABikeCharacter>(GetPawn());
+	SetViewTarget(PawnInstanceRef);
 }
 
 // Called every frame
@@ -33,27 +41,47 @@ void ABikeProjectPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	float TempPower;
-
-	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
-	PowerLevelBP = GameInstanceRef->GetSpeed();
-
-	if (PowerLevelKB > PowerLevelBP)
-	{
-		PowerLevelKB -= 1.f * DeltaTime;
-		TempPower = PowerLevelKB;
-	}
-	else TempPower = PowerLevelBP;
-
-	PowerTransition(DeltaTime, TempPower);
-
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Bike Input Speed: ") + FString::SanitizeFloat(PowerLevelBP), true);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Keyboard Input Speed: ") + FString::SanitizeFloat(PowerLevelKB), true);
-
 	ABikeCharacter* PawnInstanceRef = Cast<ABikeCharacter>(GetPawn());
+	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
+
+	switch (PlayerMoveEnum)
+	{
+	case PME_Normal:
+	case PME_LaneBoss:
+	case PME_MoveBoss:
+
+		float TempPower;
+
+		PowerLevelBP = GameInstanceRef->GetSpeed();
+
+		if (PowerLevelKB > PowerLevelBP)
+		{
+			PowerLevelKB -= 1.f * DeltaTime;
+			TempPower = PowerLevelKB;
+		}
+		else TempPower = PowerLevelBP;
+
+		PowerTransition(DeltaTime, TempPower);
+
+		break;
+	case PME_AttackBoss:
+
+		PowerTransition(DeltaTime, PowerLevelAuto);
+		break;
+	case PME_SlowDown:
+
+		PowerLevelAuto -= PowerLevelAuto * 0.95f * DeltaTime;
+		PowerTransition(DeltaTime, PowerLevelAuto);
+		break;
+	default:
+		break;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Power: ") + FString::SanitizeFloat(PowerLevel), true);
 	PawnInstanceRef->SetCurrentPower(PowerLevel);
 
-	if (!MovePauseBlocked && !MoveUIBlocked) PawnInstanceRef->Movement(DeltaTime);
+	if (!MovePauseBlocked && !MoveUIBlocked && !GetWorld()->IsPaused()) PawnInstanceRef->Movement(DeltaTime);
+	else PawnInstanceRef->ZeroPrevMov();
 }
 
 // Called to bind functionality to input
@@ -149,4 +177,74 @@ bool ABikeProjectPlayerController::GetMoveUIBlocked() const
 void ABikeProjectPlayerController::SetMoveUIBlocked(bool Blocking)
 {
 	MoveUIBlocked = Blocking;
+}
+
+void ABikeProjectPlayerController::IncPlayerHealth_Implementation(bool MaxHealth)
+{
+	if (MaxHealth) PlayerHealth = 8;
+	else if (PlayerHealth < 8) PlayerHealth++;
+}
+
+void ABikeProjectPlayerController::PlayerHit_Implementation(bool OffScreen)
+{
+	PlayerHealth--;
+}
+
+int ABikeProjectPlayerController::GetPlayerHealth() const
+{
+	return PlayerHealth;
+}
+
+void ABikeProjectPlayerController::SetComboMeter()
+{
+	ComboMeter = 0;
+}
+
+void ABikeProjectPlayerController::ChangeComboMeter_Implementation(bool PositiveChange)
+{
+	if (PositiveChange) ComboMeter++;
+	else ComboMeter -= 5;
+	if (ComboMeter < 0) ComboMeter = 0;
+}
+
+int ABikeProjectPlayerController::GetComboMeter() const
+{
+	return ComboMeter;
+}
+
+void ABikeProjectPlayerController::SetMoveEnum_Implementation(EPlayerMove NewState, float DeltaTime)
+{
+	PlayerMoveEnum = NewState;
+	ABikeCharacter* PawnInstanceRef = Cast<ABikeCharacter>(GetPawn());
+
+	switch (PlayerMoveEnum)
+	{
+	case PME_Normal:
+		SetViewTargetWithBlend(PawnInstanceRef, 1.0f);
+		PawnInstanceRef->SetLaneBlocked(false);
+		break;
+	case PME_LaneBoss:
+		PawnInstanceRef->ChangePowerLane(1, DeltaTime);
+		PawnInstanceRef->SetLaneBlocked(true);
+		break;
+	case PME_MoveBoss:
+		PawnInstanceRef->SetLaneBlocked(false);
+		break;
+	case PME_AttackBoss:
+		PowerLevelAuto = PowerLevelTarget * 1.2;
+		PawnInstanceRef->ChangePowerLane(1, DeltaTime);
+		PawnInstanceRef->SetLaneBlocked(true);
+		break;
+	case PME_SlowDown:
+		SetViewTargetWithBlend(PawnInstanceRef, 1.0f);
+		PawnInstanceRef->SetLaneBlocked(true);
+		break;
+	default:
+		break;
+	}
+}
+
+EPlayerMove ABikeProjectPlayerController::GetMoveEnum() const
+{
+	return PlayerMoveEnum;
 }
