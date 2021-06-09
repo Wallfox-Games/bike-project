@@ -4,8 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+
+#include "BikeCharacter.h"
+
+#include "Components/BoxComponent.h" 
+#include "DestructibleComponent.h"
+
 #include "BikeBoss.generated.h"
 
+UENUM(BlueprintType)
+enum EBossState{
+	BSE_Moving			UMETA(DisplayName = "Moving"),
+	BSE_Healthy			UMETA(DisplayName = "Healthy"),
+	BSE_Vulnerable		UMETA(DisplayName = "Vulnerable"),
+	BSE_Attacking		UMETA(DisplayName = "Attacking"),
+	BSE_Defeated		UMETA(DisplayName = "Defeated"),
+};
 
 UCLASS()
 class BIKEPROJECT_API ABikeBoss : public APawn
@@ -17,41 +31,94 @@ public:
 	ABikeBoss();
 
 protected:
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* BoxComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UDestructibleComponent* BossDestructibleComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	USpringArmComponent* BossCameraSpringArm;
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* BossCamera;
+
 	UPROPERTY(EditAnywhere)
-		USceneComponent* BossVisibleComponent;
+	FTransform HealthyCamTransform;
+	UPROPERTY(EditAnywhere)
+	float HealthyCameraDistance;
+	UPROPERTY(EditAnywhere)
+	float HealthyCameraFOV;
+	UPROPERTY(EditAnywhere)
+	FTransform VulnerableCamTransform;
+	UPROPERTY(EditAnywhere)
+	float VulnerableCameraDistance;
+	UPROPERTY(EditAnywhere)
+	float VulnerableCameraFOV;
+	UPROPERTY()
+	float CameraLerpAlpha;
+
+	UPROPERTY()
+	class UBikeMovementComponent* MovementComponent;
+
+	UPROPERTY()
+	int Health;
+	UPROPERTY()
+	TEnumAsByte<EBossState> BossStateEnum;
+	UPROPERTY()
+	float TargetSeconds;
+	UPROPERTY()
+	float TargetMultiplier;
+	UPROPERTY()
+	float TargetAttackPower;
+	UPROPERTY()
+	float CurrentTime;
+	UPROPERTY()
+	float CurrentAttackPower;
+	UPROPERTY(EditAnywhere)
+	bool CanHit;
+
+	UPROPERTY()
+	ABikeCharacter* PlayerPtr;
+	UPROPERTY()
+	ABikeLaneActor* BikeLanes;
+	
+	UPROPERTY()
+	int CurrentLane;
+	UPROPERTY()
+	bool LaneChange;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	UFUNCTION(BlueprintCallable)
-		void Movement(float playerLevel, float playerMax, bool paused);
-	UFUNCTION(BlueprintCallable)
-		void SpawnBullet(FVector PlayerPos);
-	UFUNCTION(BlueprintCallable)
-		void Death();
-	UFUNCTION(BlueprintCallable)
-		void SetFleeing(bool newFleeing);
-	UFUNCTION(BlueprintCallable)
-		bool GetFleeing() const;
+	UFUNCTION()
+		void Movement();
 
-	UPROPERTY(EditAnywhere)
-		FVector Velocity;
-	UPROPERTY(EditAnywhere)
-		float MAXPOWER;
-	UPROPERTY(EditAnywhere)
-		float PowerLevel;
-	UPROPERTY(EditAnywhere)
-		float SpeedBase;
-	UPROPERTY(EditAnywhere)
-		float SpeedMultiplier;
-	UPROPERTY(EditAnywhere, BlueprintSetter = SetFleeing, BlueprintGetter = GetFleeing)
-		bool fleeing;
-	UPROPERTY(EditAnywhere)
-		int fleeingCounter;
+	UFUNCTION()
+		void SetCameraPosition(float DeltaTime);
+
+public:
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void InitValues(ABikeCharacter* NewPtr, int NewHealth, float NewSeconds, float NewMultiplier, float DeltaTime);
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION(BlueprintCallable)
+	float GetCurrentAttackPower() const;
+	UFUNCTION(BlueprintCallable)
+	float GetPercentageAttackPower() const;
 
+	UFUNCTION(BlueprintCallable)
+		float GetCurrentTime() const;
+	UFUNCTION(BlueprintCallable)
+		float GetPercentageTime() const;
+	UFUNCTION(BlueprintCallable)
+		float GetTimeToGo() const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	bool OnHit();
+	UFUNCTION(BlueprintCallable)
+	int GetHealth() const;
+
+	UFUNCTION(BlueprintCallable)
+	EBossState GetBossEnum() const;
 };

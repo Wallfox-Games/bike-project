@@ -22,50 +22,42 @@ ABikeCharacter::ABikeCharacter()
 	PlayerVisibleComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PlayerVisibleComponent"));
 	PlayerVisibleComponent->SetupAttachment(RootComponent);
 
+	PlayerVisibleComponent->SetRelativeTransform(FTransform(FRotator(0.f, 180.f, 0.f), FVector(-19.5f, 0.f, -57.f), FVector(0.8f)));
+
 	PlayerCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	PlayerCameraSpringArm->SetupAttachment(RootComponent);
 
 	CameraDistance = 300.f;
-	PlayerCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 30.f), FRotator(-15.0f, 0.0f, 0.0f));
+	PlayerCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 50.f), FRotator(-15.0f, 0.0f, 0.0f));
 	PlayerCameraSpringArm->TargetArmLength = CameraDistance;
 	PlayerCameraSpringArm->bEnableCameraLag = false;
 	PlayerCameraSpringArm->bEnableCameraRotationLag = true;
+	PlayerCameraSpringArm->bDoCollisionTest = false;
 	PlayerCameraSpringArm->CameraLagSpeed = 3.0f;
 	PlayerCameraSpringArm->CameraRotationLagSpeed = 3.0f;
 
-	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
+	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	PlayerCamera->SetupAttachment(PlayerCameraSpringArm, USpringArmComponent::SocketName);
 
 	// Create an instance of our movement component, and tell it to update the root.
-	MovementComponent = CreateDefaultSubobject<UBikeMovementComponent>(TEXT("CustomMovementComponent"));
+	MovementComponent = CreateDefaultSubobject<UBikeMovementComponent>(TEXT("PlayerMovementComponent"));
 	MovementComponent->UpdatedComponent = RootComponent;
 
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
-	// Sets the starting values for non bike input to current time, so the first input isn't very long
-	TimeStartLeft = FPlatformTime::Seconds();
-	TimeStartRight = FPlatformTime::Seconds();
-	// Reserves memory for the pedal array
-	PedalTimes.Reserve(ARRAYMAXSIZE + 1);
 
-	// Default variables for lanes and width (editable in blueprints)
-	PowerLane = 1;
-	PowerLevelCurrent = 0;
-	PowerLevelTarget = 0;
-	PowerAlpha = 0;
-
+	// Default variables
 	UpperPercent = 0.7f;
 	MiddlePercent = 0.5f;
 	LowerPercent = 0.3f;
 
+	PowerLane = 1;
 	LaneWidth = 110.f;
 	LaneSpeed = 1.5f;
 	SpeedBase = 400.f;
 	SpeedMultiplier = 600.f;
 	LaneBlocked = false;
 	LaneSwitching = false;
-	MovePauseBlocked = false;
-	MoveUIBlocked = false;
 
 	FOVBase = 80.f;
 	FOVMultiplier = 30.f;
@@ -82,7 +74,7 @@ void ABikeCharacter::BeginPlay()
 	LoadMaxPower();
 
 	FVector LanesLocation = GetActorLocation();
-	FRotator LanesRotation(0.f);
+	FRotator LanesRotation(GetActorRotation());
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.bNoFail = true;
 	SpawnInfo.Owner = this;
@@ -99,38 +91,6 @@ void ABikeCharacter::BeginPlay()
 // Called every frame
 void ABikeCharacter::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
-	float TempPower;
-
-	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
-	PowerLevelBP = GameInstanceRef->GetSpeed();
-
-	if (PowerLevelKB > PowerLevelBP)
-	{
-		PowerLevelKB -= 1.f * DeltaTime;
-		TempPower = PowerLevelKB;
-	}
-	else TempPower = PowerLevelBP;
-
-	PowerTransition(DeltaTime, TempPower);
-
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Bike Input Speed: ") + FString::SanitizeFloat(PowerLevelBP), true);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Keyboard Input Speed: ") + FString::SanitizeFloat(PowerLevelKB), true);
-
-	// Determine current Lane
-	// Snap to Upper and Lower Lanes
-	if (!MovePauseBlocked && !MoveUIBlocked) Movement(DeltaTime);
-}
-
-// Called to bind functionality to input
-void ABikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	// Set up "movement" bindings.
-	PlayerInputComponent->BindAction("PedalLeftButton", IE_Pressed, this, &ABikeCharacter::PedalLeftStart);
-	PlayerInputComponent->BindAction("PedalRightButton", IE_Pressed, this, &ABikeCharacter::PedalRightStart);
 }
 
 // Checks current power of dinosaur and moves them into correct lane
@@ -142,71 +102,21 @@ void ABikeCharacter::Movement(float DeltaTime)
 	float ForwardValue;
 	MoveNewLane(DeltaTime);
 
-	ForwardValue = SpeedBase + GetPowerPercent() * SpeedMultiplier * (1 + (int)Attacking);
+	ForwardValue = SpeedBase + GetPowerPercent() * SpeedMultiplier;
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Speed: ") + FString::SanitizeFloat(ForwardValue), true);
 
-	FVector Direction = ForwardValue * GetActorForwardVector();
-	MovementComponent->AddInputVector(Direction);
+	IntendedMovement = ForwardValue * GetActorForwardVector();
+	MovementComponent->AddInputVector(IntendedMovement);
 }
 
-// Sets time for left input and calls AddTime
-void ABikeCharacter::PedalLeftStart()
+FVector ABikeCharacter::GetPrevMov()
 {
-	TimeStartLeft = FPlatformTime::Seconds();
-	AddTime();
+	return IntendedMovement;
 }
 
-// Sets time for right input and calls AddTime
-void ABikeCharacter::PedalRightStart()
+void ABikeCharacter::ZeroPrevMov()
 {
-	TimeStartRight = FPlatformTime::Seconds();
-	AddTime();
-}
-
-// Finds the absolute difference between the two inputs and adds to the PedalTimes array
-// Calls CalculateBPM
-void ABikeCharacter::AddTime()
-{
-	double TimeValue = abs(TimeStartLeft - TimeStartRight);
-
-	// Adds the value to the array and checks to make sure the array is ARRAYMAXSIZE long
-	PedalTimes.Add(TimeValue);
-	if (PedalTimes.Num() > ARRAYMAXSIZE) PedalTimes.RemoveAt(0);
-
-	CalculateBPM();
-}
-
-// Calculates the PowerLevel
-void ABikeCharacter::CalculateBPM()
-{
-	RPM = 0;
-	for (auto& Time : PedalTimes)
-	{
-		RPM += Time;
-	}
-	// Length of one beat
-	RPM = RPM / PedalTimes.Num();
-	// Beats-per-second
-	RPM = 1 / RPM;
-	// Beats-per-minute
-	RPM *= 60;
-
-	// Set to power / RPM (roughly half)
-	PowerLevelKB = RPM / 2;
-}
-
-void ABikeCharacter::PowerTransition(float DeltaTime, float NewPower)
-{
-	if (PowerLevelTarget != NewPower)
-	{
-		PowerLevelCurrent = PowerLevelTarget;
-		PowerLevelTarget = NewPower;
-		PowerAlpha = 0;
-	}
-
-	PowerAlpha += DeltaTime / 0.25f;
-	PowerAlpha = FMath::Clamp(PowerAlpha, 0.f, 1.f);
-	PowerLevel = FMath::Lerp(PowerLevelCurrent, PowerLevelTarget, PowerAlpha);
+	IntendedMovement = FVector(0.f);
 }
 
 void ABikeCharacter::PostProcessTransition(float DeltaTime)
@@ -230,11 +140,6 @@ void ABikeCharacter::PostProcessTransition(float DeltaTime)
 	}
 
 	PlayerCamera->SetFieldOfView(FOVBase + FOVMultiplier * PPAlpha);
-
-	//PlayerCameraSpringArm->TargetArmLength = CameraDistance - PPAlpha * PlayerCamera->FieldOfView;
-
-	//PlayerCameraSpringArm->RelativeLocation = FVector(0.f, 0.f, 30.f + FMath::Clamp((PPAlpha * 2.f), 0.f, 1.f) * 100.f);
-	//PlayerCameraSpringArm->TargetArmLength = CameraDistance - FMath::Clamp((PPAlpha * 2.f), 0.f, 1.f) * (CameraDistance * 1.5f);
 
 	PlayerCameraSpringArm->SetRelativeLocation(FVector(0.f, 0.f, 30.f + PPAlpha * 20.f));
 	PlayerCameraSpringArm->SetRelativeRotation(FRotator(-15.f + PPAlpha * 10.f, 0.f, 0.f));
@@ -263,8 +168,8 @@ void ABikeCharacter::MoveNewLane_Implementation(float DeltaTime)
 	}
 	else
 	{
-		// Checks if PowerLevel is past the upper of the power scale
-		if (PowerLevel > UPPERPOWER)
+		// Checks if CURRENTPOWER is past the upper of the power scale
+		if (CURRENTPOWER > UPPERPOWER)
 		{
 			if (PowerLane == 0)
 			{
@@ -277,7 +182,7 @@ void ABikeCharacter::MoveNewLane_Implementation(float DeltaTime)
 				PowerLane = 2;
 			}
 		}
-		else if (PowerLevel > MIDDLEPOWER)
+		else if (CURRENTPOWER > MIDDLEPOWER)
 		{
 			if (PowerLane != 1) NewHorizontalPos = BikeLanes->MoveCenter(true, DeltaTime, GetActorLocation());
 			PowerLane = 1;
@@ -310,6 +215,11 @@ UBikeMovementComponent* ABikeCharacter::GetMovementComponent() const
 	return MovementComponent;
 }
 
+ABikeLaneActor* ABikeCharacter::GetLaneActor() const
+{
+	return BikeLanes;
+}
+
 void ABikeCharacter::Turn(float Angle, FVector CenterPoint)
 {
 	float NewAngle = GetActorRotation().Yaw + Angle;
@@ -328,7 +238,7 @@ float ABikeCharacter::GetPostProcessAlpha() const
 
 float ABikeCharacter::GetPowerPercent() const
 {
-	return FMath::Clamp(PowerLevel / MAXPOWER, 0.f, 1.f);
+	return FMath::Clamp(CURRENTPOWER / MAXPOWER, 0.f, 1.f);
 }
 
 // Returns different power values based on Scale input
@@ -350,9 +260,14 @@ float ABikeCharacter::GetRawPower(int Scale) const
 		break;
 	case 4:
 	default:
-		return PowerLevel;
+		return CURRENTPOWER;
 		break;
 	}
+}
+
+void ABikeCharacter::SetCurrentPower(float NewPower)
+{
+	CURRENTPOWER = NewPower;
 }
 
 // Sets MAXPOWER from the GameInstance
@@ -392,30 +307,33 @@ void ABikeCharacter::SetLaneBlocked_Implementation(bool Blocking)
 	LaneBlocked = Blocking;
 }
 
-bool ABikeCharacter::GetMovePauseBlocked() const
+void ABikeCharacter::ChangePowerLane(int NewLane, float DeltaTime)
 {
-	return MovePauseBlocked;
-}
+	if (PowerLane != NewLane)
+	{
+		FVector NewHorizontalPos = GetActorLocation();
 
-void ABikeCharacter::SetMovePauseBlocked(bool Blocking)
-{
-	MovePauseBlocked = Blocking;
-}
+		PowerLane = NewLane;
+		switch (PowerLane)
+		{
+		case 0:
+			NewHorizontalPos = BikeLanes->MoveLeft(false, DeltaTime);
+			break;
+		case 1:
+			NewHorizontalPos = BikeLanes->MoveCenter(false, DeltaTime, GetActorLocation());
+			break;
+		case 2:
+			NewHorizontalPos = BikeLanes->MoveRight(false, DeltaTime);
+			break;
+		default:
+			break;
+		}
+		LaneSwitching = true;
 
-bool ABikeCharacter::GetMoveUIBlocked() const
-{
-	return MoveUIBlocked;
-}
+		NewHorizontalPos.Z = GetActorLocation().Z;
 
-void ABikeCharacter::SetMoveUIBlocked(bool Blocking)
-{
-	MoveUIBlocked = Blocking;
-}
-
-void ABikeCharacter::SetPowerLane(int NewLane)
-{
-	if (PowerLane != NewLane) PowerLane = NewLane;
-	LaneSwitching = true;
+		SetActorLocation(NewHorizontalPos);
+	}
 }
 
 int ABikeCharacter::GetPowerLane() const
@@ -423,7 +341,7 @@ int ABikeCharacter::GetPowerLane() const
 	return PowerLane;
 }
 
-void ABikeCharacter::SetAttacking(bool newattacking)
+float ABikeCharacter::GetLaneWidth()
 {
-	Attacking = newattacking;
+	return LaneWidth;
 }
