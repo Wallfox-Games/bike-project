@@ -6,7 +6,7 @@
 void UBikeMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+    
     // Make sure that everything is still valid, and that we are allowed to move.
     if (!PawnOwner || !UpdatedComponent || ShouldSkipUpdate(DeltaTime))
     {
@@ -32,6 +32,10 @@ void UBikeMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
             if (SafeMoveUpdatedComponent(DesiredMovementThisFrame, UpdatedComponent->GetComponentRotation(), true, Hit)) PrevMove = DesiredMovementThisFrame;
             else PrevMove = FVector(0.f);
         }
+    }
+    else
+    {
+        PrevMove = FVector(0.f);
     }
 };
 

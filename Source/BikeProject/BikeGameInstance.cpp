@@ -9,6 +9,7 @@
 void UBikeGameInstance::Init()
 {
 	Circumference = 2100;
+	CurrentSpeed = -1.f;
 
 	SensorState = false;
 
@@ -71,14 +72,14 @@ void UBikeGameInstance::FillArrays(unsigned short EventTime, unsigned short RevC
 		//GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
 
 		// Set current speed to new value
-		if (EventTimeDelta != 0 || RevCountDelta != 0) currentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
-		else currentSpeed = 0;
+		if (EventTimeDelta != 0 || RevCountDelta != 0) CurrentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
+		else CurrentSpeed = 0;
 	}
 }
 
-float UBikeGameInstance::GetSpeed()
+float UBikeGameInstance::GetSpeed() const
 {
-	return currentSpeed;
+	return CurrentSpeed;
 }
 
 void UBikeGameInstance::SetCircumference(float newCircumference)
@@ -123,84 +124,3 @@ void UBikeGameInstance::SetSensorState(bool NewValue)
 {
 	SensorState = NewValue;
 }
-
-void UBikeGameInstance::SetPlayerHealth(int newHealth)
-{
-	PlayerHealth = newHealth;
-}
-
-int UBikeGameInstance::GetPlayerHealth() const
-{
-	return PlayerHealth;
-}
-
-void UBikeGameInstance::SetBossHealth(int newHealth)
-{
-	BossHealth = newHealth;
-}
-
-int UBikeGameInstance::GetBossHealth() const
-{
-	return BossHealth;
-}
-
-void UBikeGameInstance::SetCombo(int newCombo)
-{
-	Combo = newCombo;
-}
-
-int UBikeGameInstance::GetCombo() const
-{
-	return Combo;
-}
-
-void UBikeGameInstance::SetMultiplier(int newMultiplier)
-{
-	Multiplier = newMultiplier;
-}
-
-int UBikeGameInstance::GetMultiplier() const
-{
-	return Multiplier;
-}
-
-void UBikeGameInstance::SetHit(bool newhit)
-{
-	hit = newhit;
-}
-
-bool UBikeGameInstance::GetHit() const
-{
-	return hit;
-}
-
-void UBikeGameInstance::SetBossActive(bool newActive)
-{
-	Active = newActive;
-}
-
-bool UBikeGameInstance::GetBossActive() const
-{
-	return Active;
-}
-
-void UBikeGameInstance::SetBossDefeated(bool newDefeated)
-{
-	BDefeated = newDefeated;
-}
-
-bool UBikeGameInstance::GetBossDefeated() const
-{
-	return BDefeated;
-}
-
-void UBikeGameInstance::SetGameState(int newState)
-{
-	gameState = (Gamestate)newState;
-}
-
-int UBikeGameInstance::GetGameState() const
-{
-	return (int)gameState;
-}
-
