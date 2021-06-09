@@ -9,6 +9,9 @@
 void UBikeGameInstance::Init()
 {
 	Circumference = 2100;
+	CurrentSpeed = -1.f;
+
+	SensorState = false;
 
 	Task = new BikePhysicalInput(this);
 
@@ -39,51 +42,44 @@ void UBikeGameInstance::Shutdown()
 void UBikeGameInstance::FillArrays(unsigned short EventTime, unsigned short RevCount)
 {
 
-	// Push values into arrays and trim array size to 2
+	// Push values into arrays and trim array size to 3
 	EventTimes.Push(EventTime);
-	while (EventTimes.Num() > 2)
+	while (EventTimes.Num() > 3)
 	{
 		EventTimes.RemoveAt(0);
 	}
 
 	RevolutionCounts.Push(RevCount);
-	while (RevolutionCounts.Num() > 2)
+	while (RevolutionCounts.Num() > 3)
 	{
 		RevolutionCounts.RemoveAt(0);
 	}
 
-	// Check if arrays are of size two and unique
-	if (EventTimes.Num() == 2 && RevolutionCounts.Num() == 2)
+	// Check if array is filled before calculating speed (m/s)
+	if (EventTimes.Num() == 3 && RevolutionCounts.Num() == 3)
 	{
-		if (EventTimes[1] != EventTimes[0] && RevolutionCounts[1] != RevolutionCounts[0])
-		{
-			// Convert Circumference to Meters
-			float CircumferenceM = Circumference / 1000;
+		// Convert Circumference to Meters
+		float CircumferenceM = Circumference / 1000;
 
-			// Find difference between event times, if rollover then add max value
-			float EventTimeDelta = EventTimes[1] - EventTimes[0];
-			if (EventTimes[1] < EventTimes[0]) EventTimeDelta += 65536;
+		// Find difference between event times, if rollover then add max value
+		float EventTimeDelta = EventTimes[2] - EventTimes[0];
+		if (EventTimes[2] < EventTimes[0]) EventTimeDelta += 65536;
 
-			float RevCountDelta = RevolutionCounts[1] - RevolutionCounts[0];
-			if (RevolutionCounts[1] < RevolutionCounts[0]) RevCountDelta += 65536;
+		float RevCountDelta = RevolutionCounts[2] - RevolutionCounts[0];
+		if (RevolutionCounts[2] < RevolutionCounts[0]) RevCountDelta += 65536;
 
-			//GEngine->AddOnScreenDebugMessage(3, 5.f, FColor::Red, TEXT("RevDelta: " + FString::SanitizeFloat(RevCountDelta)));
-			//GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
+		//GEngine->AddOnScreenDebugMessage(3, 5.f, FColor::Red, TEXT("RevDelta: " + FString::SanitizeFloat(RevCountDelta)));
+		//GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
 
-			// Set current speed to new value
-			currentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
-		}
-		else
-		{
-			// If not unique then bike must be stationary
-			currentSpeed = 0;
-		}
+		// Set current speed to new value
+		if (EventTimeDelta != 0 || RevCountDelta != 0) CurrentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
+		else CurrentSpeed = 0;
 	}
 }
 
-float UBikeGameInstance::GetSpeed()
+float UBikeGameInstance::GetSpeed() const
 {
-	return currentSpeed;
+	return CurrentSpeed;
 }
 
 void UBikeGameInstance::SetCircumference(float newCircumference)
@@ -104,6 +100,7 @@ void UBikeGameInstance::SetMaxPower(float newMaxPower)
 		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex))
 		{
 			// Save succeeded.
+			TutorialState = false;
 		}
 	}
 }
@@ -118,73 +115,12 @@ bool UBikeGameInstance::GetTutorialState() const
 	return TutorialState;
 }
 
-void UBikeGameInstance::SetPlayerHealth(int newHealth)
+bool UBikeGameInstance::GetSensorState() const
 {
-	PlayerHealth = newHealth;
+	return SensorState;
 }
 
-int UBikeGameInstance::GetPlayerHealth() const
+void UBikeGameInstance::SetSensorState(bool NewValue)
 {
-	return PlayerHealth;
+	SensorState = NewValue;
 }
-
-void UBikeGameInstance::SetBossHealth(int newHealth)
-{
-	BossHealth = newHealth;
-}
-
-int UBikeGameInstance::GetBossHealth() const
-{
-	return BossHealth;
-}
-
-void UBikeGameInstance::SetCombo(int newCombo)
-{
-	Combo = newCombo;
-}
-
-int UBikeGameInstance::GetCombo() const
-{
-	return Combo;
-}
-
-void UBikeGameInstance::SetMultiplier(int newMultiplier)
-{
-	Multiplier = newMultiplier;
-}
-
-int UBikeGameInstance::GetMultiplier() const
-{
-	return Multiplier;
-}
-
-void UBikeGameInstance::SetHit(bool newhit)
-{
-	hit = newhit;
-}
-
-bool UBikeGameInstance::GetHit() const
-{
-	return hit;
-}
-
-void UBikeGameInstance::SetBossActive(bool newActive)
-{
-	Active = newActive;
-}
-
-bool UBikeGameInstance::GetBossActive() const
-{
-	return Active;
-}
-
-void UBikeGameInstance::SetBossDefeated(bool newDefeated)
-{
-	BDefeated = newDefeated;
-}
-
-bool UBikeGameInstance::GetBossDefeated() const
-{
-	return BDefeated;
-}
-

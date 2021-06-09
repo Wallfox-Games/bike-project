@@ -7,6 +7,8 @@
 
 #include "Misc/Paths.h" 
 
+
+
 #include "Engine/Engine.h" 
 
 #include "BikeGameInstance.h"
@@ -14,7 +16,7 @@
 BikePhysicalInput::BikePhysicalInput(UBikeGameInstance* BikeInstanceRef)
 {
 	GameInstanceRef = BikeInstanceRef;
-
+	
 	Socket = nullptr;
 
 	RunnableThread = FRunnableThread::Create(this, TEXT("ANTPlusSocketTask"), 0, TPri_BelowNormal);
@@ -31,6 +33,7 @@ BikePhysicalInput::~BikePhysicalInput()
 		Socket = nullptr;
 	}
 
+	FPlatformProcess::TerminateProc(ANTProcHandle);
 	delete RunnableThread;
 	RunnableThread = nullptr;
 }
@@ -51,11 +54,43 @@ uint32 BikePhysicalInput::Run()
 {
 	FString FullPath = FPaths::ProjectContentDir() + TEXT("ThirdParty/ANTPlus/ANT_Socket.exe");
 	TCHAR* tempParam = L" ";
-	FProcHandle tempProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, true, false, NULL, 0, NULL, NULL);
+		
+	bool isInEditor = (GameInstanceRef->GetWorld()->WorldType == EWorldType::PIE);
+	ANTProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, isInEditor, !isInEditor, NULL, 0, NULL, NULL);
+	
+	bool WaitingConf = true;
 	
 	if (Socket != nullptr)
 	{
+		while (Socket != nullptr && WaitingConf)
+		{
 
+			int32 BufferSize = 1;
+			int32 BytesRead = 0;
+			uint8 Response[1];
+
+			if (Socket->Recv(Response, BufferSize, BytesRead))
+			{
+				if ((char)Response[0] == '1')
+				{
+					WaitingConf = false;
+				}
+			}
+
+			if (WaitingConf)
+			{
+				GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Waiting for conf"), true);
+				if (!FPlatformProcess::IsProcRunning(ANTProcHandle))
+				{
+					GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Green, TEXT("Handle not valid"), true);
+					FPlatformProcess::CloseProc(ANTProcHandle);
+					ANTProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, isInEditor, !isInEditor, NULL, 0, NULL, NULL);
+				}
+				// Sleep to reduce usage of system resources(nearly delta time).
+				FPlatformProcess::Sleep(0.03F);
+			}
+		}
+		GameInstanceRef->SetSensorState(true);
 		// Continue updating the device while possible...
 		while (Socket != nullptr)
 		{	
