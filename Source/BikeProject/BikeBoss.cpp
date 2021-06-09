@@ -51,10 +51,7 @@ void ABikeBoss::InitValues_Implementation(ABikeCharacter* NewPtr, int NewHealth,
 {
 	PlayerPtr = NewPtr;
 	Health = NewHealth;
-	TargetSeconds = NewSeconds;
 	TargetAttackPower = PlayerPtr->GetRawPower(3) * NewSeconds * NewMultiplier;
-
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FText::Format(FTextFormat::FromString("Health: {0}\n Target Power: {1}"), Health, TargetAttackPower), true);
 
 	SetActorRotation(PlayerPtr->GetActorRotation());
 	FVector NewLocation = FVector(PlayerPtr->GetLaneActor()->GetActorLocation().X, PlayerPtr->GetLaneActor()->GetActorLocation().Y, PlayerPtr->GetActorLocation().Z - 25.f);
