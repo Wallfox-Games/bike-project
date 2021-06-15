@@ -10,18 +10,19 @@
 class BIKEPROJECT_API UBikeGameInstance;
 
 /**
- * 
+ *
  */
-class BIKEPROJECT_API BikePhysicalInput : public FRunnable
+class BIKEPROJECT_API BikeMobileInput : public FRunnable
 {
 	FRunnableThread* RunnableThread;
-	FProcHandle ANTProcHandle;
 	FSocket* Socket;
+	FString Address;
+	FString ClientAddress;
 	UBikeGameInstance* GameInstanceRef;
 
 public:
-	BikePhysicalInput(UBikeGameInstance* BikeInstanceRef);
-	~BikePhysicalInput();
+	BikeMobileInput(UBikeGameInstance* BikeInstanceRef);
+	~BikeMobileInput();
 
 public: // FRunnable Interface
 
@@ -29,3 +30,4 @@ public: // FRunnable Interface
 	virtual uint32 Run() override;
 	virtual void Stop() override;
 };
+
