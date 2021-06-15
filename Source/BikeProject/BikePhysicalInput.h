@@ -17,7 +17,6 @@ class BIKEPROJECT_API BikePhysicalInput : public FRunnable
 	FRunnableThread* RunnableThread;
 	FProcHandle ANTProcHandle;
 	FSocket* Socket;
-	TSharedPtr<FInternetAddr> InternetAddress;
 	UBikeGameInstance* GameInstanceRef;
 
 public:
@@ -29,12 +28,4 @@ public: // FRunnable Interface
 	virtual bool Init() override;
 	virtual uint32 Run() override;
 	virtual void Stop() override;
-
-private:
-
-	/** Processes the socket message */
-	void ProcessSocketMessage(uint8 InSocketMessage[4]);
-
-private:
-	FSocket* ServerUDPSocket;
 };
