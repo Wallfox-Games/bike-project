@@ -7,8 +7,6 @@
 
 #include "Misc/Paths.h" 
 
-
-
 #include "Engine/Engine.h" 
 
 #include "BikeGameInstance.h"
@@ -100,7 +98,7 @@ uint32 BikePhysicalInput::Run()
 
 			if (Socket->Recv(Response, BufferSize, BytesRead))
 			{
-				ProcessSocketMessage(Response);
+				GameInstanceRef->SetPhysicalSpeed(((float*)Response)[0]);
 			}
 
 			// Sleep to reduce usage of system resources(nearly delta time).
@@ -118,12 +116,4 @@ void BikePhysicalInput::Stop()
 	{
 		Socket->Close();
 	}
-}
-
-void BikePhysicalInput::ProcessSocketMessage(uint8 InSocketMessage[4])
-{
-	unsigned short eventTime = ((unsigned short*)InSocketMessage)[0];
-	unsigned short revCount = ((unsigned short*)InSocketMessage)[1];
-
-	GameInstanceRef->FillArrays(eventTime, revCount);
 }

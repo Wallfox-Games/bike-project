@@ -9,11 +9,11 @@
 void UBikeGameInstance::Init()
 {
 	Circumference = 2100;
-	CurrentSpeed = -1.f;
+	PhysicalSpeed = -1.f;
+	MobileSpeed = -1.f;
 
 	SensorState = false;
-
-	Task = new BikePhysicalInput(this);
+	MobileState = false;
 
 	// Only load game stats if the load .sav file exists
 	const FString SaveSlotName = FString(TEXT("PlayerSaveSlot"));
@@ -36,50 +36,25 @@ void UBikeGameInstance::Init()
 
 void UBikeGameInstance::Shutdown()
 {
-	delete Task;
+	delete PhysicalTask;
+	delete MobileTask;
 }
 
-void UBikeGameInstance::FillArrays(unsigned short EventTime, unsigned short RevCount)
+void UBikeGameInstance::SetPhysicalSpeed(float NewSpeed)
 {
-
-	// Push values into arrays and trim array size to 3
-	EventTimes.Push(EventTime);
-	while (EventTimes.Num() > 3)
-	{
-		EventTimes.RemoveAt(0);
-	}
-
-	RevolutionCounts.Push(RevCount);
-	while (RevolutionCounts.Num() > 3)
-	{
-		RevolutionCounts.RemoveAt(0);
-	}
-
-	// Check if array is filled before calculating speed (m/s)
-	if (EventTimes.Num() == 3 && RevolutionCounts.Num() == 3)
-	{
-		// Convert Circumference to Meters
-		float CircumferenceM = Circumference / 1000;
-
-		// Find difference between event times, if rollover then add max value
-		float EventTimeDelta = EventTimes[2] - EventTimes[0];
-		if (EventTimes[2] < EventTimes[0]) EventTimeDelta += 65536;
-
-		float RevCountDelta = RevolutionCounts[2] - RevolutionCounts[0];
-		if (RevolutionCounts[2] < RevolutionCounts[0]) RevCountDelta += 65536;
-
-		//GEngine->AddOnScreenDebugMessage(3, 5.f, FColor::Red, TEXT("RevDelta: " + FString::SanitizeFloat(RevCountDelta)));
-		//GEngine->AddOnScreenDebugMessage(4, 5.f, FColor::Red, TEXT("EventDelta: " + FString::SanitizeFloat(EventTimeDelta)));
-
-		// Set current speed to new value
-		if (EventTimeDelta != 0 || RevCountDelta != 0) CurrentSpeed = ((float)CircumferenceM * RevCountDelta * 1024.f) / EventTimeDelta;
-		else CurrentSpeed = 0;
-	}
+	PhysicalSpeed = NewSpeed * Circumference / 1000.f;
 }
 
-float UBikeGameInstance::GetSpeed() const
+void UBikeGameInstance::SetMobileSpeed(float NewSpeed)
 {
-	return CurrentSpeed;
+	MobileSpeed = NewSpeed;
+}
+
+float UBikeGameInstance::GetSpeed()
+{
+	if (SensorState) return PhysicalSpeed;
+	else if (MobileState) return MobileSpeed;
+	else return -1.f;
 }
 
 void UBikeGameInstance::SetCircumference(float newCircumference)
@@ -115,9 +90,29 @@ bool UBikeGameInstance::GetTutorialState() const
 	return TutorialState;
 }
 
+void UBikeGameInstance::StartPhysicalTask()
+{
+	PhysicalTask = new BikePhysicalInput(this);
+}
+
+void UBikeGameInstance::StartMobileTask()
+{
+	MobileTask = new BikeMobileInput(this);
+}
+
 bool UBikeGameInstance::GetSensorState() const
 {
 	return SensorState;
+}
+
+void UBikeGameInstance::SetMobileState(bool NewValue)
+{
+	MobileState = NewValue;
+}
+
+bool UBikeGameInstance::GetMobileState() const
+{
+	return MobileState;
 }
 
 void UBikeGameInstance::SetSensorState(bool NewValue)

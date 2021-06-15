@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "BikePhysicalInput.h"
+#include "BikeMobileInput.h"
 #include "BikeGameInstance.generated.h"
 
 UCLASS()
@@ -17,9 +18,10 @@ public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
 
-	void FillArrays(unsigned short EventTime, unsigned short RevCount);
+	void SetPhysicalSpeed(float NewSpeed);
+	void SetMobileSpeed(float NewSpeed);
 	UFUNCTION(BlueprintCallable)
-	float GetSpeed() const;
+	float GetSpeed();
 
 	UFUNCTION()
 	void SetCircumference(float newCircumference);
@@ -28,12 +30,23 @@ public:
 	void SetMaxPower(float newMaxPower);
 	UFUNCTION(BlueprintCallable)
 	float GetMaxPower() const;
+
 	UFUNCTION(BlueprintCallable)
 	bool GetTutorialState() const;
+
+	UFUNCTION()
+	void StartPhysicalTask();
+	UFUNCTION()
+	void StartMobileTask();
+
 	UFUNCTION()
 	void SetSensorState(bool NewValue);
 	UFUNCTION(BlueprintCallable)
 	bool GetSensorState() const;
+	UFUNCTION()
+	void SetMobileState(bool NewValue);
+	UFUNCTION(BlueprintCallable)
+	bool GetMobileState() const;
 
 private:
 	TArray<unsigned short> EventTimes;
@@ -41,9 +54,12 @@ private:
 	UPROPERTY()
 	float Circumference;
 
-	BikePhysicalInput* Task;
-	UPROPERTY(BlueprintGetter = GetSpeed)
-	float CurrentSpeed;
+	BikePhysicalInput* PhysicalTask;
+	BikeMobileInput* MobileTask;
+	UPROPERTY()
+	float PhysicalSpeed;
+	UPROPERTY()
+	float MobileSpeed;
 
 	UPROPERTY(BlueprintSetter = SetMaxPower, BlueprintGetter = GetMaxPower)
 	float MAXPOWER;
@@ -51,4 +67,6 @@ private:
 	bool TutorialState;
 	UPROPERTY(BlueprintGetter = GetSensorState)
 	bool SensorState;
+	UPROPERTY(BlueprintGetter = GetMobileState)
+	bool MobileState;
 };
