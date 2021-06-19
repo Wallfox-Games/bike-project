@@ -92,7 +92,7 @@ uint32 BikePhysicalInput::Run()
 		// Continue updating the device while possible...
 		while (Socket != nullptr)
 		{	
-			int32 BufferSize = 4;
+			int32 BufferSize = 1;
 			int32 BytesRead = 0;
 			uint8 Response[4];
 

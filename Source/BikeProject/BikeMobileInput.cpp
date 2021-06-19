@@ -47,6 +47,12 @@ bool BikeMobileInput::Init()
 	FIPv4Address::Parse(Address, ip);
 
 	Socket = FUdpSocketBuilder(TEXT("Mobile Socket")).BoundToAddress(ip).BoundToPort(Port).Build();
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, TEXT("Connected to IP: " + Address + " Port: " + FString::FromInt(Port)), true);
+
+	int AddressIndex;
+	ConnectionNum = Address;
+	ConnectionNum.FindLastChar('.', AddressIndex);
+	ConnectionNum.RemoveAt(0, AddressIndex + 1);
 
 	return (Socket != nullptr);
 }
@@ -54,43 +60,76 @@ bool BikeMobileInput::Init()
 uint32 BikeMobileInput::Run()
 {
 	bool WaitingConf = true;
+	TSharedRef<FInternetAddr> ClientAddress = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
 
 	if (Socket != nullptr)
 	{
+		GameInstanceRef->SetDeviceAddress(ConnectionNum);
 		while (Socket != nullptr && WaitingConf)
 		{
 
-			int32 BufferSize = 1;
+			int32 BufferSize = 4;
 			int32 BytesRead = 0;
-			uint8 Response[1];
-
-			if (Socket->Recv(Response, BufferSize, BytesRead))
+			uint8 Response[4];
+			
+			if (Socket->RecvFrom(Response, BufferSize, BytesRead, *ClientAddress))
 			{
-				char TempChar = (char)Response[0];
-				ClientAddress = "";
-				ClientAddress.AppendChar(TempChar);
-				WaitingConf = false;
+				float TempResponse = ((float*)Response)[0];
+				int DeviceNum = (int)(TempResponse);
+
+				FString DeviceAddress = ClientAddress->ToString(false);
+				int AddressIndex;
+				DeviceAddress.FindLastChar('.', AddressIndex);
+				DeviceAddress.RemoveAt(0, AddressIndex + 1);
+
+				if (FString::FromInt(DeviceNum) == DeviceAddress) WaitingConf = false;
 			}
 
 			if (WaitingConf)
 			{
-				GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Waiting for conf"), true);
+				GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Waiting for mobile"), true);
 				// Sleep to reduce usage of system resources(nearly delta time).
 				FPlatformProcess::Sleep(0.03F);
 			}
 		}
-		GameInstanceRef->SetMobileState(true);
+		ClientAddress->SetPort(Socket->GetPortNo());
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Client IP: " + ClientAddress->ToString(true)), true);
+		GameInstanceRef->SetMobileState(0);
 		// Continue updating the device while possible...
 		while (Socket != nullptr)
 		{
-			int32 BufferSize = 1;
+			int32 BufferSize = 4;
 			int32 BytesRead = 0;
-			uint8 Response[1];
+			int32 BytesSent = 0;
+			uint8 Response[4];
 
 			if (Socket->Recv(Response, BufferSize, BytesRead))
 			{
-				// Cast to BikeInstance here
+				GEngine->AddOnScreenDebugMessage(1, 10.f, FColor::Green, TEXT("Received: " + FString::SanitizeFloat(((float*)Response)[0])), true);
+				GameInstanceRef->SetMobileSpeed(((float*)Response)[0]);
 			}
+
+			char MessageCharacter = NULL;
+			switch (GameInstanceRef->GetMobileState())
+			{
+			case 0:
+				MessageCharacter = 'a';
+				break;
+			case 1:
+				MessageCharacter = 'm';
+				break;
+			case 2:
+				MessageCharacter = 'g';
+				break;
+			default:
+				break;
+			}
+
+			FString TempStr = "";
+			TempStr.AppendChar(MessageCharacter);
+			GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Sent: " + TempStr), true);
+
+			Socket->SendTo((uint8*)&MessageCharacter, 1, BytesSent, *ClientAddress);
 
 			// Sleep to reduce usage of system resources(nearly delta time).
 			FPlatformProcess::Sleep(0.03F);

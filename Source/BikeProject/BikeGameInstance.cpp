@@ -13,7 +13,7 @@ void UBikeGameInstance::Init()
 	MobileSpeed = -1.f;
 
 	SensorState = false;
-	MobileState = false;
+	MobileState = -1;
 
 	// Only load game stats if the load .sav file exists
 	const FString SaveSlotName = FString(TEXT("PlayerSaveSlot"));
@@ -53,8 +53,7 @@ void UBikeGameInstance::SetMobileSpeed(float NewSpeed)
 float UBikeGameInstance::GetSpeed()
 {
 	if (SensorState) return PhysicalSpeed;
-	else if (MobileState) return MobileSpeed;
-	else return -1.f;
+	else return MobileSpeed;
 }
 
 void UBikeGameInstance::SetCircumference(float newCircumference)
@@ -105,14 +104,25 @@ bool UBikeGameInstance::GetSensorState() const
 	return SensorState;
 }
 
-void UBikeGameInstance::SetMobileState(bool NewValue)
+void UBikeGameInstance::SetMobileState(int NewValue)
 {
 	MobileState = NewValue;
+	MobileSpeed = -1.f;
 }
 
-bool UBikeGameInstance::GetMobileState() const
+int UBikeGameInstance::GetMobileState() const
 {
 	return MobileState;
+}
+
+void UBikeGameInstance::SetDeviceAddress(FString NewValue)
+{
+	DeviceAddress = NewValue;
+}
+
+FString UBikeGameInstance::GetDeviceAddress() const
+{
+	return DeviceAddress;
 }
 
 void UBikeGameInstance::SetSensorState(bool NewValue)
