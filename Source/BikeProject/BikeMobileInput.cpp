@@ -24,7 +24,7 @@ BikeMobileInput::~BikeMobileInput()
 
 	if (Socket != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("deleting socket"));
+		UE_LOG(LogTemp, Warning, TEXT("deleting phone socket"));
 		delete Socket;
 		Socket = nullptr;
 	}
@@ -82,19 +82,21 @@ uint32 BikeMobileInput::Run()
 				DeviceAddress.FindLastChar('.', AddressIndex);
 				DeviceAddress.RemoveAt(0, AddressIndex + 1);
 
-				if (FString::FromInt(DeviceNum) == DeviceAddress) WaitingConf = false;
+				if (FString::FromInt(DeviceNum) == DeviceAddress)
+				{
+					ClientAddress->SetPort(Socket->GetPortNo());
+					GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Client IP: " + ClientAddress->ToString(true)), true);
+					GameInstanceRef->SetMobileState(0);
+					WaitingConf = false;
+				}
 			}
-
 			if (WaitingConf)
 			{
 				GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Waiting for mobile"), true);
 				// Sleep to reduce usage of system resources(nearly delta time).
 				FPlatformProcess::Sleep(0.03F);
 			}
-		}
-		ClientAddress->SetPort(Socket->GetPortNo());
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Client IP: " + ClientAddress->ToString(true)), true);
-		GameInstanceRef->SetMobileState(0);
+		}	
 		// Continue updating the device while possible...
 		while (Socket != nullptr)
 		{

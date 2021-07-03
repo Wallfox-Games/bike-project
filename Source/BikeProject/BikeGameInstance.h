@@ -35,14 +35,18 @@ public:
 	bool GetTutorialState() const;
 
 	UFUNCTION(BlueprintCallable)
-	void StartPhysicalTask();
+	void StartPhysicalTask(int DeviceType);
+	UFUNCTION(BlueprintCallable)
+	void StopPhysicalTask();
 	UFUNCTION(BlueprintCallable)
 	void StartMobileTask();
+	UFUNCTION(BlueprintCallable)
+	void StopMobileTask();
 
 	UFUNCTION()
 	void SetSensorState(bool NewValue);
 	UFUNCTION(BlueprintCallable)
-	bool GetSensorState() const;
+	int GetSensorState() const;
 	UFUNCTION(BlueprintCallable)
 	void SetMobileState(int NewValue);
 	UFUNCTION(BlueprintCallable)
@@ -72,7 +76,7 @@ private:
 	UPROPERTY(BlueprintGetter = GetTutorialState)
 	bool TutorialState;
 	UPROPERTY(BlueprintGetter = GetSensorState)
-	bool SensorState;
+	int SensorState;
 	UPROPERTY(BlueprintSetter = SetMobileState, BlueprintGetter = GetMobileState)
 	int MobileState;
 };
