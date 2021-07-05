@@ -11,9 +11,10 @@
 
 #include "BikeGameInstance.h"
 
-BikePhysicalInput::BikePhysicalInput(UBikeGameInstance* BikeInstanceRef)
+BikePhysicalInput::BikePhysicalInput(UBikeGameInstance* BikeInstanceRef, int NewDeviceType)
 {
 	GameInstanceRef = BikeInstanceRef;
+	DeviceType = NewDeviceType;
 	
 	Socket = nullptr;
 
@@ -26,7 +27,7 @@ BikePhysicalInput::~BikePhysicalInput()
 	
 	if (Socket != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("deleting socket"));
+		UE_LOG(LogTemp, Warning, TEXT("deleting ant socket"));
 		delete Socket;
 		Socket = nullptr;
 	}
@@ -92,7 +93,7 @@ uint32 BikePhysicalInput::Run()
 		// Continue updating the device while possible...
 		while (Socket != nullptr)
 		{	
-			int32 BufferSize = 4;
+			int32 BufferSize = 1;
 			int32 BytesRead = 0;
 			uint8 Response[4];
 

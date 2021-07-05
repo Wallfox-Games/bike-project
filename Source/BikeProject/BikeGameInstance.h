@@ -34,19 +34,27 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetTutorialState() const;
 
-	UFUNCTION()
-	void StartPhysicalTask();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
+	void StartPhysicalTask(int DeviceType);
+	UFUNCTION(BlueprintCallable)
+	void StopPhysicalTask();
+	UFUNCTION(BlueprintCallable)
 	void StartMobileTask();
+	UFUNCTION(BlueprintCallable)
+	void StopMobileTask();
 
 	UFUNCTION()
 	void SetSensorState(bool NewValue);
 	UFUNCTION(BlueprintCallable)
-	bool GetSensorState() const;
-	UFUNCTION()
-	void SetMobileState(bool NewValue);
+	int GetSensorState() const;
 	UFUNCTION(BlueprintCallable)
-	bool GetMobileState() const;
+	void SetMobileState(int NewValue);
+	UFUNCTION(BlueprintCallable)
+	int GetMobileState() const;
+	UFUNCTION()
+	void SetDeviceAddress(FString NewValue);
+	UFUNCTION(BlueprintCallable)
+	FString GetDeviceAddress() const;
 
 private:
 	TArray<unsigned short> EventTimes;
@@ -60,13 +68,15 @@ private:
 	float PhysicalSpeed;
 	UPROPERTY()
 	float MobileSpeed;
+	UPROPERTY(BlueprintGetter = GetDeviceAddress)
+	FString DeviceAddress;
 
 	UPROPERTY(BlueprintSetter = SetMaxPower, BlueprintGetter = GetMaxPower)
 	float MAXPOWER;
 	UPROPERTY(BlueprintGetter = GetTutorialState)
 	bool TutorialState;
 	UPROPERTY(BlueprintGetter = GetSensorState)
-	bool SensorState;
-	UPROPERTY(BlueprintGetter = GetMobileState)
-	bool MobileState;
+	int SensorState;
+	UPROPERTY(BlueprintSetter = SetMobileState, BlueprintGetter = GetMobileState)
+	int MobileState;
 };

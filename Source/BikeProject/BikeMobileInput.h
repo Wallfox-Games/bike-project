@@ -17,7 +17,7 @@ class BIKEPROJECT_API BikeMobileInput : public FRunnable
 	FRunnableThread* RunnableThread;
 	FSocket* Socket;
 	FString Address;
-	FString ClientAddress;
+	FString ConnectionNum;
 	UBikeGameInstance* GameInstanceRef;
 
 public:
