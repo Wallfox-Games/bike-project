@@ -12,8 +12,8 @@ void UBikeGameInstance::Init()
 	PhysicalSpeed = -1.f;
 	MobileSpeed = -1.f;
 
-	SensorState = false;
-	MobileState = false;
+	SensorState = -1;
+	MobileState = -1;
 
 	// Only load game stats if the load .sav file exists
 	const FString SaveSlotName = FString(TEXT("PlayerSaveSlot"));
@@ -36,12 +36,13 @@ void UBikeGameInstance::Init()
 
 void UBikeGameInstance::Shutdown()
 {
-	delete PhysicalTask;
-	delete MobileTask;
+	StopPhysicalTask();
+	StopMobileTask();
 }
 
 void UBikeGameInstance::SetPhysicalSpeed(float NewSpeed)
 {
+	if (SensorState == 0) SensorState = 1;
 	PhysicalSpeed = NewSpeed * Circumference / 1000.f;
 }
 
@@ -53,8 +54,7 @@ void UBikeGameInstance::SetMobileSpeed(float NewSpeed)
 float UBikeGameInstance::GetSpeed()
 {
 	if (SensorState) return PhysicalSpeed;
-	else if (MobileState) return MobileSpeed;
-	else return -1.f;
+	else return MobileSpeed;
 }
 
 void UBikeGameInstance::SetCircumference(float newCircumference)
@@ -90,9 +90,16 @@ bool UBikeGameInstance::GetTutorialState() const
 	return TutorialState;
 }
 
-void UBikeGameInstance::StartPhysicalTask()
+void UBikeGameInstance::StartPhysicalTask(int DeviceType)
 {
-	PhysicalTask = new BikePhysicalInput(this);
+	PhysicalTask = new BikePhysicalInput(this, DeviceType);
+}
+
+void UBikeGameInstance::StopPhysicalTask()
+{
+	SensorState = false;
+	if (PhysicalTask != nullptr) delete PhysicalTask;
+	PhysicalTask = nullptr;
 }
 
 void UBikeGameInstance::StartMobileTask()
@@ -100,22 +107,41 @@ void UBikeGameInstance::StartMobileTask()
 	MobileTask = new BikeMobileInput(this);
 }
 
-bool UBikeGameInstance::GetSensorState() const
+void UBikeGameInstance::StopMobileTask()
+{
+	MobileState = -1;
+	MobileSpeed = -1.f;
+	if (MobileTask != nullptr) delete MobileTask;
+	MobileTask = nullptr;
+}
+
+int UBikeGameInstance::GetSensorState() const
 {
 	return SensorState;
 }
 
-void UBikeGameInstance::SetMobileState(bool NewValue)
+void UBikeGameInstance::SetMobileState(int NewValue)
 {
 	MobileState = NewValue;
+	MobileSpeed = -1.f;
 }
 
-bool UBikeGameInstance::GetMobileState() const
+int UBikeGameInstance::GetMobileState() const
 {
 	return MobileState;
 }
 
+void UBikeGameInstance::SetDeviceAddress(FString NewValue)
+{
+	DeviceAddress = NewValue;
+}
+
+FString UBikeGameInstance::GetDeviceAddress() const
+{
+	return DeviceAddress;
+}
+
 void UBikeGameInstance::SetSensorState(bool NewValue)
 {
-	SensorState = NewValue;
+	if (NewValue) SensorState = 0;
 }
