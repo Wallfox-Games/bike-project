@@ -18,10 +18,10 @@ class BIKEPROJECT_API BikePhysicalInput : public FRunnable
 	FProcHandle ANTProcHandle;
 	FSocket* Socket;
 	UBikeGameInstance* GameInstanceRef;
-	int DeviceType;
+	bool LoadDevice;
 
 public:
-	BikePhysicalInput(UBikeGameInstance* BikeInstanceRef, int NewDeviceType);
+	BikePhysicalInput(UBikeGameInstance* BikeInstanceRef, bool NewLoadDevice);
 	~BikePhysicalInput();
 
 public: // FRunnable Interface
