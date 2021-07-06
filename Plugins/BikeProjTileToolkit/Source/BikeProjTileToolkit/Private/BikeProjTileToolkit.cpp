@@ -9,6 +9,18 @@
 #include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
 
+#include "Blueprint/UserWidget.h" 
+#include "Editor/UMGEditor/Public/WidgetBlueprint.h"
+#include "Editor/LevelEditor/Public/LevelEditor.h"
+#include "Runtime/Core/Public/Modules/ModuleManager.h"
+#include "Editor/Blutility/Public/IBlutilityModule.h"
+#include "Editor/Blutility/Classes/EditorUtilityWidgetBlueprint.h"
+
+#include "EditorUtilityWidget.h" 
+
+#include "Math/UnrealMathUtility.h" 
+
+
 static const FName BikeProjTileToolkitTabName("BikeProjTileToolkit");
 
 #define LOCTEXT_NAMESPACE "FBikeProjTileToolkitModule"
@@ -55,12 +67,11 @@ void FBikeProjTileToolkitModule::ShutdownModule()
 TSharedRef<SDockTab> FBikeProjTileToolkitModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)
 {
 	FText WidgetText = FText::Format(
-		LOCTEXT("WindowWidgetText", "Add code to {0} in {1} to override this window's contents"),
-		FText::FromString(TEXT("FBikeProjTileToolkitModule::OnSpawnPluginTab")),
-		FText::FromString(TEXT("BikeProjTileToolkit.cpp"))
-		);
+		LOCTEXT("WindowWidgetText", "Error encountered, tell tavi that its broken and she'll get back to you in {0} minute(s)."), 
+		FMath::RandRange(1, 30)
+	);
 
-	return SNew(SDockTab)
+	auto NewTab = SNew(SDockTab)
 		.TabRole(ETabRole::NomadTab)
 		[
 			// Put your tab content here!
@@ -72,6 +83,19 @@ TSharedRef<SDockTab> FBikeProjTileToolkitModule::OnSpawnPluginTab(const FSpawnTa
 				.Text(WidgetText)
 			]
 		];
+
+	FSoftClassPath MyWidgetClassRef(TEXT("/Game/EditorUtilities/EUW_TileTools.EUW_TileTools_C"));
+	if (UClass* MyWidgetClass = MyWidgetClassRef.TryLoadClass<UUserWidget>())
+	{
+		UWorld* World = GEditor->GetEditorWorldContext().World();
+		check(World);
+		UEditorUtilityWidget* MyWidget = nullptr;
+		MyWidget = CreateWidget<UEditorUtilityWidget, UWorld>(World, MyWidgetClass);
+		
+		NewTab->SetContent(MyWidget->TakeWidget());
+	}
+
+	return NewTab;
 }
 
 void FBikeProjTileToolkitModule::PluginButtonClicked()
