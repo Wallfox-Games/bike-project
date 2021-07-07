@@ -11,10 +11,10 @@
 
 #include "BikeGameInstance.h"
 
-BikePhysicalInput::BikePhysicalInput(UBikeGameInstance* BikeInstanceRef, int NewDeviceType)
+BikePhysicalInput::BikePhysicalInput(UBikeGameInstance* BikeInstanceRef, bool NewLoadDevice)
 {
 	GameInstanceRef = BikeInstanceRef;
-	DeviceType = NewDeviceType;
+	LoadDevice = NewLoadDevice;
 	
 	Socket = nullptr;
 
@@ -52,8 +52,8 @@ bool BikePhysicalInput::Init()
 uint32 BikePhysicalInput::Run()
 {
 	FString FullPath = FPaths::ProjectContentDir() + TEXT("ThirdParty/ANTPlus/ANT_Socket.exe");
-	TCHAR* tempParam = L" ";
-		
+	TCHAR* tempParam = L"0";
+	if (LoadDevice) tempParam = L"1";
 	bool isInEditor = (GameInstanceRef->GetWorld()->WorldType == EWorldType::PIE);
 	ANTProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, isInEditor, !isInEditor, NULL, 0, NULL, NULL);
 	
@@ -70,8 +70,10 @@ uint32 BikePhysicalInput::Run()
 
 			if (Socket->Recv(Response, BufferSize, BytesRead))
 			{
-				if ((char)Response[0] == '1')
+				if ((char)Response[0] != '0')
 				{
+					int DeviceType = (char)Response[0];
+					GameInstanceRef->SetDeviceType(DeviceType);
 					WaitingConf = false;
 				}
 			}

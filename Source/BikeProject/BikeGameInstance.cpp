@@ -90,9 +90,9 @@ bool UBikeGameInstance::GetTutorialState() const
 	return TutorialState;
 }
 
-void UBikeGameInstance::StartPhysicalTask(int DeviceType)
+void UBikeGameInstance::StartPhysicalTask(bool LoadDevice)
 {
-	PhysicalTask = new BikePhysicalInput(this, DeviceType);
+	PhysicalTask = new BikePhysicalInput(this, LoadDevice);
 }
 
 void UBikeGameInstance::StopPhysicalTask()
@@ -129,6 +129,16 @@ void UBikeGameInstance::SetMobileState(int NewValue)
 int UBikeGameInstance::GetMobileState() const
 {
 	return MobileState;
+}
+
+void UBikeGameInstance::SetDeviceType(int NewValue)
+{
+	DeviceType = NewValue;
+}
+
+int UBikeGameInstance::GetDeviceType() const
+{
+	return DeviceType;
 }
 
 void UBikeGameInstance::SetDeviceAddress(FString NewValue)

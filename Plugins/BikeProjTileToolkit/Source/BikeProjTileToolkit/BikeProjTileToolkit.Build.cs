@@ -42,6 +42,9 @@ public class BikeProjTileToolkit : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"Blutility",
+				"UMG",
+				"UMGEditor"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

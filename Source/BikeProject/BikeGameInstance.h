@@ -35,7 +35,7 @@ public:
 	bool GetTutorialState() const;
 
 	UFUNCTION(BlueprintCallable)
-	void StartPhysicalTask(int DeviceType);
+	void StartPhysicalTask(bool LoadDevice);
 	UFUNCTION(BlueprintCallable)
 	void StopPhysicalTask();
 	UFUNCTION(BlueprintCallable)
@@ -51,6 +51,10 @@ public:
 	void SetMobileState(int NewValue);
 	UFUNCTION(BlueprintCallable)
 	int GetMobileState() const;
+	UFUNCTION(BlueprintCallable)
+	void SetDeviceType(int NewValue);
+	UFUNCTION(BlueprintCallable)
+	int GetDeviceType() const;
 	UFUNCTION()
 	void SetDeviceAddress(FString NewValue);
 	UFUNCTION(BlueprintCallable)
@@ -66,6 +70,8 @@ private:
 	BikeMobileInput* MobileTask;
 	UPROPERTY()
 	float PhysicalSpeed;
+	UPROPERTY(BlueprintGetter = GetDeviceType)
+	int DeviceType;
 	UPROPERTY()
 	float MobileSpeed;
 	UPROPERTY(BlueprintGetter = GetDeviceAddress)
