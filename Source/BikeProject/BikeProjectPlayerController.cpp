@@ -56,7 +56,7 @@ void ABikeProjectPlayerController::Tick(float DeltaTime)
 
 		if (PowerLevelKB > PowerLevelBP)
 		{
-			PowerLevelKB -= 1.f * DeltaTime;
+			PowerLevelKB -= 0.5f * DeltaTime;
 			TempPower = PowerLevelKB;
 		}
 		else TempPower = PowerLevelBP;
@@ -141,8 +141,8 @@ void ABikeProjectPlayerController::CalculateBPM()
 	// Beats-per-minute
 	RPM *= 60;
 
-	// Set to power / RPM (roughly half)
-	PowerLevelKB = RPM / 2;
+	// Scale to other devices
+	PowerLevelKB = RPM / 40;
 }
 
 void ABikeProjectPlayerController::PowerTransition(float DeltaTime, float NewPower)

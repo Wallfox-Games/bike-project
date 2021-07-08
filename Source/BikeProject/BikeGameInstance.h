@@ -18,10 +18,16 @@ public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
 
+	UFUNCTION()
 	void SetPhysicalSpeed(float NewSpeed);
+	UFUNCTION()
 	void SetMobileSpeed(float NewSpeed);
 	UFUNCTION(BlueprintCallable)
 	float GetSpeed();
+	UFUNCTION(BlueprintCallable)
+	float GetPhysicalSpeed() const;
+	UFUNCTION(BlueprintCallable)
+	float GetMobileSpeed() const;
 
 	UFUNCTION()
 	void SetCircumference(float newCircumference);
@@ -46,7 +52,7 @@ public:
 	UFUNCTION()
 	void SetSensorState(bool NewValue);
 	UFUNCTION(BlueprintCallable)
-	int GetSensorState() const;
+	bool GetSensorState() const;
 	UFUNCTION(BlueprintCallable)
 	void SetMobileState(int NewValue);
 	UFUNCTION(BlueprintCallable)
@@ -68,11 +74,11 @@ private:
 
 	BikePhysicalInput* PhysicalTask;
 	BikeMobileInput* MobileTask;
-	UPROPERTY()
+	UPROPERTY(BlueprintGetter = GetPhysicalSpeed)
 	float PhysicalSpeed;
 	UPROPERTY(BlueprintGetter = GetDeviceType)
 	int DeviceType;
-	UPROPERTY()
+	UPROPERTY(BlueprintGetter = GetMobileSpeed)
 	float MobileSpeed;
 	UPROPERTY(BlueprintGetter = GetDeviceAddress)
 	FString DeviceAddress;
@@ -82,7 +88,7 @@ private:
 	UPROPERTY(BlueprintGetter = GetTutorialState)
 	bool TutorialState;
 	UPROPERTY(BlueprintGetter = GetSensorState)
-	int SensorState;
+	bool SensorState;
 	UPROPERTY(BlueprintSetter = SetMobileState, BlueprintGetter = GetMobileState)
 	int MobileState;
 };

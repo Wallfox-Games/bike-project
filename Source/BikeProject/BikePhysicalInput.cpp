@@ -70,10 +70,9 @@ uint32 BikePhysicalInput::Run()
 
 			if (Socket->Recv(Response, BufferSize, BytesRead))
 			{
-				if ((char)Response[0] != '0')
+				if ((char)Response[0] == (char)'a')
 				{
-					int DeviceType = (char)Response[0];
-					GameInstanceRef->SetDeviceType(DeviceType);
+					GameInstanceRef->SetSensorState(true);
 					WaitingConf = false;
 				}
 			}
@@ -83,7 +82,7 @@ uint32 BikePhysicalInput::Run()
 				GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Waiting for conf"), true);
 				if (!FPlatformProcess::IsProcRunning(ANTProcHandle))
 				{
-					GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Green, TEXT("Handle not valid"), true);
+					GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Handle not valid"), true);
 					FPlatformProcess::CloseProc(ANTProcHandle);
 					ANTProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, isInEditor, !isInEditor, NULL, 0, NULL, NULL);
 				}
@@ -91,17 +90,15 @@ uint32 BikePhysicalInput::Run()
 				FPlatformProcess::Sleep(0.03F);
 			}
 		}
-		GameInstanceRef->SetSensorState(true);
 		// Continue updating the device while possible...
 		while (Socket != nullptr)
-		{	
-			int32 BufferSize = 1;
+		{
 			int32 BytesRead = 0;
-			uint8 Response[4];
 
-			if (Socket->Recv(Response, BufferSize, BytesRead))
+			if (Socket->Recv((uint8*)&sMsgPay, sizeof(sMsgPay), BytesRead))
 			{
-				GameInstanceRef->SetPhysicalSpeed(((float*)Response)[0]);
+				GameInstanceRef->SetDeviceType(sMsgPay.DeviceType);
+				GameInstanceRef->SetPhysicalSpeed(sMsgPay.BikeSpeed);
 			}
 
 			// Sleep to reduce usage of system resources(nearly delta time).
