@@ -47,8 +47,9 @@ void ABikeProjectPlayerController::Tick(float DeltaTime)
 	switch (PlayerMoveEnum)
 	{
 	case PME_Normal:
-	case PME_LaneBoss:
-	case PME_MoveBoss:
+	case PME_BossCharge:
+	case PME_BossDodge:
+	case PME_BossCooldown:
 
 		float TempPower;
 
@@ -64,7 +65,7 @@ void ABikeProjectPlayerController::Tick(float DeltaTime)
 		PowerTransition(DeltaTime, TempPower);
 
 		break;
-	case PME_AttackBoss:
+	case PME_BossAttack:
 
 		PowerTransition(DeltaTime, PowerLevelAuto);
 		break;
@@ -223,15 +224,21 @@ void ABikeProjectPlayerController::SetMoveEnum_Implementation(EPlayerMove NewSta
 		SetViewTargetWithBlend(PawnInstanceRef, 1.0f);
 		PawnInstanceRef->SetLaneBlocked(false);
 		break;
-	case PME_LaneBoss:
+	case PME_BossCharge:
 		PawnInstanceRef->ChangePowerLane(1, DeltaTime);
 		PawnInstanceRef->SetLaneBlocked(true);
 		break;
-	case PME_MoveBoss:
+	case PME_BossDodge:
+		SetViewTargetWithBlend(PawnInstanceRef, 1.0f);
 		PawnInstanceRef->SetLaneBlocked(false);
 		break;
-	case PME_AttackBoss:
-		PowerLevelAuto = PowerLevelTarget * 1.2;
+	case PME_BossAttack:
+		PowerLevelAuto = PowerLevelTarget;
+		PawnInstanceRef->ChangePowerLane(1, DeltaTime);
+		PawnInstanceRef->SetLaneBlocked(true);
+		break;
+	case PME_BossCooldown:
+		SetViewTargetWithBlend(PawnInstanceRef, 1.0f);
 		PawnInstanceRef->ChangePowerLane(1, DeltaTime);
 		PawnInstanceRef->SetLaneBlocked(true);
 		break;

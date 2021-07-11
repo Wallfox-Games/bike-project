@@ -317,13 +317,13 @@ void ABikeCharacter::ChangePowerLane(int NewLane, float DeltaTime)
 		switch (PowerLane)
 		{
 		case 0:
-			NewHorizontalPos = BikeLanes->MoveLeft(false, DeltaTime);
+			NewHorizontalPos = BikeLanes->MoveLeft(true, DeltaTime);
 			break;
 		case 1:
-			NewHorizontalPos = BikeLanes->MoveCenter(false, DeltaTime, GetActorLocation());
+			NewHorizontalPos = BikeLanes->MoveCenter(true, DeltaTime, GetActorLocation());
 			break;
 		case 2:
-			NewHorizontalPos = BikeLanes->MoveRight(false, DeltaTime);
+			NewHorizontalPos = BikeLanes->MoveRight(true, DeltaTime);
 			break;
 		default:
 			break;

@@ -45,6 +45,13 @@ ABikeBoss::ABikeBoss()
 	MovementComponent->UpdatedComponent = RootComponent;
 
 	CameraLerpAlpha = 0.f;
+
+	PlayerPtr = nullptr;
+	BikeLanes = nullptr;
+
+	Cooldown = 0.f;
+	ObstacleCurrent = -1;
+	ObstacleTick = 0.f;
 }
 
 void ABikeBoss::InitValues_Implementation(ABikeCharacter* NewPtr, int NewHealth, float NewSeconds, float NewMultiplier, float DeltaTime)
@@ -60,7 +67,7 @@ void ABikeBoss::InitValues_Implementation(ABikeCharacter* NewPtr, int NewHealth,
 	FVector NewLocation = FVector(PlayerPtr->GetLaneActor()->GetActorLocation().X, PlayerPtr->GetLaneActor()->GetActorLocation().Y, PlayerPtr->GetActorLocation().Z - 25.f);
 	SetActorLocation(NewLocation - (PlayerPtr->GetActorForwardVector() * 400.f));
 
-	BossStateEnum = BSE_Moving;
+	ChangeState(BSE_Moving);
 
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.bNoFail = true;
@@ -72,7 +79,7 @@ void ABikeBoss::InitValues_Implementation(ABikeCharacter* NewPtr, int NewHealth,
 	CurrentLane = 2;
 
 	ABikeProjectPlayerController* PlayerControllerPtr = Cast<ABikeProjectPlayerController>(PlayerPtr->GetController());
-	PlayerControllerPtr->SetMoveEnum(PME_LaneBoss, DeltaTime);
+	PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
 }
 
 // Called when the game starts or when spawned
@@ -92,8 +99,6 @@ void ABikeBoss::Movement()
 	case BSE_Moving:
 		MoveVec += (0.5f * PlayerPtr->GetPrevMov());
 		break;
-	case BSE_Healthy:
-		break;
 	case BSE_Vulnerable:
 		MoveVec -= (0.3f * PlayerPtr->GetPrevMov());
 		break;
@@ -104,7 +109,7 @@ void ABikeBoss::Movement()
 	MovementComponent->AddInputVector(MoveVec);
 }
 
-void ABikeBoss::SetCameraPosition(float DeltaTime)
+void ABikeBoss::SetCameraPosition(float DeltaTime, ABikeProjectPlayerController* PlayerControllerPtr)
 {
 	if (BossStateEnum != BSE_Vulnerable && CameraLerpAlpha != 0.f)
 	{
@@ -125,6 +130,11 @@ void ABikeBoss::SetCameraPosition(float DeltaTime)
 	BossCameraSpringArm->SetRelativeTransform(NewCameraTransform);
 	BossCameraSpringArm->TargetArmLength = NewCameraDist;
 	BossCamera->SetFieldOfView(NewCameraFOV);
+
+	if (PlayerControllerPtr->GetViewTarget() != this)
+	{
+		PlayerControllerPtr->SetViewTargetWithBlend(this, 1.f);
+	}
 }
 
 // Called every frame
@@ -132,57 +142,191 @@ void ABikeBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	GEngine->AddOnScreenDebugMessage(1, DeltaTime, FColor::Green, TEXT("Boss State: ") + StaticEnum<EBossState>()->GetValueAsString(BossStateEnum), true);
+
 	Movement();
 
-	ABikeProjectPlayerController* PlayerControllerPtr = Cast<ABikeProjectPlayerController>(PlayerPtr->GetController());
+	FVector NewHorizontalPos = GetActorLocation();
 
-	if (BossStateEnum == BSE_Moving)
+	ABikeProjectPlayerController* PlayerControllerPtr = Cast<ABikeProjectPlayerController>(PlayerPtr->GetController());
+	float ToPlayerDist = FVector::Distance(GetActorLocation(), PlayerPtr->GetActorLocation());
+
+	if (!PlayerControllerPtr->GetMoveUIBlocked() && !PlayerControllerPtr->GetMovePauseBlocked())
 	{
-		float ToPlayerDist = FVector::Distance(GetActorLocation(), PlayerPtr->GetActorLocation());
-		if (ToPlayerDist >= 500.f && ToPlayerDist < 800.f)
+		switch (BossStateEnum)
 		{
+		case BSE_Moving:
+			if (ToPlayerDist >= 500.f && ToPlayerDist < 800.f)
+			{
+				if (CurrentLane != 1)
+				{
+					NewHorizontalPos = BikeLanes->MoveCenter(true, DeltaTime, GetActorLocation());
+					CurrentLane = 1;
+					LaneChange = true;
+				}
+				else if (LaneChange)
+				{
+					NewHorizontalPos = BikeLanes->MoveCenter(false, DeltaTime, GetActorLocation());
+					LaneChange = !BikeLanes->IsFinishedMove();
+				}
+				else
+				{
+					SetCameraPosition(DeltaTime, PlayerControllerPtr);
+				}
+			}
+			else if (ToPlayerDist >= 800.f)
+			{
+				SetCameraPosition(DeltaTime, PlayerControllerPtr);
+				ChangeState(BSE_Cooldown);
+				PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
+			}
+			Cooldown = FMath::Clamp(Cooldown - DeltaTime, 0.f, MaxCooldown);
+			break;
+
+		case BSE_Cooldown:
+			if (Cooldown == 0.f)
+			{
+				CanHit = true;
+				ObstacleStringTemp = ObstacleString;
+				ChangeState(BSE_Attacking);
+				PlayerControllerPtr->SetMoveEnum(PME_BossDodge, DeltaTime);
+			}
+			else
+			{
+				SetCameraPosition(DeltaTime, PlayerControllerPtr);
+				Cooldown = FMath::Clamp(Cooldown - DeltaTime, 0.f, MaxCooldown);
+			}
+			break;
+
+		case BSE_Attacking:
+			if (ObstacleTick == 0.f)
+			{
+				if (ObstacleCurrent == -1)
+				{
+					if (ObstacleStringTemp.Len() > 0)
+					{
+						ObstacleCurrent = FCString::Atoi(*(ObstacleStringTemp.Left(1)));
+						ObstacleStringTemp.RemoveAt(0);
+						if (ObstacleCurrent == 3) ObstacleTick = ObstacleMaxTick;
+						else if (CurrentLane != ObstacleCurrent)
+						{
+							switch (ObstacleCurrent)
+							{
+							case 0:
+								NewHorizontalPos = BikeLanes->MoveLeft(true, DeltaTime);
+								CurrentLane = 0;
+								break;
+							case 1:
+								NewHorizontalPos = BikeLanes->MoveCenter(true, DeltaTime, GetActorLocation());
+								CurrentLane = 1;
+								break;
+							case 2:
+								NewHorizontalPos = BikeLanes->MoveRight(true, DeltaTime);
+								CurrentLane = 2;
+								break;
+							default:
+								break;
+							}
+							LaneChange = !BikeLanes->IsFinishedMove();
+						}
+						else SpawnMine();
+					}
+					else
+					{
+						ObstacleCurrent = -1;
+						CurrentAttackPower = 0;
+						CurrentTime = 0;
+						ChangeState(BSE_Despawning);
+						PlayerControllerPtr->SetMoveEnum(PME_BossCharge, DeltaTime);
+					}
+				}
+				else if (LaneChange)
+				{
+					switch (CurrentLane)
+					{
+					case 0:
+						NewHorizontalPos = BikeLanes->MoveLeft(false, DeltaTime);
+						break;
+					case 1:
+						NewHorizontalPos = BikeLanes->MoveCenter(false, DeltaTime, GetActorLocation());
+						break;
+					case 2:
+						NewHorizontalPos = BikeLanes->MoveRight(false, DeltaTime);
+						break;
+					default:
+						break;
+					}
+					LaneChange = !BikeLanes->IsFinishedMove();
+				}
+
+				if (BossStateEnum == BSE_Attacking)
+				{
+					if (ObstacleCurrent == 3) ObstacleCurrent = -1;
+					else if (!LaneChange) SpawnMine();
+				}
+			}
+			else ObstacleTick = FMath::Clamp(ObstacleTick - DeltaTime, 0.f, ObstacleMaxTick);
+			break;
+
+		case BSE_Despawning:
+			GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Current Lane: ") + FString::FromInt(CurrentLane), true);
 			if (CurrentLane != 1)
 			{
-				SetActorLocation(BikeLanes->MoveCenter(true, DeltaTime, GetActorLocation()));
+				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Start Switching Lanes"), true);
+				NewHorizontalPos = BikeLanes->MoveCenter(true, DeltaTime, GetActorLocation());
 				CurrentLane = 1;
 				LaneChange = true;
 			}
 			else if (LaneChange)
 			{
-				SetActorLocation(BikeLanes->MoveCenter(false, DeltaTime, GetActorLocation()));
+				GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Switching Lanes"), true);
+				NewHorizontalPos = BikeLanes->MoveCenter(false, DeltaTime, GetActorLocation());
 				LaneChange = !BikeLanes->IsFinishedMove();
 			}
-			if (PlayerControllerPtr->GetViewTarget() != this)
+			else if (ObstaclesDestroyed)
 			{
-				PlayerControllerPtr->SetViewTargetWithBlend(this, 1.f);
+				ChangeState(EBossState::BSE_Reloading);
+				SetCameraPosition(DeltaTime, PlayerControllerPtr);
 			}
+			break;
+
+		case BSE_Reloading:
+			CurrentAttackPower += FMath::Clamp(PlayerPtr->GetRawPower(4), 0.f, PlayerPtr->GetRawPower(3)) * DeltaTime;
+			CurrentTime += DeltaTime;
+
+			if (CurrentAttackPower > TargetAttackPower)
+			{
+				ChangeState(EBossState::BSE_Vulnerable);
+				PlayerControllerPtr->SetMoveEnum(PME_BossAttack, DeltaTime);
+			}
+			else if (CurrentTime >= TargetSeconds)
+			{
+				Cooldown = MaxCooldown;
+				ChangeState(EBossState::BSE_Cooldown);
+				PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
+			}
+			SetCameraPosition(DeltaTime, PlayerControllerPtr);
+			break;
+
+		case BSE_Vulnerable:
+			SetCameraPosition(DeltaTime, PlayerControllerPtr);
+			break;
+
+		case BSE_Defeated:
+		default:
+			break;
 		}
-		else if (ToPlayerDist >= 800.f)
-		{
-			BossStateEnum = BSE_Healthy;
-			CanHit = true;
-		}
+
+		NewHorizontalPos.Z = GetActorLocation().Z;
+
+		SetActorLocation(NewHorizontalPos);
 	}
+}
 
-	else if (BossStateEnum == BSE_Healthy && !PlayerControllerPtr->GetMoveUIBlocked() && !PlayerControllerPtr->GetMovePauseBlocked())
-	{
-		CurrentAttackPower += FMath::Clamp(PlayerPtr->GetRawPower(4), 0.f, PlayerPtr->GetRawPower(3)) * DeltaTime;
-		CurrentTime += DeltaTime;
-
-		if (CurrentAttackPower > TargetAttackPower)
-		{
-			BossStateEnum = EBossState::BSE_Vulnerable;
-			PlayerControllerPtr->SetMoveEnum(PME_AttackBoss, DeltaTime);
-		}
-		else if (CurrentTime >= TargetSeconds)
-		{
-			CurrentAttackPower = 0;
-			CurrentTime = 0;
-			PlayerControllerPtr->PlayerHit(true);
-		}
-	}
-
-	SetCameraPosition(DeltaTime);
+void ABikeBoss::ChangeState_Implementation(EBossState NewState)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Switching to state: ") + StaticEnum<EBossState>()->GetValueAsString(NewState), true);
+	BossStateEnum = NewState;
 }
 
 float ABikeBoss::GetCurrentAttackPower() const
@@ -210,6 +354,18 @@ float ABikeBoss::GetTimeToGo() const
 	return TargetSeconds - CurrentTime;
 }
 
+void ABikeBoss::SetObstaclesDestroyed(bool IsDestroyed)
+{
+	ObstaclesDestroyed = IsDestroyed;
+}
+
+void ABikeBoss::SpawnMine_Implementation()
+{
+	ObstacleCurrent = -1;
+	ObstacleTick = ObstacleMaxTick;
+	ObstaclesDestroyed = false;
+}
+
 int ABikeBoss::GetHealth() const
 {
 	return Health;
@@ -225,20 +381,20 @@ bool ABikeBoss::OnHit_Implementation()
 	if (CanHit)
 	{
 		ABikeProjectPlayerController* PlayerControllerPtr = Cast<ABikeProjectPlayerController>(PlayerPtr->GetController());
-		PlayerControllerPtr->SetMoveEnum(PME_LaneBoss, 0.f);
 		Health--;
 		CanHit = false;
 
 		if (Health > 0)
 		{
-			CurrentAttackPower = 0;
-			CurrentTime = 0;
-			BossStateEnum = BSE_Moving;
+			ChangeState(BSE_Moving);
+			PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, 0.f);
+			Cooldown = MaxCooldown;
 			return false;
 		}
 		else
 		{
-			BossStateEnum = BSE_Defeated;
+			ChangeState(BSE_Defeated);
+			PlayerControllerPtr->SetMoveEnum(PME_Normal, 0.f);
 			return true;
 		}
 	}
