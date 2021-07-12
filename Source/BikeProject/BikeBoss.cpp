@@ -25,6 +25,9 @@ ABikeBoss::ABikeBoss()
 	BoxComponent->SetBoxExtent(FVector(75.f, 35.f, 38.f));
 	BoxComponent->SetCollisionProfileName(TEXT("Pawn"));
 
+	BossVisibleComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BossVisibleComponent"));
+	BossVisibleComponent->SetupAttachment(RootComponent);
+	BossVisibleComponent->SetRelativeTransform(FTransform(FRotator(0.f, 270.f, 0.f), FVector(20.f, 0.f, -40.f), FVector(1.f)));
 	BossDestructibleComponent = CreateDefaultSubobject<UDestructibleComponent>(TEXT("BossDestructibleComponent"));
 	BossDestructibleComponent->SetupAttachment(RootComponent);
 	BossDestructibleComponent->SetRelativeTransform(FTransform(FRotator(0.f, 270.f, 0.f), FVector(20.f, 0.f, -40.f), FVector(1.f)));
@@ -141,8 +144,6 @@ void ABikeBoss::SetCameraPosition(float DeltaTime, ABikeProjectPlayerController*
 void ABikeBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	GEngine->AddOnScreenDebugMessage(1, DeltaTime, FColor::Green, TEXT("Boss State: ") + StaticEnum<EBossState>()->GetValueAsString(BossStateEnum), true);
 
 	Movement();
 
@@ -325,8 +326,27 @@ void ABikeBoss::Tick(float DeltaTime)
 
 void ABikeBoss::ChangeState_Implementation(EBossState NewState)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Switching to state: ") + StaticEnum<EBossState>()->GetValueAsString(NewState), true);
 	BossStateEnum = NewState;
+
+	switch (NewState)
+	{
+	case BSE_Moving:
+		break;
+	case BSE_Cooldown:
+		break;
+	case BSE_Attacking:
+		break;
+	case BSE_Despawning:
+		break;
+	case BSE_Reloading:
+		break;
+	case BSE_Vulnerable:
+		break;
+	case BSE_Defeated:
+		break;
+	default:
+		break;
+	}
 }
 
 float ABikeBoss::GetCurrentAttackPower() const

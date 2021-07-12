@@ -36,6 +36,8 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	UBoxComponent* BoxComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USkeletalMeshComponent* BossVisibleComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UDestructibleComponent* BossDestructibleComponent;
 
 	UPROPERTY(VisibleAnywhere)

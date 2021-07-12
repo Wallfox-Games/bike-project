@@ -132,7 +132,7 @@ public:
 	void SetCurrentPower(float NewPower);
 	UFUNCTION()
 	void Movement(float DeltaTime);
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	FVector GetPrevMov();
 	UFUNCTION()
 	void ZeroPrevMov();
