@@ -9,6 +9,11 @@
 
 class BIKEPROJECT_API UBikeGameInstance;
 
+struct MessagePayload {
+	int DeviceType;
+	float BikeSpeed;
+};
+
 /**
  * 
  */
@@ -18,10 +23,11 @@ class BIKEPROJECT_API BikePhysicalInput : public FRunnable
 	FProcHandle ANTProcHandle;
 	FSocket* Socket;
 	UBikeGameInstance* GameInstanceRef;
-	int DeviceType;
+	MessagePayload sMsgPay;
+	bool LoadDevice;
 
 public:
-	BikePhysicalInput(UBikeGameInstance* BikeInstanceRef, int NewDeviceType);
+	BikePhysicalInput(UBikeGameInstance* BikeInstanceRef, bool NewLoadDevice);
 	~BikePhysicalInput();
 
 public: // FRunnable Interface

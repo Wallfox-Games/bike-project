@@ -12,7 +12,7 @@ void UBikeGameInstance::Init()
 	PhysicalSpeed = -1.f;
 	MobileSpeed = -1.f;
 
-	SensorState = -1;
+	SensorState = false;
 	MobileState = -1;
 
 	// Only load game stats if the load .sav file exists
@@ -42,7 +42,6 @@ void UBikeGameInstance::Shutdown()
 
 void UBikeGameInstance::SetPhysicalSpeed(float NewSpeed)
 {
-	if (SensorState == 0) SensorState = 1;
 	PhysicalSpeed = NewSpeed * Circumference / 1000.f;
 }
 
@@ -55,6 +54,16 @@ float UBikeGameInstance::GetSpeed()
 {
 	if (SensorState) return PhysicalSpeed;
 	else return MobileSpeed;
+}
+
+float UBikeGameInstance::GetPhysicalSpeed() const
+{
+	return PhysicalSpeed;
+}
+
+float UBikeGameInstance::GetMobileSpeed() const
+{
+	return MobileSpeed;
 }
 
 void UBikeGameInstance::SetCircumference(float newCircumference)
@@ -90,9 +99,9 @@ bool UBikeGameInstance::GetTutorialState() const
 	return TutorialState;
 }
 
-void UBikeGameInstance::StartPhysicalTask(int DeviceType)
+void UBikeGameInstance::StartPhysicalTask(bool LoadDevice)
 {
-	PhysicalTask = new BikePhysicalInput(this, DeviceType);
+	PhysicalTask = new BikePhysicalInput(this, LoadDevice);
 }
 
 void UBikeGameInstance::StopPhysicalTask()
@@ -115,7 +124,7 @@ void UBikeGameInstance::StopMobileTask()
 	MobileTask = nullptr;
 }
 
-int UBikeGameInstance::GetSensorState() const
+bool UBikeGameInstance::GetSensorState() const
 {
 	return SensorState;
 }
@@ -131,6 +140,16 @@ int UBikeGameInstance::GetMobileState() const
 	return MobileState;
 }
 
+void UBikeGameInstance::SetDeviceType(int NewValue)
+{
+	DeviceType = NewValue;
+}
+
+int UBikeGameInstance::GetDeviceType() const
+{
+	return DeviceType;
+}
+
 void UBikeGameInstance::SetDeviceAddress(FString NewValue)
 {
 	DeviceAddress = NewValue;
@@ -143,5 +162,5 @@ FString UBikeGameInstance::GetDeviceAddress() const
 
 void UBikeGameInstance::SetSensorState(bool NewValue)
 {
-	if (NewValue) SensorState = 0;
+	SensorState = NewValue;
 }
