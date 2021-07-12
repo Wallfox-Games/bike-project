@@ -10,9 +10,10 @@
 UENUM(BlueprintType)
 enum EPlayerMove {
 	PME_Normal			UMETA(DisplayName = "Normal Movement"),
-	PME_LaneBoss		UMETA(DisplayName = "1 Lane Boss"),
-	PME_MoveBoss		UMETA(DisplayName = "3 Lane Boss"),
-	PME_AttackBoss		UMETA(DisplayName = "Attacking Boss"),
+	PME_BossCharge		UMETA(DisplayName = "1 Lane Boss"),
+	PME_BossDodge		UMETA(DisplayName = "3 Lane Boss"),
+	PME_BossAttack		UMETA(DisplayName = "Attacking Boss"),
+	PME_BossCooldown	UMETA(DisplayName = "Cooling Down"),
 	PME_SlowDown		UMETA(DisplayName = "Slowing to Stop")
 };
 

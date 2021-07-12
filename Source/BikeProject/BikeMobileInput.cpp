@@ -92,7 +92,7 @@ uint32 BikeMobileInput::Run()
 			}
 			if (WaitingConf)
 			{
-				GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Waiting for mobile"), true);
+				GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Green, TEXT("Waiting for mobile"), true);
 				// Sleep to reduce usage of system resources(nearly delta time).
 				FPlatformProcess::Sleep(0.03F);
 			}

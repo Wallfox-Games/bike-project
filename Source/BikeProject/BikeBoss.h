@@ -14,10 +14,12 @@
 
 UENUM(BlueprintType)
 enum EBossState{
-	BSE_Moving			UMETA(DisplayName = "Moving"),
-	BSE_Healthy			UMETA(DisplayName = "Healthy"),
-	BSE_Vulnerable		UMETA(DisplayName = "Vulnerable"),
-	BSE_Attacking		UMETA(DisplayName = "Attacking"),
+	BSE_Moving			UMETA(DisplayName = "Moving into position"),
+	BSE_Cooldown		UMETA(DisplayName = "Cooldown"),
+	BSE_Attacking		UMETA(DisplayName = "Attacking player"),
+	BSE_Despawning		UMETA(DisplayName = "Despawning mines"),
+	BSE_Reloading		UMETA(DisplayName = "Reloading mines"),
+	BSE_Vulnerable		UMETA(DisplayName = "Vulnerable to player"),
 	BSE_Defeated		UMETA(DisplayName = "Defeated"),
 };
 
@@ -63,18 +65,39 @@ protected:
 	int Health;
 	UPROPERTY()
 	TEnumAsByte<EBossState> BossStateEnum;
+
 	UPROPERTY()
 	float TargetSeconds;
 	UPROPERTY()
 	float TargetMultiplier;
 	UPROPERTY()
 	float TargetAttackPower;
+
+	UPROPERTY(EditAnywhere)
+	FString ObstacleString;
+	UPROPERTY()
+	FString ObstacleStringTemp;
+	UPROPERTY()
+	int ObstacleCurrent;
+	UPROPERTY()
+	float ObstacleTick;
+	UPROPERTY(BlueprintSetter = SetObstaclesDestroyed)
+	bool ObstaclesDestroyed;
+	UPROPERTY(EditAnywhere)
+	float ObstacleMaxTick = 1.f;
+
 	UPROPERTY()
 	float CurrentTime;
 	UPROPERTY()
 	float CurrentAttackPower;
+
 	UPROPERTY(EditAnywhere)
 	bool CanHit;
+
+	UPROPERTY()
+	float Cooldown;
+	UPROPERTY(EditAnywhere)
+	float MaxCooldown = 10.f;
 
 	UPROPERTY()
 	ABikeCharacter* PlayerPtr;
@@ -93,7 +116,7 @@ protected:
 		void Movement();
 
 	UFUNCTION()
-		void SetCameraPosition(float DeltaTime);
+		void SetCameraPosition(float DeltaTime, ABikeProjectPlayerController* PlayerControllerPtr);
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
@@ -102,17 +125,25 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void ChangeState(EBossState NewState);
+
 	UFUNCTION(BlueprintCallable)
 	float GetCurrentAttackPower() const;
 	UFUNCTION(BlueprintCallable)
 	float GetPercentageAttackPower() const;
 
 	UFUNCTION(BlueprintCallable)
-		float GetCurrentTime() const;
+	float GetCurrentTime() const;
 	UFUNCTION(BlueprintCallable)
-		float GetPercentageTime() const;
+	float GetPercentageTime() const;
 	UFUNCTION(BlueprintCallable)
-		float GetTimeToGo() const;
+	float GetTimeToGo() const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SpawnMine();
+	UFUNCTION(BlueprintCallable)
+	void SetObstaclesDestroyed(bool IsDestroyed);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool OnHit();
