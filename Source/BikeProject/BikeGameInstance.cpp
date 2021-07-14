@@ -23,7 +23,7 @@ void UBikeGameInstance::Init()
 	{
 		class UBikeProjectSaveGame* LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass()));
 		LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadInstance->SaveSlotName, LoadInstance->UserIndex));
-		MAXPOWER = LoadInstance->PlayerMaxPower;
+		PlayerStats = LoadInstance->SaveStats;
 		TutorialState = false;
 	}
 	// Else set MAXPOWER to high value and tutorial state to true
@@ -71,14 +71,19 @@ void UBikeGameInstance::SetCircumference(float newCircumference)
 	Circumference = newCircumference;
 }
 
+FPlayerStats UBikeGameInstance::GetPlayerStats() const
+{
+	return PlayerStats;
+}
+
 void UBikeGameInstance::SetMaxPower(float newMaxPower)
 {
-	MAXPOWER = newMaxPower;
+	PlayerStats.PlayerMaxPower = newMaxPower;
 
 	if (UBikeProjectSaveGame* SaveGameInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass())))
 	{
 		// Set data on the savegame object.
-		SaveGameInstance->PlayerMaxPower = MAXPOWER;
+		SaveGameInstance->SaveStats = PlayerStats;
 
 		// Save the data immediately.
 		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex))
@@ -91,7 +96,27 @@ void UBikeGameInstance::SetMaxPower(float newMaxPower)
 
 float UBikeGameInstance::GetMaxPower() const
 {
-	return MAXPOWER;
+	return PlayerStats.PlayerMaxPower;
+}
+
+void UBikeGameInstance::IncDistTravelled(float Distance)
+{
+	PlayerStats.TotalDistanceRan += Distance;
+}
+
+void UBikeGameInstance::IncBossesDefeated()
+{
+	PlayerStats.BossesDefeated++;
+}
+
+void UBikeGameInstance::IncMainGMCount()
+{
+	PlayerStats.MainGameModeCount++;
+}
+
+void UBikeGameInstance::IncStagesComplete()
+{
+	PlayerStats.StagesComplete++;
 }
 
 bool UBikeGameInstance::GetTutorialState() const

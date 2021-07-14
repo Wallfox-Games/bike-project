@@ -238,7 +238,6 @@ void ABikeProjectPlayerController::SetMoveEnum_Implementation(EPlayerMove NewSta
 		PawnInstanceRef->SetLaneBlocked(true);
 		break;
 	case PME_BossCooldown:
-		SetViewTargetWithBlend(PawnInstanceRef, 1.0f);
 		PawnInstanceRef->ChangePowerLane(1, DeltaTime);
 		PawnInstanceRef->SetLaneBlocked(true);
 		break;

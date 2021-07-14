@@ -133,11 +133,6 @@ void ABikeBoss::SetCameraPosition(float DeltaTime, ABikeProjectPlayerController*
 	BossCameraSpringArm->SetRelativeTransform(NewCameraTransform);
 	BossCameraSpringArm->TargetArmLength = NewCameraDist;
 	BossCamera->SetFieldOfView(NewCameraFOV);
-
-	if (PlayerControllerPtr->GetViewTarget() != this)
-	{
-		PlayerControllerPtr->SetViewTargetWithBlend(this, 1.f);
-	}
 }
 
 // Called every frame
@@ -170,14 +165,9 @@ void ABikeBoss::Tick(float DeltaTime)
 					NewHorizontalPos = BikeLanes->MoveCenter(false, DeltaTime, GetActorLocation());
 					LaneChange = !BikeLanes->IsFinishedMove();
 				}
-				else
-				{
-					SetCameraPosition(DeltaTime, PlayerControllerPtr);
-				}
 			}
 			else if (ToPlayerDist >= 800.f)
 			{
-				SetCameraPosition(DeltaTime, PlayerControllerPtr);
 				ChangeState(BSE_Cooldown);
 				PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
 			}
@@ -194,7 +184,6 @@ void ABikeBoss::Tick(float DeltaTime)
 			}
 			else
 			{
-				SetCameraPosition(DeltaTime, PlayerControllerPtr);
 				Cooldown = FMath::Clamp(Cooldown - DeltaTime, 0.f, MaxCooldown);
 			}
 			break;
@@ -287,7 +276,6 @@ void ABikeBoss::Tick(float DeltaTime)
 			else if (ObstaclesDestroyed)
 			{
 				ChangeState(EBossState::BSE_Reloading);
-				SetCameraPosition(DeltaTime, PlayerControllerPtr);
 			}
 			break;
 
@@ -306,11 +294,9 @@ void ABikeBoss::Tick(float DeltaTime)
 				ChangeState(EBossState::BSE_Cooldown);
 				PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
 			}
-			SetCameraPosition(DeltaTime, PlayerControllerPtr);
 			break;
 
 		case BSE_Vulnerable:
-			SetCameraPosition(DeltaTime, PlayerControllerPtr);
 			break;
 
 		case BSE_Defeated:
@@ -319,8 +305,9 @@ void ABikeBoss::Tick(float DeltaTime)
 		}
 
 		NewHorizontalPos.Z = GetActorLocation().Z;
-
 		SetActorLocation(NewHorizontalPos);
+
+		SetCameraPosition(DeltaTime, PlayerControllerPtr);
 	}
 }
 
@@ -328,6 +315,7 @@ void ABikeBoss::ChangeState_Implementation(EBossState NewState)
 {
 	BossStateEnum = NewState;
 
+	ABikeProjectPlayerController* PlayerControllerPtr = Cast<ABikeProjectPlayerController>(PlayerPtr->GetController());
 	switch (NewState)
 	{
 	case BSE_Moving:
@@ -337,10 +325,25 @@ void ABikeBoss::ChangeState_Implementation(EBossState NewState)
 	case BSE_Attacking:
 		break;
 	case BSE_Despawning:
+
+		if (PlayerControllerPtr->GetViewTarget() != this)
+		{
+			PlayerControllerPtr->SetViewTargetWithBlend(this, 1.f);
+		}
 		break;
 	case BSE_Reloading:
+
+		if (PlayerControllerPtr->GetViewTarget() != this)
+		{
+			PlayerControllerPtr->SetViewTargetWithBlend(this, 1.f);
+		}
 		break;
 	case BSE_Vulnerable:
+
+		if (PlayerControllerPtr->GetViewTarget() != this)
+		{
+			PlayerControllerPtr->SetViewTargetWithBlend(this, 1.f);
+		}
 		break;
 	case BSE_Defeated:
 		break;
