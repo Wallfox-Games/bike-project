@@ -30,6 +30,8 @@ class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 	UPROPERTY(BlueprintGetter = GetPowerLevel)
 	float PowerLevel;
 	UPROPERTY()
+	float PowerLevelMax;
+	UPROPERTY()
 	float PowerLevelKB;
 	UPROPERTY()
 	float PowerLevelBP;
@@ -95,6 +97,8 @@ class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 
 	UFUNCTION(BlueprintCallable)
 	float GetPowerLevel() const;
+	UFUNCTION(BlueprintCallable)
+	float GetPowerLevelMax() const;
 
 	UFUNCTION(BlueprintCallable)
 	bool GetMovePauseBlocked() const;

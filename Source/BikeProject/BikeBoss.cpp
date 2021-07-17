@@ -3,6 +3,7 @@
 #include "BikeBoss.h"
 
 #include "BikeProjectPlayerController.h"
+#include "BikeGameInstance.h"
 
 // Sets default values
 ABikeBoss::ABikeBoss()
@@ -316,6 +317,8 @@ void ABikeBoss::ChangeState_Implementation(EBossState NewState)
 	BossStateEnum = NewState;
 
 	ABikeProjectPlayerController* PlayerControllerPtr = Cast<ABikeProjectPlayerController>(PlayerPtr->GetController());
+	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
+
 	switch (NewState)
 	{
 	case BSE_Moving:
@@ -346,6 +349,7 @@ void ABikeBoss::ChangeState_Implementation(EBossState NewState)
 		}
 		break;
 	case BSE_Defeated:
+		GameInstanceRef->SetMaxPower(PlayerControllerPtr->GetPowerLevelMax());
 		break;
 	default:
 		break;

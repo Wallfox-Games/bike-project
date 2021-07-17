@@ -26,10 +26,9 @@ void UBikeGameInstance::Init()
 		PlayerStats = LoadInstance->SaveStats;
 		TutorialState = false;
 	}
-	// Else set MAXPOWER to high value and tutorial state to true
+	// Else set tutorial state to true
 	else
 	{
-		// In tutorial mode
 		TutorialState = true;
 	}
 }
@@ -76,10 +75,8 @@ FPlayerStats UBikeGameInstance::GetPlayerStats() const
 	return PlayerStats;
 }
 
-void UBikeGameInstance::SetMaxPower(float newMaxPower)
+void UBikeGameInstance::SavePlayerStats()
 {
-	PlayerStats.PlayerMaxPower = newMaxPower;
-
 	if (UBikeProjectSaveGame* SaveGameInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass())))
 	{
 		// Set data on the savegame object.
@@ -94,6 +91,11 @@ void UBikeGameInstance::SetMaxPower(float newMaxPower)
 	}
 }
 
+void UBikeGameInstance::SetMaxPower(float newMaxPower)
+{
+	PlayerStats.PlayerMaxPower = newMaxPower;	
+}
+
 float UBikeGameInstance::GetMaxPower() const
 {
 	return PlayerStats.PlayerMaxPower;
@@ -104,9 +106,9 @@ void UBikeGameInstance::IncDistTravelled(float Distance)
 	PlayerStats.TotalDistanceRan += Distance;
 }
 
-void UBikeGameInstance::IncBossesDefeated()
+void UBikeGameInstance::IncBossChunks()
 {
-	PlayerStats.BossesDefeated++;
+	PlayerStats.BossChunks++;
 }
 
 void UBikeGameInstance::IncMainGMCount()

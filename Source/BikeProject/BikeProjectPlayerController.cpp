@@ -34,6 +34,7 @@ void ABikeProjectPlayerController::BeginPlay()
 
 	ABikeCharacter* PawnInstanceRef = Cast<ABikeCharacter>(GetPawn());
 	SetViewTarget(PawnInstanceRef);
+	PowerLevelMax = PawnInstanceRef->GetRawPower(3);
 }
 
 // Called every frame
@@ -46,8 +47,9 @@ void ABikeProjectPlayerController::Tick(float DeltaTime)
 
 	switch (PlayerMoveEnum)
 	{
-	case PME_Normal:
 	case PME_BossCharge:
+		if (PowerLevelMax < PowerLevelTarget) PowerLevelMax = PowerLevelTarget;
+	case PME_Normal:
 	case PME_BossDodge:
 	case PME_BossCooldown:
 
@@ -98,6 +100,11 @@ void ABikeProjectPlayerController::SetupInputComponent()
 float ABikeProjectPlayerController::GetPowerLevel() const
 {
 	return PowerLevel;
+}
+
+float ABikeProjectPlayerController::GetPowerLevelMax() const
+{
+	return 0.0f;
 }
 
 // Sets time for left input and calls AddTime

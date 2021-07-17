@@ -36,13 +36,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FPlayerStats GetPlayerStats() const;
 	UFUNCTION(BlueprintCallable)
+	void SavePlayerStats();
+	UFUNCTION(BlueprintCallable)
 	void SetMaxPower(float newMaxPower);
 	UFUNCTION(BlueprintCallable)
 	float GetMaxPower() const;
 	UFUNCTION(BlueprintCallable)
 	void IncDistTravelled(float Distance);
 	UFUNCTION(BlueprintCallable)
-	void IncBossesDefeated();
+	void IncBossChunks();
 	UFUNCTION(BlueprintCallable)
 	void IncMainGMCount();
 	UFUNCTION(BlueprintCallable)

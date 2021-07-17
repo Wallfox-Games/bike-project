@@ -17,29 +17,28 @@ struct FPlayerStats
     // Use UPROPERTY() to decorate member variables as they allow for easier integration with network replication as well as potential garbage collection processing
     UPROPERTY()
     float PlayerMaxPower;
-
+    UPROPERTY()
+    float TotalDistanceRan;
     UPROPERTY()
     int TotalCurrency;
 
     UPROPERTY()
-    float TotalDistanceRan;
-
-    UPROPERTY()
-    int BossesDefeated;
-
-    UPROPERTY()
     int MainGameModeCount;
-
+    UPROPERTY()
+    int EndlessGameModeCount;
     UPROPERTY()
     int StagesComplete;
+    UPROPERTY()
+    int BossChunks;
 
     FPlayerStats()
     {
         PlayerMaxPower = 0;
-        TotalCurrency = 0;
         TotalDistanceRan = 0;
-        BossesDefeated = 0;
+        TotalCurrency = 0;
         MainGameModeCount = 0;
+        EndlessGameModeCount = 0;
         StagesComplete = 0;
+        BossChunks = 0;
     }
 };
