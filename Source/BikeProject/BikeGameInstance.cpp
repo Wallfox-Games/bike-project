@@ -41,7 +41,21 @@ void UBikeGameInstance::Shutdown()
 
 void UBikeGameInstance::SetPhysicalSpeed(float NewSpeed)
 {
-	PhysicalSpeed = NewSpeed * Circumference / 1000.f;
+	switch (DeviceType)
+	{
+	case 1:
+		PhysicalSpeed = NewSpeed * Circumference / 1000.f;
+		break;
+	case 2:
+		PhysicalSpeed = NewSpeed * 60.f;
+		break;
+	case 3:
+		PhysicalSpeed = NewSpeed;
+		break;
+	default:
+		break;
+	}
+	
 }
 
 void UBikeGameInstance::SetMobileSpeed(float NewSpeed)
