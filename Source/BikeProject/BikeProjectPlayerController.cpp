@@ -50,6 +50,7 @@ void ABikeProjectPlayerController::Tick(float DeltaTime)
 	case PME_BossCharge:
 		if (PowerLevelMax < PowerLevelTarget) PowerLevelMax = PowerLevelTarget;
 	case PME_Normal:
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("In Normal"), true);
 	case PME_BossDodge:
 	case PME_BossCooldown:
 
@@ -104,7 +105,7 @@ float ABikeProjectPlayerController::GetPowerLevel() const
 
 float ABikeProjectPlayerController::GetPowerLevelMax() const
 {
-	return 0.0f;
+	return PowerLevelMax;
 }
 
 // Sets time for left input and calls AddTime

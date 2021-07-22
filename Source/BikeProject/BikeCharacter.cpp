@@ -279,6 +279,7 @@ void ABikeCharacter::LoadMaxPower()
 	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
 	MAXPOWER = GameInstanceRef->GetMaxPower();
 
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Max Power: ") + FString::SanitizeFloat(MAXPOWER), true);
 	// Sets three power stages to be a percentage of MAXPOWER
 	UPPERPOWER = MAXPOWER * UpperPercent;
 	MIDDLEPOWER = MAXPOWER * MiddlePercent;

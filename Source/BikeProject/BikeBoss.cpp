@@ -260,17 +260,14 @@ void ABikeBoss::Tick(float DeltaTime)
 			break;
 
 		case BSE_Despawning:
-			GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Current Lane: ") + FString::FromInt(CurrentLane), true);
 			if (CurrentLane != 1)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Start Switching Lanes"), true);
 				NewHorizontalPos = BikeLanes->MoveCenter(true, DeltaTime, GetActorLocation());
 				CurrentLane = 1;
 				LaneChange = true;
 			}
 			else if (LaneChange)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Switching Lanes"), true);
 				NewHorizontalPos = BikeLanes->MoveCenter(false, DeltaTime, GetActorLocation());
 				LaneChange = !BikeLanes->IsFinishedMove();
 			}
