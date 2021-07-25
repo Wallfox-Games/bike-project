@@ -78,11 +78,17 @@ class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 
 	// Gameplay Variables
 	UPROPERTY()
-		int PlayerHealth;
-	UPROPERTY()
-		int ComboMeter;
-	UPROPERTY()
 		TEnumAsByte<EPlayerMove> PlayerMoveEnum;
+	UPROPERTY()
+		int PlayerHealth;
+	UPROPERTY(BlueprintGetter = GetCurrency)
+		int CurrencyCount;
+	UPROPERTY(EditAnywhere)
+		float CurrencyMultPos;
+	UPROPERTY(EditAnywhere)
+		float CurrencyMultRevive;
+	UPROPERTY(EditAnywhere)
+		float CurrencyMultDead;
 
 	public:
 	ABikeProjectPlayerController();
@@ -117,11 +123,11 @@ class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 		int GetPlayerHealth() const;
 
 	UFUNCTION(BlueprintCallable)
-		void SetComboMeter();
+		void ResetCurrency();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-		void ChangeComboMeter(bool PositiveChange);
+		void SetCurrency(bool PositiveChange);
 	UFUNCTION(BlueprintCallable)
-		int GetComboMeter() const;
+		int GetCurrency() const;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void SetMoveEnum(EPlayerMove NewState, float DeltaTime);

@@ -22,7 +22,10 @@ ABikeProjectPlayerController::ABikeProjectPlayerController()
 	MoveUIBlocked = false;
 
 	PlayerHealth = 8;
-	ComboMeter = 0;
+	CurrencyCount = 1000;
+	CurrencyMultPos = 1.5f;
+	CurrencyMultRevive = 0.2f;
+	CurrencyMultDead = 0.8f;
 
 	PlayerMoveEnum = PME_Normal;
 }
@@ -204,21 +207,20 @@ int ABikeProjectPlayerController::GetPlayerHealth() const
 	return PlayerHealth;
 }
 
-void ABikeProjectPlayerController::SetComboMeter()
+void ABikeProjectPlayerController::ResetCurrency()
 {
-	ComboMeter = 0;
+	CurrencyCount = 0;
 }
 
-void ABikeProjectPlayerController::ChangeComboMeter_Implementation(bool PositiveChange)
+void ABikeProjectPlayerController::SetCurrency_Implementation(bool PositiveChange)
 {
-	if (PositiveChange) ComboMeter++;
-	else ComboMeter -= 5;
-	if (ComboMeter < 0) ComboMeter = 0;
+	if (PositiveChange) CurrencyCount += CurrencyCount * CurrencyMultPos;
+	else CurrencyCount -= CurrencyCount * CurrencyMultRevive;
 }
 
-int ABikeProjectPlayerController::GetComboMeter() const
+int ABikeProjectPlayerController::GetCurrency() const
 {
-	return ComboMeter;
+	return CurrencyCount;
 }
 
 void ABikeProjectPlayerController::SetMoveEnum_Implementation(EPlayerMove NewState, float DeltaTime)
