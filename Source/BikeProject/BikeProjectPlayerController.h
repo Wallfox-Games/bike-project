@@ -17,9 +17,6 @@ enum EPlayerMove {
 	PME_SlowDown		UMETA(DisplayName = "Slowing to Stop")
 };
 
-/**
- * 
- */
 UCLASS()
 class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 {

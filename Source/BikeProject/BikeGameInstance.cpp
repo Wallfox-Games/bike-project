@@ -15,6 +15,9 @@ void UBikeGameInstance::Init()
 	SensorState = false;
 	MobileState = -1;
 
+	MobileTask = nullptr;
+	PhysicalTask = nullptr;
+
 	// Only load game stats if the load .sav file exists
 	const FString SaveSlotName = FString(TEXT("PlayerSaveSlot"));
 

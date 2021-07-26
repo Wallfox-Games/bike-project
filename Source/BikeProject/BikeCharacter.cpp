@@ -51,6 +51,7 @@ ABikeCharacter::ABikeCharacter()
 	MiddlePercent = 0.5f;
 	LowerPercent = 0.3f;
 
+	BikeLanes = nullptr;
 	PowerLane = 1;
 	LaneWidth = 110.f;
 	LaneSpeed = 1.5f;
