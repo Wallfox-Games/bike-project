@@ -312,6 +312,11 @@ void ABikeCharacter::SetLaneBlocked_Implementation(bool Blocking)
 	LaneBlocked = Blocking;
 }
 
+bool ABikeCharacter::GetLaneSwitching() const
+{
+	return LaneSwitching;
+}
+
 void ABikeCharacter::ChangePowerLane(int NewLane, float DeltaTime)
 {
 	if (PowerLane != NewLane)
