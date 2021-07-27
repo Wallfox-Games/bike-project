@@ -68,7 +68,7 @@ protected:
 	float SpeedMultiplier;
 	UPROPERTY()
 	int PowerLane;
-	UPROPERTY()
+	UPROPERTY(BlueprintGetter = GetLaneSwitching)
 	bool LaneSwitching;
 	UPROPERTY()
 	bool LaneBlocked;
@@ -146,6 +146,8 @@ public:
 	void SetLanePos(FVector Easy, FVector Med, FVector Hard);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetLaneBlocked(bool Blocking);
+	UFUNCTION(BlueprintCallable)
+	bool GetLaneSwitching() const;
 
 	UFUNCTION(BlueprintCallable)
 	void ChangePowerLane(int NewLane, float DeltaTime);
