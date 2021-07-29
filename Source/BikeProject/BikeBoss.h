@@ -96,7 +96,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	bool CanHit;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintGetter = GetCooldown)
 	float Cooldown;
 	UPROPERTY(EditAnywhere)
 	float MaxCooldown = 10.f;
@@ -141,6 +141,9 @@ public:
 	float GetPercentageTime() const;
 	UFUNCTION(BlueprintCallable)
 	float GetTimeToGo() const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetCooldown() const;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SpawnMine();

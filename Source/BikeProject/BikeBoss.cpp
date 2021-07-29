@@ -378,6 +378,11 @@ float ABikeBoss::GetTimeToGo() const
 	return TargetSeconds - CurrentTime;
 }
 
+float ABikeBoss::GetCooldown() const
+{
+	return Cooldown;
+}
+
 void ABikeBoss::SetObstaclesDestroyed(bool IsDestroyed)
 {
 	ObstaclesDestroyed = IsDestroyed;
