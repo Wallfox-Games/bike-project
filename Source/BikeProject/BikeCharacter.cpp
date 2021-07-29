@@ -130,14 +130,14 @@ void ABikeCharacter::PostProcessTransition(float DeltaTime)
 	switch (PowerLane)
 	{
 	case 0:
-		PPAlpha = FMath::Clamp(PPAlpha - DeltaTime, 0.f, PPMed);
+		PPAlpha = FMath::Clamp(PPAlpha - AlphaChange, 0.f, PPMed);
 		break;
 	case 1:
-		if (PPAlpha > PPMed) PPAlpha = FMath::Clamp(PPAlpha - DeltaTime, PPMed, 1.f);
-		else PPAlpha = FMath::Clamp(PPAlpha + DeltaTime, 0.f, PPMed);
+		if (PPAlpha > PPMed) PPAlpha = FMath::Clamp(PPAlpha - AlphaChange, PPMed, 1.f);
+		else PPAlpha = FMath::Clamp(PPAlpha + AlphaChange, 0.f, PPMed);
 		break;
 	case 2:
-		PPAlpha = FMath::Clamp(PPAlpha + DeltaTime, PPMed, 1.f);
+		PPAlpha = FMath::Clamp(PPAlpha + AlphaChange, PPMed, 1.f);
 		break;
 	default:
 		break;
