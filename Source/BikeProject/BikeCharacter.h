@@ -84,7 +84,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* CapsuleComponent;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadWrite)
 	USkeletalMeshComponent* PlayerVisibleComponent;
 
 	UPROPERTY(VisibleAnywhere)
