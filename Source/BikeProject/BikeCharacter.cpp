@@ -123,6 +123,12 @@ void ABikeCharacter::ZeroPrevMov()
 	IntendedMovement = FVector(0.f);
 }
 
+void ABikeCharacter::DestroySelf_Implementation()
+{
+	BikeLanes->Destroy();
+	BikeLanes = nullptr;
+}
+
 void ABikeCharacter::PostProcessTransition(float DeltaTime)
 {
 	float AlphaChange = DeltaTime * PPAlphaMult;

@@ -11,15 +11,6 @@ ABikeBoss::ABikeBoss()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	HealthyCamTransform = FTransform(FRotator(5.f, -5.f, 0.0f), FVector(0.0f, 0.0f, 50.f), FVector(1.f));
-	VulnerableCamTransform = FTransform(FRotator(-20.f, -120.0f, 0.0f), FVector(-50.0f, 0.0f, 20.f), FVector(1.f));
-
-	HealthyCameraDistance = 900.f;
-	VulnerableCameraDistance = 300.f;
-
-	HealthyCameraFOV = 90.f;
-	VulnerableCameraFOV = 60.f;
-
 	// Our root component will be a sphere that reacts to physics
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("RootComponent"));
 	RootComponent = BoxComponent;
@@ -35,20 +26,13 @@ ABikeBoss::ABikeBoss()
 
 	BossCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("BossCameraSpringArm"));
 	BossCameraSpringArm->SetupAttachment(RootComponent);
-
-	BossCameraSpringArm->SetRelativeTransform(HealthyCamTransform);
-	BossCameraSpringArm->TargetArmLength = HealthyCameraDistance;
 	BossCameraSpringArm->bDoCollisionTest = false;
 
 	BossCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BossCamera"));
 	BossCamera->SetupAttachment(BossCameraSpringArm, USpringArmComponent::SocketName);
 
-	BossCamera->SetFieldOfView(HealthyCameraFOV);
-
 	MovementComponent = CreateDefaultSubobject<UBikeMovementComponent>(TEXT("BossMovementComponent"));
 	MovementComponent->UpdatedComponent = RootComponent;
-
-	CameraLerpAlpha = 0.f;
 
 	PlayerPtr = nullptr;
 	BikeLanes = nullptr;
@@ -86,6 +70,12 @@ void ABikeBoss::InitValues_Implementation(ABikeCharacter* NewPtr, int NewHealth,
 	PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
 }
 
+void ABikeBoss::DestroySelf_Implementation()
+{
+	BikeLanes->Destroy();
+	BikeLanes = nullptr;
+}
+
 // Called when the game starts or when spawned
 void ABikeBoss::BeginPlay()
 {
@@ -111,31 +101,6 @@ void ABikeBoss::Movement()
 	}
 
 	MovementComponent->AddInputVector(MoveVec);
-}
-
-void ABikeBoss::SetCameraPosition(float DeltaTime, ABikeProjectPlayerController* PlayerControllerPtr)
-{
-	if (BossStateEnum != BSE_Vulnerable && CameraLerpAlpha != 0.f)
-	{
-		//CameraLerpAlpha -= DeltaTime;
-		CameraLerpAlpha = 0.f;
-	}
-	else if (BossStateEnum == BSE_Vulnerable && CameraLerpAlpha != 1.f)
-	{
-		//CameraLerpAlpha += DeltaTime;
-		CameraLerpAlpha = 1.f;
-	}
-	CameraLerpAlpha = FMath::Clamp(CameraLerpAlpha, 0.f, 1.f);
-
-	FTransform NewCameraTransform;
-	NewCameraTransform.Blend(HealthyCamTransform, VulnerableCamTransform, CameraLerpAlpha);
-
-	float NewCameraDist = FMath::Lerp(HealthyCameraDistance, VulnerableCameraDistance, CameraLerpAlpha);
-	float NewCameraFOV = FMath::Lerp(HealthyCameraFOV, VulnerableCameraFOV, CameraLerpAlpha);
-
-	BossCameraSpringArm->SetRelativeTransform(NewCameraTransform);
-	BossCameraSpringArm->TargetArmLength = NewCameraDist;
-	BossCamera->SetFieldOfView(NewCameraFOV);
 }
 
 // Called every frame
@@ -306,8 +271,6 @@ void ABikeBoss::Tick(float DeltaTime)
 
 		NewHorizontalPos.Z = GetActorLocation().Z;
 		SetActorLocation(NewHorizontalPos);
-
-		SetCameraPosition(DeltaTime, PlayerControllerPtr);
 	}
 }
 

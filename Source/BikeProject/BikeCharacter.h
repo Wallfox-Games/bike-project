@@ -26,6 +26,9 @@ public:
 	// Sets default values for this character's properties
 	ABikeCharacter();
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void DestroySelf();
+
 protected:
 	// Variables
 	UPROPERTY(EditAnywhere)
