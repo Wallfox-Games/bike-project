@@ -117,11 +117,13 @@ void ABikeBoss::SetCameraPosition(float DeltaTime, ABikeProjectPlayerController*
 {
 	if (BossStateEnum != BSE_Vulnerable && CameraLerpAlpha != 0.f)
 	{
-		CameraLerpAlpha -= DeltaTime;
+		//CameraLerpAlpha -= DeltaTime;
+		CameraLerpAlpha = 0.f;
 	}
 	else if (BossStateEnum == BSE_Vulnerable && CameraLerpAlpha != 1.f)
 	{
-		CameraLerpAlpha += DeltaTime;
+		//CameraLerpAlpha += DeltaTime;
+		CameraLerpAlpha = 1.f;
 	}
 	CameraLerpAlpha = FMath::Clamp(CameraLerpAlpha, 0.f, 1.f);
 
