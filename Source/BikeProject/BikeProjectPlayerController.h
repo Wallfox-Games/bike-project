@@ -17,9 +17,6 @@ enum EPlayerMove {
 	PME_SlowDown		UMETA(DisplayName = "Slowing to Stop")
 };
 
-/**
- * 
- */
 UCLASS()
 class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 {
@@ -29,6 +26,8 @@ class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 	// Power Variables
 	UPROPERTY(BlueprintGetter = GetPowerLevel)
 	float PowerLevel;
+	UPROPERTY()
+	float PowerLevelMax;
 	UPROPERTY()
 	float PowerLevelKB;
 	UPROPERTY()
@@ -76,11 +75,17 @@ class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 
 	// Gameplay Variables
 	UPROPERTY()
-		int PlayerHealth;
-	UPROPERTY()
-		int ComboMeter;
-	UPROPERTY()
 		TEnumAsByte<EPlayerMove> PlayerMoveEnum;
+	UPROPERTY()
+		int PlayerHealth;
+	UPROPERTY(BlueprintGetter = GetCurrency)
+		int CurrencyCount;
+	UPROPERTY(EditAnywhere)
+		float CurrencyMultPos;
+	UPROPERTY(EditAnywhere)
+		float CurrencyMultRevive;
+	UPROPERTY(EditAnywhere)
+		float CurrencyMultDead;
 
 	public:
 	ABikeProjectPlayerController();
@@ -95,6 +100,8 @@ class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 
 	UFUNCTION(BlueprintCallable)
 	float GetPowerLevel() const;
+	UFUNCTION(BlueprintCallable)
+	float GetPowerLevelMax() const;
 
 	UFUNCTION(BlueprintCallable)
 	bool GetMovePauseBlocked() const;
@@ -113,11 +120,11 @@ class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 		int GetPlayerHealth() const;
 
 	UFUNCTION(BlueprintCallable)
-		void SetComboMeter();
+		void ResetCurrency();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-		void ChangeComboMeter(bool PositiveChange);
+		void SetCurrency(bool PositiveChange);
 	UFUNCTION(BlueprintCallable)
-		int GetComboMeter() const;
+		int GetCurrency() const;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void SetMoveEnum(EPlayerMove NewState, float DeltaTime);

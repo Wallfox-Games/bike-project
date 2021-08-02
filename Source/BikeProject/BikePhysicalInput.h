@@ -14,9 +14,6 @@ struct MessagePayload {
 	float BikeSpeed;
 };
 
-/**
- * 
- */
 class BIKEPROJECT_API BikePhysicalInput : public FRunnable
 {
 	FRunnableThread* RunnableThread;

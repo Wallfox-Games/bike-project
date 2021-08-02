@@ -3,6 +3,7 @@
 #include "BikeBoss.h"
 
 #include "BikeProjectPlayerController.h"
+#include "BikeGameInstance.h"
 
 // Sets default values
 ABikeBoss::ABikeBoss()
@@ -10,41 +11,28 @@ ABikeBoss::ABikeBoss()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	HealthyCamTransform = FTransform(FRotator(5.f, -5.f, 0.0f), FVector(0.0f, 0.0f, 50.f), FVector(1.f));
-	VulnerableCamTransform = FTransform(FRotator(-20.f, -120.0f, 0.0f), FVector(-50.0f, 0.0f, 20.f), FVector(1.f));
-
-	HealthyCameraDistance = 900.f;
-	VulnerableCameraDistance = 300.f;
-
-	HealthyCameraFOV = 90.f;
-	VulnerableCameraFOV = 60.f;
-
 	// Our root component will be a sphere that reacts to physics
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("RootComponent"));
 	RootComponent = BoxComponent;
 	BoxComponent->SetBoxExtent(FVector(75.f, 35.f, 38.f));
 	BoxComponent->SetCollisionProfileName(TEXT("Pawn"));
 
+	BossVisibleComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BossVisibleComponent"));
+	BossVisibleComponent->SetupAttachment(RootComponent);
+	BossVisibleComponent->SetRelativeTransform(FTransform(FRotator(0.f, 270.f, 0.f), FVector(20.f, 0.f, -40.f), FVector(1.f)));
 	BossDestructibleComponent = CreateDefaultSubobject<UDestructibleComponent>(TEXT("BossDestructibleComponent"));
 	BossDestructibleComponent->SetupAttachment(RootComponent);
 	BossDestructibleComponent->SetRelativeTransform(FTransform(FRotator(0.f, 270.f, 0.f), FVector(20.f, 0.f, -40.f), FVector(1.f)));
 
 	BossCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("BossCameraSpringArm"));
 	BossCameraSpringArm->SetupAttachment(RootComponent);
-
-	BossCameraSpringArm->SetRelativeTransform(HealthyCamTransform);
-	BossCameraSpringArm->TargetArmLength = HealthyCameraDistance;
 	BossCameraSpringArm->bDoCollisionTest = false;
 
 	BossCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("BossCamera"));
 	BossCamera->SetupAttachment(BossCameraSpringArm, USpringArmComponent::SocketName);
 
-	BossCamera->SetFieldOfView(HealthyCameraFOV);
-
 	MovementComponent = CreateDefaultSubobject<UBikeMovementComponent>(TEXT("BossMovementComponent"));
 	MovementComponent->UpdatedComponent = RootComponent;
-
-	CameraLerpAlpha = 0.f;
 
 	PlayerPtr = nullptr;
 	BikeLanes = nullptr;
@@ -82,6 +70,12 @@ void ABikeBoss::InitValues_Implementation(ABikeCharacter* NewPtr, int NewHealth,
 	PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
 }
 
+void ABikeBoss::DestroySelf_Implementation()
+{
+	BikeLanes->Destroy();
+	BikeLanes = nullptr;
+}
+
 // Called when the game starts or when spawned
 void ABikeBoss::BeginPlay()
 {
@@ -109,40 +103,10 @@ void ABikeBoss::Movement()
 	MovementComponent->AddInputVector(MoveVec);
 }
 
-void ABikeBoss::SetCameraPosition(float DeltaTime, ABikeProjectPlayerController* PlayerControllerPtr)
-{
-	if (BossStateEnum != BSE_Vulnerable && CameraLerpAlpha != 0.f)
-	{
-		CameraLerpAlpha -= DeltaTime;
-	}
-	else if (BossStateEnum == BSE_Vulnerable && CameraLerpAlpha != 1.f)
-	{
-		CameraLerpAlpha += DeltaTime;
-	}
-	CameraLerpAlpha = FMath::Clamp(CameraLerpAlpha, 0.f, 1.f);
-
-	FTransform NewCameraTransform;
-	NewCameraTransform.Blend(HealthyCamTransform, VulnerableCamTransform, CameraLerpAlpha);
-
-	float NewCameraDist = FMath::Lerp(HealthyCameraDistance, VulnerableCameraDistance, CameraLerpAlpha);
-	float NewCameraFOV = FMath::Lerp(HealthyCameraFOV, VulnerableCameraFOV, CameraLerpAlpha);
-
-	BossCameraSpringArm->SetRelativeTransform(NewCameraTransform);
-	BossCameraSpringArm->TargetArmLength = NewCameraDist;
-	BossCamera->SetFieldOfView(NewCameraFOV);
-
-	if (PlayerControllerPtr->GetViewTarget() != this)
-	{
-		PlayerControllerPtr->SetViewTargetWithBlend(this, 1.f);
-	}
-}
-
 // Called every frame
 void ABikeBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	GEngine->AddOnScreenDebugMessage(1, DeltaTime, FColor::Green, TEXT("Boss State: ") + StaticEnum<EBossState>()->GetValueAsString(BossStateEnum), true);
 
 	Movement();
 
@@ -169,14 +133,9 @@ void ABikeBoss::Tick(float DeltaTime)
 					NewHorizontalPos = BikeLanes->MoveCenter(false, DeltaTime, GetActorLocation());
 					LaneChange = !BikeLanes->IsFinishedMove();
 				}
-				else
-				{
-					SetCameraPosition(DeltaTime, PlayerControllerPtr);
-				}
 			}
 			else if (ToPlayerDist >= 800.f)
 			{
-				SetCameraPosition(DeltaTime, PlayerControllerPtr);
 				ChangeState(BSE_Cooldown);
 				PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
 			}
@@ -193,7 +152,6 @@ void ABikeBoss::Tick(float DeltaTime)
 			}
 			else
 			{
-				SetCameraPosition(DeltaTime, PlayerControllerPtr);
 				Cooldown = FMath::Clamp(Cooldown - DeltaTime, 0.f, MaxCooldown);
 			}
 			break;
@@ -269,24 +227,20 @@ void ABikeBoss::Tick(float DeltaTime)
 			break;
 
 		case BSE_Despawning:
-			GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Current Lane: ") + FString::FromInt(CurrentLane), true);
 			if (CurrentLane != 1)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Start Switching Lanes"), true);
 				NewHorizontalPos = BikeLanes->MoveCenter(true, DeltaTime, GetActorLocation());
 				CurrentLane = 1;
 				LaneChange = true;
 			}
 			else if (LaneChange)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Switching Lanes"), true);
 				NewHorizontalPos = BikeLanes->MoveCenter(false, DeltaTime, GetActorLocation());
 				LaneChange = !BikeLanes->IsFinishedMove();
 			}
 			else if (ObstaclesDestroyed)
 			{
 				ChangeState(EBossState::BSE_Reloading);
-				SetCameraPosition(DeltaTime, PlayerControllerPtr);
 			}
 			break;
 
@@ -305,11 +259,9 @@ void ABikeBoss::Tick(float DeltaTime)
 				ChangeState(EBossState::BSE_Cooldown);
 				PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
 			}
-			SetCameraPosition(DeltaTime, PlayerControllerPtr);
 			break;
 
 		case BSE_Vulnerable:
-			SetCameraPosition(DeltaTime, PlayerControllerPtr);
 			break;
 
 		case BSE_Defeated:
@@ -318,15 +270,52 @@ void ABikeBoss::Tick(float DeltaTime)
 		}
 
 		NewHorizontalPos.Z = GetActorLocation().Z;
-
 		SetActorLocation(NewHorizontalPos);
 	}
 }
 
 void ABikeBoss::ChangeState_Implementation(EBossState NewState)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Switching to state: ") + StaticEnum<EBossState>()->GetValueAsString(NewState), true);
 	BossStateEnum = NewState;
+
+	ABikeProjectPlayerController* PlayerControllerPtr = Cast<ABikeProjectPlayerController>(PlayerPtr->GetController());
+	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
+
+	switch (NewState)
+	{
+	case BSE_Moving:
+		break;
+	case BSE_Cooldown:
+		break;
+	case BSE_Attacking:
+		break;
+	case BSE_Despawning:
+
+		if (PlayerControllerPtr->GetViewTarget() != this)
+		{
+			PlayerControllerPtr->SetViewTargetWithBlend(this, 1.f);
+		}
+		break;
+	case BSE_Reloading:
+
+		if (PlayerControllerPtr->GetViewTarget() != this)
+		{
+			PlayerControllerPtr->SetViewTargetWithBlend(this, 1.f);
+		}
+		break;
+	case BSE_Vulnerable:
+
+		if (PlayerControllerPtr->GetViewTarget() != this)
+		{
+			PlayerControllerPtr->SetViewTargetWithBlend(this, 1.f);
+		}
+		break;
+	case BSE_Defeated:
+		GameInstanceRef->SetMaxPower(PlayerControllerPtr->GetPowerLevelMax());
+		break;
+	default:
+		break;
+	}
 }
 
 float ABikeBoss::GetCurrentAttackPower() const
@@ -352,6 +341,11 @@ float ABikeBoss::GetPercentageTime() const
 float ABikeBoss::GetTimeToGo() const
 {
 	return TargetSeconds - CurrentTime;
+}
+
+float ABikeBoss::GetCooldown() const
+{
+	return Cooldown;
 }
 
 void ABikeBoss::SetObstaclesDestroyed(bool IsDestroyed)

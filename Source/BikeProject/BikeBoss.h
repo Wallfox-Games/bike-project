@@ -32,31 +32,21 @@ public:
 	// Sets default values for this pawn's properties
 	ABikeBoss();
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void DestroySelf();
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	UBoxComponent* BoxComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USkeletalMeshComponent* BossVisibleComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UDestructibleComponent* BossDestructibleComponent;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USpringArmComponent* BossCameraSpringArm;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UCameraComponent* BossCamera;
-
-	UPROPERTY(EditAnywhere)
-	FTransform HealthyCamTransform;
-	UPROPERTY(EditAnywhere)
-	float HealthyCameraDistance;
-	UPROPERTY(EditAnywhere)
-	float HealthyCameraFOV;
-	UPROPERTY(EditAnywhere)
-	FTransform VulnerableCamTransform;
-	UPROPERTY(EditAnywhere)
-	float VulnerableCameraDistance;
-	UPROPERTY(EditAnywhere)
-	float VulnerableCameraFOV;
-	UPROPERTY()
-	float CameraLerpAlpha;
 
 	UPROPERTY()
 	class UBikeMovementComponent* MovementComponent;
@@ -94,7 +84,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	bool CanHit;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintGetter = GetCooldown)
 	float Cooldown;
 	UPROPERTY(EditAnywhere)
 	float MaxCooldown = 10.f;
@@ -114,9 +104,6 @@ protected:
 
 	UFUNCTION()
 		void Movement();
-
-	UFUNCTION()
-		void SetCameraPosition(float DeltaTime, ABikeProjectPlayerController* PlayerControllerPtr);
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
@@ -139,6 +126,9 @@ public:
 	float GetPercentageTime() const;
 	UFUNCTION(BlueprintCallable)
 	float GetTimeToGo() const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetCooldown() const;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SpawnMine();

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
+#include "BikeProjectStatsStruct.h"
 #include "BikeProjectSaveGame.generated.h"
 
 /**
@@ -20,7 +21,7 @@ public:
         FString PlayerName;
 
     UPROPERTY(VisibleAnywhere, Category = Basic)
-        float PlayerMaxPower;
+        FPlayerStats SaveStats;
 
     UPROPERTY(VisibleAnywhere, Category = Basic)
         FString SaveSlotName;

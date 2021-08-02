@@ -15,6 +15,9 @@ void UBikeGameInstance::Init()
 	SensorState = false;
 	MobileState = -1;
 
+	MobileTask = nullptr;
+	PhysicalTask = nullptr;
+
 	// Only load game stats if the load .sav file exists
 	const FString SaveSlotName = FString(TEXT("PlayerSaveSlot"));
 
@@ -23,13 +26,12 @@ void UBikeGameInstance::Init()
 	{
 		class UBikeProjectSaveGame* LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass()));
 		LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadInstance->SaveSlotName, LoadInstance->UserIndex));
-		MAXPOWER = LoadInstance->PlayerMaxPower;
+		PlayerStats = LoadInstance->SaveStats;
 		TutorialState = false;
 	}
-	// Else set MAXPOWER to high value and tutorial state to true
+	// Else set tutorial state to true
 	else
 	{
-		// In tutorial mode
 		TutorialState = true;
 	}
 }
@@ -42,7 +44,21 @@ void UBikeGameInstance::Shutdown()
 
 void UBikeGameInstance::SetPhysicalSpeed(float NewSpeed)
 {
-	PhysicalSpeed = NewSpeed * Circumference / 1000.f;
+	switch (DeviceType)
+	{
+	case 1:
+		PhysicalSpeed = NewSpeed * Circumference / 1000.f;
+		break;
+	case 2:
+		PhysicalSpeed = NewSpeed * 60.f;
+		break;
+	case 3:
+		PhysicalSpeed = NewSpeed;
+		break;
+	default:
+		break;
+	}
+	
 }
 
 void UBikeGameInstance::SetMobileSpeed(float NewSpeed)
@@ -71,14 +87,17 @@ void UBikeGameInstance::SetCircumference(float newCircumference)
 	Circumference = newCircumference;
 }
 
-void UBikeGameInstance::SetMaxPower(float newMaxPower)
+FPlayerStats UBikeGameInstance::GetPlayerStats() const
 {
-	MAXPOWER = newMaxPower;
+	return PlayerStats;
+}
 
+void UBikeGameInstance::SavePlayerStats()
+{
 	if (UBikeProjectSaveGame* SaveGameInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass())))
 	{
 		// Set data on the savegame object.
-		SaveGameInstance->PlayerMaxPower = MAXPOWER;
+		SaveGameInstance->SaveStats = PlayerStats;
 
 		// Save the data immediately.
 		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex))
@@ -89,9 +108,34 @@ void UBikeGameInstance::SetMaxPower(float newMaxPower)
 	}
 }
 
+void UBikeGameInstance::SetMaxPower(float newMaxPower)
+{
+	PlayerStats.PlayerMaxPower = newMaxPower;	
+}
+
 float UBikeGameInstance::GetMaxPower() const
 {
-	return MAXPOWER;
+	return PlayerStats.PlayerMaxPower;
+}
+
+void UBikeGameInstance::IncDistTravelled(float Distance)
+{
+	PlayerStats.TotalDistanceRan += Distance;
+}
+
+void UBikeGameInstance::IncBossChunks()
+{
+	PlayerStats.BossChunks++;
+}
+
+void UBikeGameInstance::IncMainGMCount()
+{
+	PlayerStats.MainGameModeCount++;
+}
+
+void UBikeGameInstance::IncStagesComplete()
+{
+	PlayerStats.StagesComplete++;
 }
 
 bool UBikeGameInstance::GetTutorialState() const

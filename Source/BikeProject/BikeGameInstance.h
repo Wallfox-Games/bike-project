@@ -6,6 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "BikePhysicalInput.h"
 #include "BikeMobileInput.h"
+#include "BikeProjectStatsStruct.h"
 #include "BikeGameInstance.generated.h"
 
 UCLASS()
@@ -33,9 +34,21 @@ public:
 	void SetCircumference(float newCircumference);
 
 	UFUNCTION(BlueprintCallable)
+	FPlayerStats GetPlayerStats() const;
+	UFUNCTION(BlueprintCallable)
+	void SavePlayerStats();
+	UFUNCTION(BlueprintCallable)
 	void SetMaxPower(float newMaxPower);
 	UFUNCTION(BlueprintCallable)
 	float GetMaxPower() const;
+	UFUNCTION(BlueprintCallable)
+	void IncDistTravelled(float Distance);
+	UFUNCTION(BlueprintCallable)
+	void IncBossChunks();
+	UFUNCTION(BlueprintCallable)
+	void IncMainGMCount();
+	UFUNCTION(BlueprintCallable)
+	void IncStagesComplete();
 
 	UFUNCTION(BlueprintCallable)
 	bool GetTutorialState() const;
@@ -83,8 +96,8 @@ private:
 	UPROPERTY(BlueprintGetter = GetDeviceAddress)
 	FString DeviceAddress;
 
-	UPROPERTY(BlueprintSetter = SetMaxPower, BlueprintGetter = GetMaxPower)
-	float MAXPOWER;
+	UPROPERTY(BlueprintGetter = GetPlayerStats)
+	FPlayerStats PlayerStats;
 	UPROPERTY(BlueprintGetter = GetTutorialState)
 	bool TutorialState;
 	UPROPERTY(BlueprintGetter = GetSensorState)

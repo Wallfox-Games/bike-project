@@ -22,7 +22,10 @@ ABikeProjectPlayerController::ABikeProjectPlayerController()
 	MoveUIBlocked = false;
 
 	PlayerHealth = 8;
-	ComboMeter = 0;
+	CurrencyCount = 1000;
+	CurrencyMultPos = 1.5f;
+	CurrencyMultRevive = 0.2f;
+	CurrencyMultDead = 0.8f;
 
 	PlayerMoveEnum = PME_Normal;
 }
@@ -34,6 +37,7 @@ void ABikeProjectPlayerController::BeginPlay()
 
 	ABikeCharacter* PawnInstanceRef = Cast<ABikeCharacter>(GetPawn());
 	SetViewTarget(PawnInstanceRef);
+	PowerLevelMax = PawnInstanceRef->GetRawPower(3);
 }
 
 // Called every frame
@@ -46,8 +50,10 @@ void ABikeProjectPlayerController::Tick(float DeltaTime)
 
 	switch (PlayerMoveEnum)
 	{
-	case PME_Normal:
 	case PME_BossCharge:
+		if (PowerLevelMax < PowerLevelTarget) PowerLevelMax = PowerLevelTarget;
+	case PME_Normal:
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("In Normal"), true);
 	case PME_BossDodge:
 	case PME_BossCooldown:
 
@@ -98,6 +104,11 @@ void ABikeProjectPlayerController::SetupInputComponent()
 float ABikeProjectPlayerController::GetPowerLevel() const
 {
 	return PowerLevel;
+}
+
+float ABikeProjectPlayerController::GetPowerLevelMax() const
+{
+	return PowerLevelMax;
 }
 
 // Sets time for left input and calls AddTime
@@ -196,21 +207,20 @@ int ABikeProjectPlayerController::GetPlayerHealth() const
 	return PlayerHealth;
 }
 
-void ABikeProjectPlayerController::SetComboMeter()
+void ABikeProjectPlayerController::ResetCurrency()
 {
-	ComboMeter = 0;
+	CurrencyCount = 0;
 }
 
-void ABikeProjectPlayerController::ChangeComboMeter_Implementation(bool PositiveChange)
+void ABikeProjectPlayerController::SetCurrency_Implementation(bool PositiveChange)
 {
-	if (PositiveChange) ComboMeter++;
-	else ComboMeter -= 5;
-	if (ComboMeter < 0) ComboMeter = 0;
+	if (PositiveChange) CurrencyCount += CurrencyCount * CurrencyMultPos;
+	else CurrencyCount -= CurrencyCount * CurrencyMultRevive;
 }
 
-int ABikeProjectPlayerController::GetComboMeter() const
+int ABikeProjectPlayerController::GetCurrency() const
 {
-	return ComboMeter;
+	return CurrencyCount;
 }
 
 void ABikeProjectPlayerController::SetMoveEnum_Implementation(EPlayerMove NewState, float DeltaTime)
@@ -238,7 +248,6 @@ void ABikeProjectPlayerController::SetMoveEnum_Implementation(EPlayerMove NewSta
 		PawnInstanceRef->SetLaneBlocked(true);
 		break;
 	case PME_BossCooldown:
-		SetViewTargetWithBlend(PawnInstanceRef, 1.0f);
 		PawnInstanceRef->ChangePowerLane(1, DeltaTime);
 		PawnInstanceRef->SetLaneBlocked(true);
 		break;
