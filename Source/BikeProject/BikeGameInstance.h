@@ -71,6 +71,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetMobileState() const;
 	UFUNCTION(BlueprintCallable)
+	void SetMobileMessage(int NewValue);
+	UFUNCTION(BlueprintCallable)
+	int GetMobileMessage() const;
+	UFUNCTION(BlueprintCallable)
 	void SetDeviceType(int NewValue);
 	UFUNCTION(BlueprintCallable)
 	int GetDeviceType() const;
@@ -91,6 +95,8 @@ private:
 	float PhysicalSpeed;
 	UPROPERTY(BlueprintGetter = GetDeviceType)
 	int DeviceType;
+	UPROPERTY(BlueprintGetter = GetMobileMessage)
+	int MobileMessage;
 	UPROPERTY(BlueprintGetter = GetMobileSpeed)
 	float MobileSpeed;
 	UPROPERTY(BlueprintGetter = GetDeviceAddress)

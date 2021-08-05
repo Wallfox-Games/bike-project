@@ -184,6 +184,16 @@ int UBikeGameInstance::GetMobileState() const
 	return MobileState;
 }
 
+void UBikeGameInstance::SetMobileMessage(int NewValue)
+{
+	MobileMessage = NewValue;
+}
+
+int UBikeGameInstance::GetMobileMessage() const
+{
+	return MobileMessage;
+}
+
 void UBikeGameInstance::SetDeviceType(int NewValue)
 {
 	DeviceType = NewValue;

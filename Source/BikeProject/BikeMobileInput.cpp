@@ -107,8 +107,12 @@ uint32 BikeMobileInput::Run()
 
 			if (Socket->Recv(Response, BufferSize, BytesRead))
 			{
-				GEngine->AddOnScreenDebugMessage(1, 10.f, FColor::Green, TEXT("Received: " + FString::SanitizeFloat(((float*)Response)[0])), true);
-				GameInstanceRef->SetMobileSpeed(((float*)Response)[0]);
+				if (GameInstanceRef->GetMobileState() == 1) GameInstanceRef->SetMobileMessage((int*)Response[0]);
+				else 
+				{
+					GEngine->AddOnScreenDebugMessage(1, 10.f, FColor::Green, TEXT("Received: " + FString::SanitizeFloat(((float*)Response)[0])), true);
+					GameInstanceRef->SetMobileSpeed(((float*)Response)[0]);
+				}
 			}
 
 			char MessageCharacter = NULL;
