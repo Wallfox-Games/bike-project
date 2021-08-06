@@ -16,7 +16,7 @@ struct FPlayerStats
 
     // Use UPROPERTY() to decorate member variables as they allow for easier integration with network replication as well as potential garbage collection processing
     UPROPERTY()
-    float PlayerMaxPower;
+    float PlayerMaxPower[3];
     UPROPERTY()
     float TotalDistanceRan;
     UPROPERTY()
@@ -33,7 +33,9 @@ struct FPlayerStats
 
     FPlayerStats()
     {
-        PlayerMaxPower = 0;
+        PlayerMaxPower[0] = 0;
+        PlayerMaxPower[1] = 0;
+        PlayerMaxPower[2] = 0;
         TotalDistanceRan = 0;
         TotalCurrency = 0;
         MainGameModeCount = 0;

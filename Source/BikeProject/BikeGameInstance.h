@@ -62,6 +62,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopMobileTask();
 
+	UFUNCTION(BlueprintCallable)
+	int GetConnectedState() const;
 	UFUNCTION()
 	void SetSensorState(bool NewValue);
 	UFUNCTION(BlueprintCallable)
