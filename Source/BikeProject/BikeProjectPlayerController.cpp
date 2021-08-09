@@ -72,8 +72,8 @@ void ABikeProjectPlayerController::Tick(float DeltaTime)
 
 		break;
 	case PME_BossAttack:
-		PowerTransition(DeltaTime, 0);
-		//PowerTransition(DeltaTime, PowerLevelAuto);
+		
+		PowerTransition(DeltaTime, PowerLevelAuto);
 		break;
 	case PME_SlowDown:
 
