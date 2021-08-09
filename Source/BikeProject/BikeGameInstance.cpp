@@ -110,12 +110,12 @@ void UBikeGameInstance::SavePlayerStats()
 
 void UBikeGameInstance::SetMaxPower(float newMaxPower)
 {
-	PlayerStats.PlayerMaxPower = newMaxPower;	
+	PlayerStats.PlayerMaxPower[GetConnectedState()] = newMaxPower;	
 }
 
 float UBikeGameInstance::GetMaxPower() const
 {
-	return PlayerStats.PlayerMaxPower;
+	return PlayerStats.PlayerMaxPower[GetConnectedState()];
 }
 
 void UBikeGameInstance::IncDistTravelled(float Distance)
@@ -184,6 +184,16 @@ int UBikeGameInstance::GetMobileState() const
 	return MobileState;
 }
 
+void UBikeGameInstance::SetMobileMessage(int NewValue)
+{
+	MobileMessage = NewValue;
+}
+
+int UBikeGameInstance::GetMobileMessage() const
+{
+	return MobileMessage;
+}
+
 void UBikeGameInstance::SetDeviceType(int NewValue)
 {
 	DeviceType = NewValue;
@@ -202,6 +212,13 @@ void UBikeGameInstance::SetDeviceAddress(FString NewValue)
 FString UBikeGameInstance::GetDeviceAddress() const
 {
 	return DeviceAddress;
+}
+
+int UBikeGameInstance::GetConnectedState() const
+{
+	if (SensorState) return 2;
+	else if (MobileState != -1) return 1;
+	else return 0;
 }
 
 void UBikeGameInstance::SetSensorState(bool NewValue)
