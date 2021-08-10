@@ -136,6 +136,13 @@ void ABikeBoss::Tick(float DeltaTime)
 			}
 			else if (ToPlayerDist >= 800.f)
 			{
+				float TempBossZ = GetActorLocation().Z;
+				SetActorLocation(PlayerPtr->GetActorLocation() + PlayerPtr->GetActorForwardVector() * 800.f);
+
+				FVector TempBossLocation = GetActorLocation();
+				TempBossLocation.Z = TempBossZ;
+				SetActorLocation(TempBossLocation);
+
 				ChangeState(BSE_Cooldown);
 				PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
 			}
