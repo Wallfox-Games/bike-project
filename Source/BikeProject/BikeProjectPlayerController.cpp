@@ -22,7 +22,7 @@ ABikeProjectPlayerController::ABikeProjectPlayerController()
 	MoveUIBlocked = false;
 
 	PlayerHealth = 8;
-	CurrencyCount = 1000;
+	CurrencyCount = 0;
 	CurrencyMultPos = 1.5f;
 	CurrencyMultRevive = 0.2f;
 	CurrencyMultDead = 0.8f;
@@ -214,7 +214,11 @@ void ABikeProjectPlayerController::ResetCurrency()
 
 void ABikeProjectPlayerController::SetCurrency_Implementation(bool PositiveChange)
 {
-	if (PositiveChange) CurrencyCount += CurrencyCount * CurrencyMultPos;
+	if (PositiveChange)
+	{
+		if (CurrencyCount == 0) CurrencyCount = CurrencyBase;
+		else CurrencyCount += CurrencyCount * CurrencyMultPos;
+	}
 	else CurrencyCount -= CurrencyCount * CurrencyMultRevive;
 }
 

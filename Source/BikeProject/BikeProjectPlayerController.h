@@ -81,6 +81,8 @@ class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 	UPROPERTY(BlueprintGetter = GetCurrency)
 		int CurrencyCount;
 	UPROPERTY(EditAnywhere)
+		int CurrencyBase;
+	UPROPERTY(EditAnywhere)
 		float CurrencyMultPos;
 	UPROPERTY(EditAnywhere)
 		float CurrencyMultRevive;
