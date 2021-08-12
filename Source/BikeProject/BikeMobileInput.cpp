@@ -130,6 +130,12 @@ uint32 BikeMobileInput::Run()
 			case 2:
 				MessageCharacter = 'g';
 				break;
+			case 3:
+				MessageCharacter = 'r';
+				break;
+			case 4:
+				MessageCharacter = 'e';
+				break;
 			default:
 				break;
 			}

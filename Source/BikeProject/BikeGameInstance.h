@@ -41,12 +41,26 @@ public:
 	void SetMaxPower(float newMaxPower);
 	UFUNCTION(BlueprintCallable)
 	float GetMaxPower() const;
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateCurrency(int Amount);
+	UFUNCTION(BlueprintCallable)
+	int GetCurrency() const;
+	UFUNCTION(BlueprintCallable)
+	void UpdateCostumeIndex(int Index, int Value);
+	UFUNCTION(BlueprintCallable)
+	int GetCostumeValue(int Index) const;
+	UFUNCTION(BlueprintCallable)
+	int GetCostumeEquipped() const;
+
 	UFUNCTION(BlueprintCallable)
 	void IncDistTravelled(float Distance);
 	UFUNCTION(BlueprintCallable)
 	void IncBossChunks();
 	UFUNCTION(BlueprintCallable)
 	void IncMainGMCount();
+	UFUNCTION(BlueprintCallable)
+	void IncEndlessGMCount();
 	UFUNCTION(BlueprintCallable)
 	void IncStagesComplete();
 

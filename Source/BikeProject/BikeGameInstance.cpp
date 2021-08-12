@@ -118,6 +118,37 @@ float UBikeGameInstance::GetMaxPower() const
 	return PlayerStats.PlayerMaxPower[GetConnectedState()];
 }
 
+void UBikeGameInstance::UpdateCurrency(int Amount)
+{
+	PlayerStats.TotalCurrency += Amount;
+}
+
+int UBikeGameInstance::GetCurrency() const
+{
+	return PlayerStats.TotalCurrency;
+}
+
+void UBikeGameInstance::UpdateCostumeIndex(int Index, int Value)
+{
+	PlayerStats.CostumeStatus[Index] = Value;
+}
+
+int UBikeGameInstance::GetCostumeValue(int Index) const
+{
+	return PlayerStats.CostumeStatus[Index];
+}
+
+int UBikeGameInstance::GetCostumeEquipped() const
+{
+	int Index = 0;
+	for (const int &i : PlayerStats.CostumeStatus)
+	{
+		if (i == 2) return Index;
+		Index++;
+	}
+	return 0;
+}
+
 void UBikeGameInstance::IncDistTravelled(float Distance)
 {
 	PlayerStats.TotalDistanceRan += Distance;
@@ -131,6 +162,11 @@ void UBikeGameInstance::IncBossChunks()
 void UBikeGameInstance::IncMainGMCount()
 {
 	PlayerStats.MainGameModeCount++;
+}
+
+void UBikeGameInstance::IncEndlessGMCount()
+{
+	PlayerStats.EndlessGameModeCount++;
 }
 
 void UBikeGameInstance::IncStagesComplete()
