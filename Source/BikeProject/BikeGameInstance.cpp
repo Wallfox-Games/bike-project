@@ -12,7 +12,8 @@ void UBikeGameInstance::Init()
 	PhysicalSpeed = -1.f;
 	MobileSpeed = -1.f;
 
-	SensorState = false;
+	SensorEnabled = false;
+	MobileEnabled = false;
 	MobileState = -1;
 
 	MobileTask = nullptr;
@@ -68,7 +69,7 @@ void UBikeGameInstance::SetMobileSpeed(float NewSpeed)
 
 float UBikeGameInstance::GetSpeed()
 {
-	if (SensorState) return PhysicalSpeed;
+	if (SensorEnabled) return PhysicalSpeed;
 	else return MobileSpeed;
 }
 
@@ -186,7 +187,7 @@ void UBikeGameInstance::StartPhysicalTask(bool LoadDevice)
 
 void UBikeGameInstance::StopPhysicalTask()
 {
-	SensorState = false;
+	SensorEnabled = false;
 	if (PhysicalTask != nullptr) delete PhysicalTask;
 	PhysicalTask = nullptr;
 }
@@ -204,15 +205,38 @@ void UBikeGameInstance::StopMobileTask()
 	MobileTask = nullptr;
 }
 
-bool UBikeGameInstance::GetSensorState() const
+int UBikeGameInstance::GetConnectedState() const
 {
-	return SensorState;
+	if (SensorEnabled) return 2;
+	else if (MobileEnabled) return 1;
+	else return 0;
+}
+
+void UBikeGameInstance::SetSensorEnabled(bool NewValue)
+{
+	SensorEnabled = NewValue;
+}
+
+bool UBikeGameInstance::GetSensorEnabled() const
+{
+	return SensorEnabled;
+}
+
+void UBikeGameInstance::SetMobileEnabled(bool NewValue)
+{
+	MobileEnabled = NewValue;
+}
+
+bool UBikeGameInstance::GetMobileEnabled() const
+{
+	return MobileEnabled;
 }
 
 void UBikeGameInstance::SetMobileState(int NewValue)
 {
 	MobileState = NewValue;
-	MobileSpeed = -1.f;
+	MobileSpeed = 0.f;
+	MobileMessage = 0.f;
 }
 
 int UBikeGameInstance::GetMobileState() const
@@ -248,16 +272,4 @@ void UBikeGameInstance::SetDeviceAddress(FString NewValue)
 FString UBikeGameInstance::GetDeviceAddress() const
 {
 	return DeviceAddress;
-}
-
-int UBikeGameInstance::GetConnectedState() const
-{
-	if (SensorState) return 2;
-	else if (MobileState != -1) return 1;
-	else return 0;
-}
-
-void UBikeGameInstance::SetSensorState(bool NewValue)
-{
-	SensorState = NewValue;
 }

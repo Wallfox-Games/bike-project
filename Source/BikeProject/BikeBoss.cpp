@@ -143,8 +143,18 @@ void ABikeBoss::Tick(float DeltaTime)
 				TempBossLocation.Z = TempBossZ;
 				SetActorLocation(TempBossLocation);
 
-				ChangeState(BSE_Cooldown);
-				PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
+				if (Cooldown > 0.f)
+				{
+					ChangeState(BSE_Cooldown);
+					PlayerControllerPtr->SetMoveEnum(PME_BossCooldown, DeltaTime);
+				}
+				else
+				{
+					CanHit = true;
+					ObstacleStringTemp = ObstacleString;
+					ChangeState(BSE_Attacking);
+					PlayerControllerPtr->SetMoveEnum(PME_BossDodge, DeltaTime);
+				}
 			}
 			Cooldown = FMath::Clamp(Cooldown - DeltaTime, 0.f, MaxCooldown);
 			break;

@@ -189,6 +189,7 @@ bool ABikeProjectPlayerController::GetMoveUIBlocked() const
 
 void ABikeProjectPlayerController::SetMoveUIBlocked(bool Blocking)
 {
+	if (Blocking) PowerLevelKB = 0;
 	MoveUIBlocked = Blocking;
 }
 
@@ -252,6 +253,7 @@ void ABikeProjectPlayerController::SetMoveEnum_Implementation(EPlayerMove NewSta
 		PawnInstanceRef->SetLaneBlocked(true);
 		break;
 	case PME_BossCooldown:
+		PowerLevelAuto = PowerLevelTarget;
 		PawnInstanceRef->ChangePowerLane(1, DeltaTime);
 		PawnInstanceRef->SetLaneBlocked(true);
 		break;

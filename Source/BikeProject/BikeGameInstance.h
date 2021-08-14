@@ -79,9 +79,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetConnectedState() const;
 	UFUNCTION()
-	void SetSensorState(bool NewValue);
+	void SetSensorEnabled(bool NewValue);
 	UFUNCTION(BlueprintCallable)
-	bool GetSensorState() const;
+	bool GetSensorEnabled() const;
+	UFUNCTION()
+	void SetMobileEnabled(bool NewValue);
+	UFUNCTION(BlueprintCallable)
+	bool GetMobileEnabled() const;
 	UFUNCTION(BlueprintCallable)
 	void SetMobileState(int NewValue);
 	UFUNCTION(BlueprintCallable)
@@ -122,8 +126,10 @@ private:
 	FPlayerStats PlayerStats;
 	UPROPERTY(BlueprintGetter = GetTutorialState)
 	bool TutorialState;
-	UPROPERTY(BlueprintGetter = GetSensorState)
-	bool SensorState;
+	UPROPERTY(BlueprintGetter = GetSensorEnabled)
+	bool SensorEnabled;
+	UPROPERTY(BlueprintGetter = GetMobileEnabled)
+	bool MobileEnabled;
 	UPROPERTY(BlueprintSetter = SetMobileState, BlueprintGetter = GetMobileState)
 	int MobileState;
 };

@@ -72,7 +72,7 @@ uint32 BikePhysicalInput::Run()
 			{
 				if ((char)Response[0] == (char)'a')
 				{
-					GameInstanceRef->SetSensorState(true);
+					GameInstanceRef->SetSensorEnabled(true);
 					WaitingConf = false;
 				}
 			}

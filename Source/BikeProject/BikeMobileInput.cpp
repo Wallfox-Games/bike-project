@@ -87,6 +87,7 @@ uint32 BikeMobileInput::Run()
 					ClientAddress->SetPort(Socket->GetPortNo());
 					GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Client IP: " + ClientAddress->ToString(true)), true);
 					GameInstanceRef->SetMobileState(0);
+					GameInstanceRef->SetMobileEnabled(true);
 					WaitingConf = false;
 				}
 			}
@@ -108,7 +109,7 @@ uint32 BikeMobileInput::Run()
 			if (Socket->Recv(Response, BufferSize, BytesRead))
 			{
 				GEngine->AddOnScreenDebugMessage(2, 10.f, FColor::Green, TEXT("Received: " + FString::SanitizeFloat(((float*)Response)[0])), true);
-				if (GameInstanceRef->GetMobileState() == 1)
+				if (GameInstanceRef->GetMobileState() != 2)
 				{
 					GameInstanceRef->SetMobileMessage(((float*)Response)[0]);
 				}
