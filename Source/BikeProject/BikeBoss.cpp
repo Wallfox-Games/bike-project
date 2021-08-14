@@ -298,6 +298,9 @@ void ABikeBoss::ChangeState_Implementation(EBossState NewState)
 	ABikeProjectPlayerController* PlayerControllerPtr = Cast<ABikeProjectPlayerController>(PlayerPtr->GetController());
 	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
 
+	float TempBossZ = GetActorLocation().Z;
+	FVector TempBossLocation;
+
 	switch (NewState)
 	{
 	case BSE_Moving:
@@ -321,6 +324,11 @@ void ABikeBoss::ChangeState_Implementation(EBossState NewState)
 		}
 		break;
 	case BSE_Vulnerable:
+		SetActorLocation(PlayerPtr->GetActorLocation() + PlayerPtr->GetActorForwardVector() * 800.f);
+
+		TempBossLocation = GetActorLocation();
+		TempBossLocation.Z = TempBossZ;
+		SetActorLocation(TempBossLocation);
 
 		if (PlayerControllerPtr->GetViewTarget() != this)
 		{

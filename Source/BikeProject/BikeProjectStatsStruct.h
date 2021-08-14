@@ -22,7 +22,7 @@ struct FPlayerStats
     UPROPERTY(BlueprintReadWrite)
     int TotalCurrency;
     UPROPERTY()
-    int CostumeStatus[5];
+    int CostumeStatus[3];
 
     UPROPERTY(BlueprintReadWrite)
     int MainGameModeCount;
@@ -40,12 +40,9 @@ struct FPlayerStats
         PlayerMaxPower[2] = 0;
         TotalDistanceRan = 0;
         TotalCurrency = 0;
-        CostumeStatus[0] = 0;
+        CostumeStatus[0] = 2;
         CostumeStatus[1] = 0;
         CostumeStatus[2] = 0;
-        CostumeStatus[3] = 0;
-        CostumeStatus[4] = 0;
-        CostumeStatus[5] = 0;
         MainGameModeCount = 0;
         EndlessGameModeCount = 0;
         StagesComplete = 0;
