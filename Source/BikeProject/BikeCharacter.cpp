@@ -110,7 +110,7 @@ void ABikeCharacter::Movement(float DeltaTime)
 	MovementComponent->AddInputVector(IntendedMovement);
 
 	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
-	GameInstanceRef->IncDistTravelled(ForwardValue * DeltaTime);
+	GameInstanceRef->IncDistTravelled(ForwardValue * DeltaTime / 1000.f);
 }
 
 FVector ABikeCharacter::GetPrevMov()
