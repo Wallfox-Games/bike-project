@@ -47,7 +47,7 @@ bool BikeMobileInput::Init()
 	FIPv4Address::Parse(Address, ip);
 
 	Socket = FUdpSocketBuilder(TEXT("Mobile Socket")).BoundToAddress(ip).BoundToPort(Port).Build();
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, TEXT("Connected to IP: " + Address + " Port: " + FString::FromInt(Port)), true);
+	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, TEXT("Connected to IP: " + Address + " Port: " + FString::FromInt(Port)), true);
 
 	int AddressIndex;
 	ConnectionNum = Address;
@@ -85,7 +85,7 @@ uint32 BikeMobileInput::Run()
 				if (FString::FromInt(DeviceNum) == DeviceAddress)
 				{
 					ClientAddress->SetPort(Socket->GetPortNo());
-					GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Client IP: " + ClientAddress->ToString(true)), true);
+					//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Client IP: " + ClientAddress->ToString(true)), true);
 					GameInstanceRef->SetMobileState(0);
 					GameInstanceRef->SetMobileEnabled(true);
 					WaitingConf = false;
@@ -93,7 +93,7 @@ uint32 BikeMobileInput::Run()
 			}
 			if (WaitingConf)
 			{
-				GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Green, TEXT("Waiting for mobile"), true);
+				//GEngine->AddOnScreenDebugMessage(2, 0.5f, FColor::Green, TEXT("Waiting for mobile"), true);
 				// Sleep to reduce usage of system resources(nearly delta time).
 				FPlatformProcess::Sleep(0.03F);
 			}
@@ -108,7 +108,7 @@ uint32 BikeMobileInput::Run()
 
 			if (Socket->Recv(Response, BufferSize, BytesRead))
 			{
-				GEngine->AddOnScreenDebugMessage(2, 10.f, FColor::Green, TEXT("Received: " + FString::SanitizeFloat(((float*)Response)[0])), true);
+				//GEngine->AddOnScreenDebugMessage(2, 10.f, FColor::Green, TEXT("Received: " + FString::SanitizeFloat(((float*)Response)[0])), true);
 				if (GameInstanceRef->GetMobileState() != 2)
 				{
 					GameInstanceRef->SetMobileMessage(((float*)Response)[0]);
@@ -143,7 +143,7 @@ uint32 BikeMobileInput::Run()
 
 			FString TempStr = "";
 			TempStr.AppendChar(MessageCharacter);
-			GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Sent: " + TempStr), true);
+			//GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Sent: " + TempStr), true);
 
 			Socket->SendTo((uint8*)&MessageCharacter, 1, BytesSent, *ClientAddress);
 

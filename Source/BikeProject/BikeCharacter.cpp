@@ -104,7 +104,7 @@ void ABikeCharacter::Movement(float DeltaTime)
 	MoveNewLane(DeltaTime);
 
 	ForwardValue = SpeedBase + GetPowerPercent() * SpeedMultiplier;
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Speed: ") + FString::SanitizeFloat(ForwardValue), true);
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Speed: ") + FString::SanitizeFloat(ForwardValue), true);
 
 	IntendedMovement = ForwardValue * GetActorForwardVector();
 	MovementComponent->AddInputVector(IntendedMovement);
@@ -286,7 +286,7 @@ void ABikeCharacter::LoadMaxPower()
 	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
 	MAXPOWER = GameInstanceRef->GetMaxPower();
 
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Max Power: ") + FString::SanitizeFloat(MAXPOWER), true);
+	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Max Power: ") + FString::SanitizeFloat(MAXPOWER), true);
 	// Sets three power stages to be a percentage of MAXPOWER
 	UPPERPOWER = MAXPOWER * UpperPercent;
 	MIDDLEPOWER = MAXPOWER * MiddlePercent;

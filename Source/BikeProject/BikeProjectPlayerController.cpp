@@ -54,7 +54,7 @@ void ABikeProjectPlayerController::Tick(float DeltaTime)
 	case PME_BossCharge:
 		if (PowerLevelMax < PowerLevelTarget) PowerLevelMax = PowerLevelTarget;
 	case PME_Normal:
-		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("In Normal"), true);
+		//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("In Normal"), true);
 	case PME_BossDodge:
 	case PME_BossCooldown:
 
@@ -85,7 +85,7 @@ void ABikeProjectPlayerController::Tick(float DeltaTime)
 		break;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Power: ") + FString::SanitizeFloat(PowerLevel), true);
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, TEXT("Power: ") + FString::SanitizeFloat(PowerLevel), true);
 	PawnInstanceRef->SetCurrentPower(PowerLevel);
 
 	if (!MovePauseBlocked && !MoveUIBlocked && !GetWorld()->IsPaused()) PawnInstanceRef->Movement(DeltaTime);
