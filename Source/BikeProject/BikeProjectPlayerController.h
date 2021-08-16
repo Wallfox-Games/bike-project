@@ -124,7 +124,7 @@ class BIKEPROJECT_API ABikeProjectPlayerController : public APlayerController
 	UFUNCTION(BlueprintCallable)
 		void ResetCurrency();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-		void SetCurrency(bool PositiveChange);
+		void SetCurrency(bool PositiveChange, int Multiplier);
 	UFUNCTION(BlueprintCallable)
 		int GetCurrency() const;
 
