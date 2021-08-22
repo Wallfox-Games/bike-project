@@ -214,11 +214,11 @@ void ABikeProjectPlayerController::ResetCurrency()
 	CurrencyCount = 0;
 }
 
-void ABikeProjectPlayerController::SetCurrency_Implementation(bool PositiveChange)
+void ABikeProjectPlayerController::SetCurrency_Implementation(bool PositiveChange, int Multiplier)
 {
 	if (PositiveChange)
 	{
-		CurrencyCount += CurrencyBase + CurrencyCount * CurrencyMultPos;
+		CurrencyCount += CurrencyBase * Multiplier + CurrencyCount * CurrencyMultPos;
 	}
 	else CurrencyCount -= CurrencyCount * CurrencyMultRevive;
 }
