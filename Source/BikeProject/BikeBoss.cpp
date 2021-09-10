@@ -40,6 +40,7 @@ ABikeBoss::ABikeBoss()
 	Cooldown = 0.f;
 	ObstacleCurrent = -1;
 	ObstacleTick = 0.f;
+	ObstacleString = "0001101101101101101101101103333222222222222222222222222333300011011011011011011011011033332222222222222222222222223333";
 }
 
 void ABikeBoss::InitValues_Implementation(ABikeCharacter* NewPtr, int NewHealth, float NewSeconds, float NewMultiplier, float DeltaTime)
