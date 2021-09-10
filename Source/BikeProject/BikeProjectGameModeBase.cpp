@@ -12,7 +12,7 @@ void ABikeProjectGameModeBase::StartPlay()
 	// Display a debug message for five seconds. 
 	// The -1 "Key" value argument prevents the message from being updated or refreshed.
 
-	ChangeMenuWidget(StartingWidgetClass);
+	//ChangeMenuWidget(StartingWidgetClass);
 }
 
 void ABikeProjectGameModeBase::ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass)

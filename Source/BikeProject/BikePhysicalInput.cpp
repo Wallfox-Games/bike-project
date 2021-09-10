@@ -72,17 +72,17 @@ uint32 BikePhysicalInput::Run()
 			{
 				if ((char)Response[0] == (char)'a')
 				{
-					GameInstanceRef->SetSensorState(true);
+					GameInstanceRef->SetSensorEnabled(true);
 					WaitingConf = false;
 				}
 			}
 
 			if (WaitingConf)
 			{
-				GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Waiting for conf"), true);
+				//GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Green, TEXT("Waiting for conf"), true);
 				if (!FPlatformProcess::IsProcRunning(ANTProcHandle))
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Handle not valid"), true);
+					//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Handle not valid"), true);
 					FPlatformProcess::CloseProc(ANTProcHandle);
 					ANTProcHandle = FPlatformProcess::CreateProc(*FullPath, tempParam, false, isInEditor, !isInEditor, NULL, 0, NULL, NULL);
 				}

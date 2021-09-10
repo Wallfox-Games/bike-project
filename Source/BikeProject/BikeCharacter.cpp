@@ -51,6 +51,7 @@ ABikeCharacter::ABikeCharacter()
 	MiddlePercent = 0.5f;
 	LowerPercent = 0.3f;
 
+	BikeLanes = nullptr;
 	PowerLane = 1;
 	LaneWidth = 110.f;
 	LaneSpeed = 1.5f;
@@ -103,10 +104,13 @@ void ABikeCharacter::Movement(float DeltaTime)
 	MoveNewLane(DeltaTime);
 
 	ForwardValue = SpeedBase + GetPowerPercent() * SpeedMultiplier;
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Speed: ") + FString::SanitizeFloat(ForwardValue), true);
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, TEXT("Speed: ") + FString::SanitizeFloat(ForwardValue), true);
 
 	IntendedMovement = ForwardValue * GetActorForwardVector();
 	MovementComponent->AddInputVector(IntendedMovement);
+
+	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
+	GameInstanceRef->IncDistTravelled(ForwardValue * DeltaTime / 1000.f);
 }
 
 FVector ABikeCharacter::GetPrevMov()
@@ -119,6 +123,12 @@ void ABikeCharacter::ZeroPrevMov()
 	IntendedMovement = FVector(0.f);
 }
 
+void ABikeCharacter::DestroySelf_Implementation()
+{
+	BikeLanes->Destroy();
+	BikeLanes = nullptr;
+}
+
 void ABikeCharacter::PostProcessTransition(float DeltaTime)
 {
 	float AlphaChange = DeltaTime * PPAlphaMult;
@@ -126,14 +136,14 @@ void ABikeCharacter::PostProcessTransition(float DeltaTime)
 	switch (PowerLane)
 	{
 	case 0:
-		PPAlpha = FMath::Clamp(PPAlpha - DeltaTime, 0.f, PPMed);
+		PPAlpha = FMath::Clamp(PPAlpha - AlphaChange, 0.f, PPMed);
 		break;
 	case 1:
-		if (PPAlpha > PPMed) PPAlpha = FMath::Clamp(PPAlpha - DeltaTime, PPMed, 1.f);
-		else PPAlpha = FMath::Clamp(PPAlpha + DeltaTime, 0.f, PPMed);
+		if (PPAlpha > PPMed) PPAlpha = FMath::Clamp(PPAlpha - AlphaChange, PPMed, 1.f);
+		else PPAlpha = FMath::Clamp(PPAlpha + AlphaChange, 0.f, PPMed);
 		break;
 	case 2:
-		PPAlpha = FMath::Clamp(PPAlpha + DeltaTime, PPMed, 1.f);
+		PPAlpha = FMath::Clamp(PPAlpha + AlphaChange, PPMed, 1.f);
 		break;
 	default:
 		break;
@@ -276,6 +286,7 @@ void ABikeCharacter::LoadMaxPower()
 	UBikeGameInstance* GameInstanceRef = Cast<UBikeGameInstance>(GetGameInstance());
 	MAXPOWER = GameInstanceRef->GetMaxPower();
 
+	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("Max Power: ") + FString::SanitizeFloat(MAXPOWER), true);
 	// Sets three power stages to be a percentage of MAXPOWER
 	UPPERPOWER = MAXPOWER * UpperPercent;
 	MIDDLEPOWER = MAXPOWER * MiddlePercent;
@@ -305,6 +316,11 @@ void ABikeCharacter::SetLanePos(FVector Easy, FVector Med, FVector Hard)
 void ABikeCharacter::SetLaneBlocked_Implementation(bool Blocking)
 {
 	LaneBlocked = Blocking;
+}
+
+bool ABikeCharacter::GetLaneSwitching() const
+{
+	return LaneSwitching;
 }
 
 void ABikeCharacter::ChangePowerLane(int NewLane, float DeltaTime)

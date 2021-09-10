@@ -26,6 +26,9 @@ public:
 	// Sets default values for this character's properties
 	ABikeCharacter();
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void DestroySelf();
+
 protected:
 	// Variables
 	UPROPERTY(EditAnywhere)
@@ -68,7 +71,7 @@ protected:
 	float SpeedMultiplier;
 	UPROPERTY()
 	int PowerLane;
-	UPROPERTY()
+	UPROPERTY(BlueprintGetter = GetLaneSwitching)
 	bool LaneSwitching;
 	UPROPERTY()
 	bool LaneBlocked;
@@ -84,7 +87,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* CapsuleComponent;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadWrite)
 	USkeletalMeshComponent* PlayerVisibleComponent;
 
 	UPROPERTY(VisibleAnywhere)
@@ -132,7 +135,7 @@ public:
 	void SetCurrentPower(float NewPower);
 	UFUNCTION()
 	void Movement(float DeltaTime);
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	FVector GetPrevMov();
 	UFUNCTION()
 	void ZeroPrevMov();
@@ -146,6 +149,8 @@ public:
 	void SetLanePos(FVector Easy, FVector Med, FVector Hard);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetLaneBlocked(bool Blocking);
+	UFUNCTION(BlueprintCallable)
+	bool GetLaneSwitching() const;
 
 	UFUNCTION(BlueprintCallable)
 	void ChangePowerLane(int NewLane, float DeltaTime);

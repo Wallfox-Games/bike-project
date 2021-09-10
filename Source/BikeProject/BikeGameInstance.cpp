@@ -12,8 +12,12 @@ void UBikeGameInstance::Init()
 	PhysicalSpeed = -1.f;
 	MobileSpeed = -1.f;
 
-	SensorState = false;
+	SensorEnabled = false;
+	MobileEnabled = false;
 	MobileState = -1;
+
+	MobileTask = nullptr;
+	PhysicalTask = nullptr;
 
 	// Only load game stats if the load .sav file exists
 	const FString SaveSlotName = FString(TEXT("PlayerSaveSlot"));
@@ -23,13 +27,12 @@ void UBikeGameInstance::Init()
 	{
 		class UBikeProjectSaveGame* LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass()));
 		LoadInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadInstance->SaveSlotName, LoadInstance->UserIndex));
-		MAXPOWER = LoadInstance->PlayerMaxPower;
+		PlayerStats = LoadInstance->SaveStats;
 		TutorialState = false;
 	}
-	// Else set MAXPOWER to high value and tutorial state to true
+	// Else set tutorial state to true
 	else
 	{
-		// In tutorial mode
 		TutorialState = true;
 	}
 }
@@ -42,7 +45,21 @@ void UBikeGameInstance::Shutdown()
 
 void UBikeGameInstance::SetPhysicalSpeed(float NewSpeed)
 {
-	PhysicalSpeed = NewSpeed * Circumference / 1000.f;
+	switch (DeviceType)
+	{
+	case 1:
+		PhysicalSpeed = NewSpeed * Circumference / 1000.f;
+		break;
+	case 2:
+		PhysicalSpeed = NewSpeed * 60.f;
+		break;
+	case 3:
+		PhysicalSpeed = NewSpeed;
+		break;
+	default:
+		break;
+	}
+	
 }
 
 void UBikeGameInstance::SetMobileSpeed(float NewSpeed)
@@ -52,7 +69,7 @@ void UBikeGameInstance::SetMobileSpeed(float NewSpeed)
 
 float UBikeGameInstance::GetSpeed()
 {
-	if (SensorState) return PhysicalSpeed;
+	if (SensorEnabled) return PhysicalSpeed;
 	else return MobileSpeed;
 }
 
@@ -71,14 +88,17 @@ void UBikeGameInstance::SetCircumference(float newCircumference)
 	Circumference = newCircumference;
 }
 
-void UBikeGameInstance::SetMaxPower(float newMaxPower)
+FPlayerStats UBikeGameInstance::GetPlayerStats() const
 {
-	MAXPOWER = newMaxPower;
+	return PlayerStats;
+}
 
+void UBikeGameInstance::SavePlayerStats()
+{
 	if (UBikeProjectSaveGame* SaveGameInstance = Cast<UBikeProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UBikeProjectSaveGame::StaticClass())))
 	{
 		// Set data on the savegame object.
-		SaveGameInstance->PlayerMaxPower = MAXPOWER;
+		SaveGameInstance->SaveStats = PlayerStats;
 
 		// Save the data immediately.
 		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex))
@@ -89,9 +109,70 @@ void UBikeGameInstance::SetMaxPower(float newMaxPower)
 	}
 }
 
+void UBikeGameInstance::SetMaxPower(float newMaxPower)
+{
+	PlayerStats.PlayerMaxPower[GetConnectedState()] = newMaxPower;	
+}
+
 float UBikeGameInstance::GetMaxPower() const
 {
-	return MAXPOWER;
+	return PlayerStats.PlayerMaxPower[GetConnectedState()];
+}
+
+void UBikeGameInstance::UpdateCurrency(int Amount)
+{
+	PlayerStats.TotalCurrency += Amount;
+}
+
+int UBikeGameInstance::GetCurrency() const
+{
+	return PlayerStats.TotalCurrency;
+}
+
+void UBikeGameInstance::UpdateCostumeIndex(int Index, int Value)
+{
+	PlayerStats.CostumeStatus[Index] = Value;
+}
+
+int UBikeGameInstance::GetCostumeValue(int Index) const
+{
+	return PlayerStats.CostumeStatus[Index];
+}
+
+int UBikeGameInstance::GetCostumeEquipped() const
+{
+	int Index = 0;
+	for (const int &i : PlayerStats.CostumeStatus)
+	{
+		if (i == 2) return Index;
+		Index++;
+	}
+	return 0;
+}
+
+void UBikeGameInstance::IncDistTravelled(float Distance)
+{
+	PlayerStats.TotalDistanceRan += Distance;
+}
+
+void UBikeGameInstance::IncBossChunks()
+{
+	PlayerStats.BossChunks++;
+}
+
+void UBikeGameInstance::IncMainGMCount()
+{
+	PlayerStats.MainGameModeCount++;
+}
+
+void UBikeGameInstance::IncEndlessGMCount()
+{
+	PlayerStats.EndlessGameModeCount++;
+}
+
+void UBikeGameInstance::IncStagesComplete()
+{
+	PlayerStats.StagesComplete++;
 }
 
 bool UBikeGameInstance::GetTutorialState() const
@@ -106,7 +187,7 @@ void UBikeGameInstance::StartPhysicalTask(bool LoadDevice)
 
 void UBikeGameInstance::StopPhysicalTask()
 {
-	SensorState = false;
+	SensorEnabled = false;
 	if (PhysicalTask != nullptr) delete PhysicalTask;
 	PhysicalTask = nullptr;
 }
@@ -124,20 +205,53 @@ void UBikeGameInstance::StopMobileTask()
 	MobileTask = nullptr;
 }
 
-bool UBikeGameInstance::GetSensorState() const
+int UBikeGameInstance::GetConnectedState() const
 {
-	return SensorState;
+	if (SensorEnabled) return 2;
+	else if (MobileEnabled) return 1;
+	else return 0;
+}
+
+void UBikeGameInstance::SetSensorEnabled(bool NewValue)
+{
+	SensorEnabled = NewValue;
+}
+
+bool UBikeGameInstance::GetSensorEnabled() const
+{
+	return SensorEnabled;
+}
+
+void UBikeGameInstance::SetMobileEnabled(bool NewValue)
+{
+	MobileEnabled = NewValue;
+}
+
+bool UBikeGameInstance::GetMobileEnabled() const
+{
+	return MobileEnabled;
 }
 
 void UBikeGameInstance::SetMobileState(int NewValue)
 {
 	MobileState = NewValue;
-	MobileSpeed = -1.f;
+	MobileSpeed = 0.f;
+	MobileMessage = 0.f;
 }
 
 int UBikeGameInstance::GetMobileState() const
 {
 	return MobileState;
+}
+
+void UBikeGameInstance::SetMobileMessage(int NewValue)
+{
+	MobileMessage = NewValue;
+}
+
+int UBikeGameInstance::GetMobileMessage() const
+{
+	return MobileMessage;
 }
 
 void UBikeGameInstance::SetDeviceType(int NewValue)
@@ -158,9 +272,4 @@ void UBikeGameInstance::SetDeviceAddress(FString NewValue)
 FString UBikeGameInstance::GetDeviceAddress() const
 {
 	return DeviceAddress;
-}
-
-void UBikeGameInstance::SetSensorState(bool NewValue)
-{
-	SensorState = NewValue;
 }
